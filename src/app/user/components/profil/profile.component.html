@@ -1,0 +1,146 @@
+<div class="profile-content">
+    <div class="row">
+        <div class="col-lg-4">
+            <mat-card class="cardWithShadow shadow-none b-1 custom-card">
+                <mat-card-content class="custom-content">
+                    <app-profil-photo [photo]="profil().photo"></app-profil-photo>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <div class="col-lg-8">
+            @if (form) {
+                <form [formGroup]="form">
+                    <mat-card class="cardWithShadow shadow-none b-1">
+                        <mat-card-content>
+                            <!--
+                            <h5 class="f-s-21 f-w-600 m-b-16">Profil</h5>
+                            -->
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Votre nom</mat-label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <input matInput formControlName="name" />
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Langue maternelle</mat-label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select formControlName="langueMaternelle">
+                                            @for (language of langues(); track language) {
+                                                <mat-option [value]="language.id">{{ language.name }}</mat-option>
+                                            }
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <mat-label class="f-s-14 f-w-600 m-b-8 d-block">J'apprends</mat-label>
+                                    <mat-form-field appearance="outline" class="w-100">
+                                        <mat-select formControlName="langues" multiple>
+                                            @for (language of langues(); track language) {
+                                                <mat-option [value]="language.id">{{ language.name }}</mat-option>
+                                            }
+                                        </mat-select>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+
+                            <!--
+                    <p class="f-s-14 m-b-16 m-t-0">
+                        Hello, I am Mathew Anderson. I love making websites and graphics. Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                    </p>
+                    <div class="d-flex align-items-center gap-16 m-b-24">
+                        <i-tabler name="briefcase" class="icon-20"></i-tabler>
+                        <h6 class="f-s-16 f-w-600">Sir, P P Institute Of Science</h6>
+                    </div>
+                    <div class="d-flex align-items-center gap-16 m-b-24">
+                        <i-tabler name="mail" class="icon-20"></i-tabler>
+                        <h6 class="f-s-16 f-w-600">xyzjonathan&#64;gmail.com</h6>
+                    </div>
+                    <div class="d-flex align-items-center gap-16 m-b-24">
+                        <i-tabler name="device-desktop" class="icon-20"></i-tabler>
+                        <h6 class="f-s-16 f-w-600">www.xyz.com</h6>
+                    </div>
+                    <div class="d-flex align-items-center gap-16">
+                        <i-tabler name="map-pin" class="icon-20"></i-tabler>
+                        <h6 class="f-s-16 f-w-600">Newyork, USA - 100001</h6>
+                    </div>
+                    -->
+                            <button mat-flat-button (click)="save()" [disabled]="form.invalid || !form.dirty || loading" class="ms-auto m-t-6">
+                                Enregistrer
+                            </button>
+                        </mat-card-content>
+                    </mat-card>
+                </form>
+            } @else {
+                <mat-card class="cardWithShadow shadow-none b-1">
+                    <mat-card-content>
+                        <div class="d-flex align-items-center gap-16 m-b-24">
+                            <h6 class="f-s-16 f-w-600">{{ profil().name }}</h6>
+                        </div>
+                        <div class="d-flex align-items-center gap-16 m-b-12">
+                            <span class="f-s-14 f-w-600">Langue maternelle:</span>
+                            <span class="f-s-14">{{ langueNameById(profil().langueMaternelle) }}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-16">
+                            <span class="f-s-14 f-w-600">J'apprends :</span>
+                            <span class="f-s-14">{{ languesNamesByIds(profil().langues) }}</span>
+                        </div>
+                        <div class="d-flex m-t-12">
+                            <button mat-stroked-button class="ms-auto" (click)="openEditDialog()">Modifier</button>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            }
+        </div>
+    </div>
+</div>
+
+<!--
+        <div class="flex flex-wrap" [ngClass]="{ 'opacity-70': loading }">
+            @if (loading) {
+                <div class="absolute inset-0 bg-transparent flex justify-center z-20 pt-10">
+                    <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+                </div>
+            }
+            <div class="w-full md:w-1/2 p-2 flex md:justify-end items-start order-2 md:order-2">
+                <app-profil-photo [photo]="photo" (addPhoto)="addPhoto($event)"></app-profil-photo>
+            </div>
+            <div class="w-full md:w-1/2 p-2 order-1 md:order-1">
+                <h1 class="text-2xl font-medium text-gray-900">Votre profile</h1>
+                <div class="max-w-3xl pt-4 pb-2">
+                    <label class="block font-medium text-sm text-gray-900">Nom</label>
+                    <mat-form-field class="mt-2 w-full max-w-md" appearance="fill">
+                        <input matInput formControlName="name" />
+                    </mat-form-field>
+                </div>
+                <div class="max-w-3xl pt-4 pb-2">
+                    <label class="block font-medium text-sm text-gray-900">Langue maternelle</label>
+                    <mat-form-field class="mt-2 w-full max-w-md" appearance="fill">
+                        <mat-select formControlName="langueMaternelle">
+                            @for (language of langues(); track language) {
+                                <mat-option [value]="language.id">{{ language.name }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="max-w-3xl pt-4 pb-2 mb-2">
+                    <label class="block font-medium text-sm text-gray-900">J'apprends</label>
+                    <mat-form-field class="mt-2 w-full max-w-md" appearance="fill">
+                        <mat-select formControlName="langues" multiple>
+                            @for (language of langues(); track language) {
+                                <mat-option [value]="language.id">{{ language.name }}</mat-option>
+                            }
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-gray-300 mt-4 pt-4 flex">
+            <button mat-flat-button (click)="save()" [disabled]="form.invalid || !form.dirty || loading">Enregistrer</button>
+        </div>
+        -->

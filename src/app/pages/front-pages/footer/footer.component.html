@@ -1,0 +1,94 @@
+<div class="footer-content">
+  <div class="custom-container footer-dashboard">
+    <div class="bg-light-primary rounded-8 footer-container m-b-80 overflow-hidden">
+      <div class="row">
+        <div class="col-lg-6">
+          <div class="spacing-top-bottom spacing-left left-side-content">
+            <h2 class="f-s-40 m-b-24 lh-normal section-sub-title">
+              Develop with feature-rich Angular Dashboard
+            </h2>
+            <div class="m-b-24 hstack">
+              <a href="authentication/login" target="_blank" mat-flat-button color="primary" class="">Member Login</a>
+              <a href="authentication/side-register" target="_blank" mat-stroked-button color="primary"
+                class="border-primary">Register as Member</a>
+            </div>
+
+            <span class="f-s-14 f-w-600"> One-time purchase</span> - no
+            recurring fees.
+          </div>
+        </div>
+        <div class="col-md-6 d-none d-lg-block">
+          <img src="assets/images/front-pages/design-collection.png" alt="bg-img" class="imgStyleDash" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-wrapper">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-3 col-6 m-b-30">
+          <div class="listContainer">
+            <h5 class="f-s-16 f-w-600 m-b-30">Applications</h5>
+            <mat-list role="list" class="p-y-0">
+              @for (item of applicationsItems; track item) {
+              <a class="text-decoration-none d-block m-b-20" [routerLink]="[item.href]">
+                {{ item.title }}
+              </a>
+              }
+            </mat-list>
+          </div>
+        </div>
+        <div class="col-md-3 col-6 m-b-30">
+          <div class="listContainer">
+            <h5 class="f-s-16 f-w-600 m-b-30">Forms</h5>
+            <mat-list role="list" class="p-y-0">
+              @for (item of formsItems; track item) {
+              <a class="text-decoration-none d-block m-b-20" [routerLink]="[item.href]">
+                {{ item.title }}
+              </a>
+              }
+            </mat-list>
+          </div>
+        </div>
+        <div class="col-md-3 col-6 m-b-30">
+          <div class="listContainer">
+            <h5 class="f-s-16 f-w-600 m-b-30">Tables</h5>
+            <mat-list role="list" class="p-y-0">
+              @for (item of tablesItems; track item) {
+              <a class="text-decoration-none d-block m-b-20" [routerLink]="[item.href]">
+                {{ item.title }}
+              </a>
+              }
+            </mat-list>
+          </div>
+        </div>
+        <div class="col-md-3 col-6 m-b-30">
+          <h5 class="f-s-16 f-w-600 m-b-30">Follow us</h5>
+          <div class="d-flex align-items-center gap-20">
+            @for (icon of socialIcons; track icon.src) {
+            <img [src]="icon.src" [matTooltip]="icon.tooltip" alt="social-icon" width="22" height="22"
+              class="cursor-pointer" />
+            }
+          </div>
+        </div>
+      </div>
+      <div class="d-flex align-items-center justify-content-between p-y-30 b-t-1 flex-wrap">
+        <!-- Left side -->
+        <div class="d-flex align-items-center gap-4">
+          <img src="assets/images/landingpage/favicon.png" alt="logo" width="20" height="15" />
+          <h6 class="f-s-16 f-w-500">All rights reserved by Modernize.</h6>
+        </div>
+
+        <!-- Right side -->
+        <div class="d-flex justify-content-end align-items-center">
+          <p class="f-s-16 m-0">
+            Designed & Developed by
+            <a href="https://adminmart.com/" target="_blank" class="text-decoration-none text-primary">
+              AdminMart </a>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

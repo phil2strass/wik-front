@@ -1,0 +1,603 @@
+<div class="home-page">
+  <div class="bg-light-primary home-page-header">
+    <div class="header-container-content custom-container m-x-auto">
+      <div class="row justify-content-center">
+        <div class="col-md-8">
+          <h1 class="banner-title text-center m-t-48">
+            Most powerful &
+            <span class="text-primary">developer friendly </span>
+            dashboard
+          </h1>
+        </div>
+      </div>
+      <div class="row align-items-end justify-content-center">
+        @if(!isMobileView){
+
+        <div class="col-md-3 d-none d-lg-block cardPosition">
+          <img src="assets/images/front-pages/banner-top-left.svg" alt="banner-top-left"
+            class="img-fluid rounded-8 float-image w-100" />
+        </div>
+        }
+
+        <div class="col-md-6 m-b-10">
+          <div class="row m-t-24">
+            <div class="col-12 d-flex gap-20 align-items-center justify-content-center chipContainer">
+              <div class="social-chips flex-shrink-0">
+                <img src="assets/images/profile/user-2.jpg" width="40" alt="social" class="rounded-circle" />
+                <img src="assets/images/profile/user-3.jpg" width="40" alt="social" class="rounded-circle" />
+                <img src="assets/images/profile/user-4.jpg" width="40" alt="social" class="rounded-circle" />
+              </div>
+              <div class="f-s-16 f-w-500">
+                52,589+ developers & agencies using our templates
+              </div>
+            </div>
+          </div>
+          <div class="d-flex align-items-center justify-content-center m-t-24 gap-20 loginBtn">
+            <a mat-flat-button color="primary" [routerLink]="'/authentication/login'"><span
+                class="p-y-10">Login</span></a>
+            <div class="d-flex align-items-center" matRipple [matRippleCentered]="centered"
+              [matRippleDisabled]="disabled" [matRippleUnbounded]="unbounded" [matRippleRadius]="radius"
+              [matRippleColor]="color" [ngClass]="{
+                'rounded bg-light-primary': showBackground,
+                'p-y-2': true,
+                'p-x-7': true
+              }" (click)="openDialog(true)">
+              <button mat-mini-fab class="text-primary play-button m-l-10"
+                aria-label="Example icon button with a delete icon">
+                <i-tabler class="icon-18 d-flex margin-auto" name="player-play"></i-tabler></button><span
+                class="textSee f-s-14 f-w-500 m-x-10">
+                See how it works</span>
+            </div>
+          </div>
+          <div class="d-flex align-items-center gap-20 justify-content-center framework m-t-32">
+            @for (framework of frameworks; track framework.tooltip) {
+            <a href="javascript:void(0)"
+              class="rounded-8 m-b-0 bg-white icon-54 d-flex align-items-center justify-content-center"
+              matTooltip="{{ framework.tooltip }}" matTooltipPosition="below">
+              <img [src]="framework.src" [alt]="framework.alt" class="" width="28" height="28" />
+            </a>
+            }
+          </div>
+        </div>
+        @if(!isMobileView){
+        <div class="col-md-3 d-none d-lg-block cardPositionTwo">
+          <img src="assets/images/front-pages/banner-top-right.svg" alt="banner-top-right"
+            class="img-fluid rounded-8 float-image w-100" />
+        </div>
+
+        }
+      </div>
+      @if (!isMobileView) {
+      <div class="row d-none d-lg-block m-t-30">
+        <div class="col-12">
+          <img src="assets/images/front-pages/bottom-part.svg" alt="bottom-part" class="w-100 img-fluid d-block" />
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+
+  <div class="introducing-section dashboardCards spacing-top-bottom">
+    <div class="container card-container">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <p class="text-center m-t-0">
+            Introducing Modernize's Light & Dark Skins, Exceptional Dashboards,
+            and Dynamic Pages - Stay Updated on What's New!
+          </p>
+        </div>
+      </div>
+
+
+      <!--new-->
+      <!-- DESKTOP VIEW -->
+      @if (!isMobileView) {
+      <div class="row m-t-24">
+        <!-- Column 1: Light & Dark + 12+ Designs -->
+        <div class="col-md-4">
+          <div>
+            @for (topcard of topcards; track topcard.title) {
+            @if (topcard.title === 'Light & Dark Color Schemes' || topcard.title.includes('12+')) {
+            <mat-card class="shadow-none text-center rounded-12 bg-light-{{ topcard.color }} card-box p-x-30 p-y-44">
+              <mat-card-content>
+                @if (topcard.title === 'Light & Dark Color Schemes') {
+                <img [src]="topcard.img" alt="icon" width="40" />
+                }
+                <h6 class="f-s-16 m-t-16">{{ topcard.title }}</h6>
+                <p class="f-s-14 m-t-16">{{ topcard.subtitle }}</p>
+                @if (topcard.title.includes('12+')) {
+                <img [src]="topcard.imgMain" alt="image" class="img-fluid w-100 m-t-16 m-b--48" />
+                }
+              </mat-card-content>
+            </mat-card>
+            }
+            }
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div>
+            @for (topcard of topcards; track topcard.title)
+            {
+            @if
+            (topcard.title.includes('New Demos')) {
+            <mat-card class="shadow-none text-center rounded-12 bg-light-{{
+          topcard.color
+        }} card-box tall-card p-x-30 p-y-48">
+              <mat-card-content>
+                <img [src]="topcard.img" alt="icon" width="40" class="" />
+                <h2 class="f-s-40 m-t-48 lh-lg section-sub-title">{{ topcard.title }}</h2>
+                <p class="f-s-14 m-t-20 m-b-0" [innerHTML]="topcard.subtitle"></p>
+                <img src="assets/images/landingpage/background/screen1.png" alt="demo" class="img-fluid w-100 m-t-48" />
+              </mat-card-content>
+            </mat-card>
+            } }
+          </div>
+        </div>
+
+        <!-- Column 2: Code Improvements + UI Components -->
+        <div class="col-md-4">
+          <div>
+            @for (topcard of topcards; track topcard.title) {
+            @if (topcard.title.includes('Code Improvements') || topcard.title.includes('UI Components')) {
+            <mat-card class="shadow-none text-center rounded-12 bg-light-{{ topcard.color }} card-box p-x-30 p-y-48">
+              <mat-card-content>
+                <img [src]="topcard.img" alt="icon" width="40" />
+                <h6 class="f-s-16 m-t-16">{{ topcard.title }}</h6>
+                <p class="f-s-14 m-t-16">{{ topcard.subtitle }}</p>
+              </mat-card-content>
+            </mat-card>
+            }
+            }
+          </div>
+        </div>
+
+      </div>
+      }
+
+      <!-- MOBILE VIEW -->
+      @else {
+      <div class="grid-container m-t-24 m-x-0">
+        @for (topcard of topcards; track topcard.title) {
+        @if (!topcard.title.includes('New Demos')) {
+        <mat-card class="shadow-none text-center rounded-12 bg-light-{{ topcard.color }} card-box p-x-24 p-y-32">
+          <mat-card-content>
+            @if (!topcard.title.includes('12+')) {
+            <img [src]="topcard.img" alt="icon" width="40" />
+            }
+            <h6 class="f-s-16 m-t-16">{{ topcard.title }}</h6>
+            <p class="f-s-14 m-t-16">{{ topcard.subtitle }}</p>
+
+            @if (topcard.title.includes('12+')) {
+            <img [src]="topcard.imgMain" alt="image" class="img-fluid w-100 m-t-16" />
+            }
+          </mat-card-content>
+        </mat-card>
+        }
+        }
+      </div>
+
+
+      <div>
+        @for (topcard of topcards; track topcard.title)
+        {
+        @if
+        (topcard.title.includes('New Demos')) {
+        <mat-card class="shadow-none text-center rounded-12 bg-light-{{
+        topcard.color
+      }} card-box tall-card p-x-32 p-y-48">
+          <mat-card-content>
+            <img [src]="topcard.img" alt="icon" width="40" class="" />
+            <h6 class="f-s-40 m-t-32 tall-card-title section-sub-title">{{ topcard.title }}</h6>
+            <p class="f-s-14 m-t-20" [innerHTML]="topcard.subtitle"></p>
+            <img src="assets/images/landingpage/background/screen1.png" alt="demo" class="img-fluid w-100 m-t-30" />
+          </mat-card-content>
+        </mat-card>
+        } }
+      </div>
+      }
+
+      <!--end-->
+    </div>
+  </div>
+
+  <div class="tab-header">
+    <mat-divider></mat-divider>
+    <div class="container">
+      <mat-tab-group headerPosition="below" [(selectedIndex)]="selectedIndex" class="profileTabs">
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <tabler-icon name="user-circle" class="m-r-10 icon-24"></tabler-icon>
+            <span class="tab-label f-s-18 f-w-500">Team Scheduling</span>
+          </ng-template>
+        </mat-tab>
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <tabler-icon name="wallet" class="m-r-10 icon-24"></tabler-icon>
+            <span class="tab-label f-s-18 f-w-500">Payments</span>
+          </ng-template>
+        </mat-tab>
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <tabler-icon name="app-window" class="m-r-10 icon-24"></tabler-icon>
+            <span class="tab-label f-s-18 f-w-500">Embedding</span>
+          </ng-template>
+        </mat-tab>
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <tabler-icon name="arrow-fork" class="m-r-10 icon-24"></tabler-icon>
+            <span class="tab-label f-s-18 f-w-500">Workflows</span>
+          </ng-template>
+        </mat-tab>
+      </mat-tab-group>
+
+      <!-- Tab content shown BELOW the tab group -->
+
+      <div class="row tab-header-content p-y-66 align-items-center">
+        <div class="col-md-6">
+          <div class="tabsimage">
+            <img src="assets/images/landingpage/background/accordian1.jpg" alt="slider-group" class="img-fluid w-100" />
+          </div>
+        </div>
+
+        <div class="col-md-6 m-t-30">
+          <div class="right-content m-l-24">
+            <h2 class="f-s-40 lh-lg section-sub-title">Defend your focus</h2>
+            <div class="m-y-30">
+              <mat-accordion multi>
+                <!-- Panel 0 -->
+                <mat-expansion-panel #panel0 [expanded]="selectedIndex === 0 || selectedIndex === 3" hideToggle
+                  class="expansion-panel">
+                  <mat-expansion-panel-header>
+                    <div class="d-flex align-items-center justify-content-between w-100">
+                      <span class="f-s-18 f-w-500">Factor in outside colleagues</span>
+                      <tabler-icon [name]="panel0.expanded ? 'minus' : 'plus'" class="m-l-8 icon-20"></tabler-icon>
+                    </div>
+                  </mat-expansion-panel-header>
+                  <div>
+                    <p class="f-s-16 m-y-0">
+                      Factor in availability for required attendees, and skip
+                      checking for conflicts for optional attendees.
+                    </p>
+                  </div>
+                </mat-expansion-panel>
+
+                <!-- Panel 1 -->
+                <mat-expansion-panel #panel1 [expanded]="selectedIndex === 1" hideToggle class="expansion-panel">
+                  <mat-expansion-panel-header>
+                    <div class="d-flex align-items-center justify-content-between w-100">
+                      <span class="f-s-18 f-w-500">Combine teammate schedules</span>
+                      <tabler-icon [name]="panel1.expanded ? 'minus' : 'plus'" class="icon-20"></tabler-icon>
+                    </div>
+                  </mat-expansion-panel-header>
+                  <div>
+                    <p class="f-s-16 m-y-0">
+                      Factor in availability for required attendees, and skip
+                      checking for conflicts for optional attendees.
+                    </p>
+                  </div>
+                </mat-expansion-panel>
+
+                <!-- Panel 2 & 3 merged -->
+                <mat-expansion-panel #panel2 [expanded]="selectedIndex === 2" hideToggle class="expansion-panel">
+                  <mat-expansion-panel-header>
+                    <div class="d-flex align-items-center justify-content-between w-100">
+                      <span class="f-s-18 f-w-500">Round robin pooling</span>
+                      <tabler-icon [name]="panel2.expanded ? 'minus' : 'plus'" class="m-l-8 icon-20"></tabler-icon>
+                    </div>
+                  </mat-expansion-panel-header>
+                  <div>
+                    <p class="f-s-16 m-y-0">
+                      Factor in availability for required attendees, and skip
+                      checking for conflicts for optional attendees.
+                    </p>
+                  </div>
+                </mat-expansion-panel>
+              </mat-accordion>
+            </div>
+
+            <a mat-flat-button color="primary">Learn More</a>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="our-leadership spacing-top p-b-48">
+    <app-image-slider></app-image-slider>
+  </div>
+
+  <div class="toolBar bg-primary p-y-16">
+    <div class="container">
+      <div class="d-flex align-items-center justify-content-center">
+        <div class="social-chips flex-shrink-0">
+          <img src="assets/images/profile/user-2.jpg" width="44" height="44" alt="social"
+            class="rounded-circle m-x-1" />
+          <img src="assets/images/profile/user-3.jpg" width="44" height="44" alt="social"
+            class="rounded-circle m-x-1" />
+        </div>
+        <span class="text-white f-s-16 m-l-16">
+          Save valuable time and effort spent searching for a solution.
+          <a class="text-white f-w-600 m-l-8" href="#">Contact us now</a>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="template-slider spacing-top-bottom">
+    <div class="custom-container">
+      <div class="bg-light-primary rounded-pill spacing-top-bottom template-slider-content">
+        <div class="spacing-left-right m-b-8">
+          <h2 class="f-s-40 lh-normal section-sub-title">
+            Discover Powerful Dozens of <br> Purpose-Fit Templates
+          </h2>
+        </div>
+        <div class="demo-slider overflow-hidden d-flex gap-30 spacing-bottom">
+          <div>
+            <div class="demo-slide">
+              <a [routerLink]="['/apps/chat']">
+                <img src="assets/images/front-pages/app-chat.jpg" alt="slide" class="img-fluid rounded-7 sliderImg" />
+              </a>
+            </div>
+          </div>
+          <div>
+            <div class="demo-slide">
+              <a (click)="onImageClick('/apps/email/inbox')">
+                <img src="assets/images/front-pages/app-email.jpg" alt="slide" class="img-fluid rounded-7 sliderImg"
+                  [ngClass]="{
+                  'img-border': selectedPath === '/apps/email/inbox'
+                }" />
+              </a>
+            </div>
+          </div>
+          <div>
+            <div class="demo-slide">
+              <a (click)="onImageClick('/dashboards/dashboard1')">
+                <img src="assets/images/front-pages/demo-main.jpg" alt="slide" class="img-fluid rounded-7 sliderImg"
+                  [ngClass]="{
+                  'img-border': selectedPath === '/dashboards/dashboard1'
+                }" />
+              </a>
+            </div>
+          </div>
+          <div>
+            <div class="demo-slide">
+              <img src="assets/images/front-pages/demo-dark.jpg" alt="slide" class="img-fluid rounded-7 sliderImg" />
+            </div>
+          </div>
+          <div>
+            <div class="demo-slide">
+              <a (click)="onImageClick('/front-pages/homepage')">
+                <img src="assets/images/front-pages/demo-horizontal.jpg" alt="slide"
+                  class="img-fluid rounded-7 sliderImg" [ngClass]="{
+                  'img-border': selectedPath === '/front-pages/homepage'
+                }" />
+              </a>
+            </div>
+          </div>
+          <div>
+            <div class="demo-slide">
+              <img src="assets/images/front-pages/demo-rtl.jpg" alt="slide" class="img-fluid rounded-7 sliderImg" />
+            </div>
+          </div>
+          <div>
+            <div class="demo-slide">
+              <img src="assets/images/front-pages/app-chat.jpg" alt="slide" class="img-fluid rounded-7 sliderImg" />
+            </div>
+          </div>
+          <div>
+            <div class="demo-slide">
+              <img src="assets/images/front-pages/app-email.jpg" alt="slide" class="img-fluid rounded-7 sliderImg" />
+            </div>
+          </div>
+        </div>
+        <div class="spacing-left-right">
+          <div class="row">
+            <div class="col-md-4 text-center m-b-30">
+              <h3 class="f-s-18 m-b-16">High Customizability</h3>
+              <p class="f-s-14 m-0">
+                Tailor the dashboard to your exact needs. Customize layouts, color
+                schemes, and widgets effortlessly for a personalized user
+                experience.
+              </p>
+            </div>
+            <div class="col-md-4 text-center m-b-30">
+              <h3 class="f-s-18 m-b-16">Powerful Data Analytics</h3>
+              <p class="f-s-14 m-0">
+                Unlock the true potential of your data with our advanced analytics
+                tools. Gain valuable insights and make data-driven decisions with
+                ease.
+              </p>
+            </div>
+
+            <div class="col-md-4 text-center m-b-30">
+              <h3 class="f-s-18 m-b-16">Interactive Charts</h3>
+              <p class="f-s-14 m-0">
+                Visualize complex data sets beautifully with our interactive
+                graphs and charts. Quickly grasp trends and patterns for smarter
+                analysis.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="features spacing-bottom">
+    <div class="container">
+      <div class="row align-items-center justify-content-between">
+        <!--row-->
+        <div class="col-md-5 m-b-30">
+          <div class="client-margin">
+            <h2 class="lh-normal f-s-40 m-b-16 section-sub-title">
+              What our clients <br> think <img src="assets/images/front-pages/logoIcon.svg" alt="logo" />
+              about us?
+            </h2>
+            <p class="m-0">
+              Our users' feedback is a testament to our commitment to quality
+              and user satisfaction. Read what they have to say about their
+              journey with us.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-5">
+          <mat-card class="cardWithShadow b-1 rounded-8 m-b-0 p-48">
+            <mat-card-content>
+              <mat-card-title class="f-s-24 f-w-600 m-b-24">Features availability</mat-card-title>
+
+              <div class="d-flex align-items-center gap-16 m-b-24">
+                <div>
+                  <img [src]="currentUser().img" [alt]="currentUser().name" class="rounded-circle" width="40" />
+                </div>
+                <h6 class="f-s-14 f-w-600">{{ currentUser().name }}</h6>
+              </div>
+
+              <p class="f-s-14 m-b-16 m-t-0">
+                Our users' feedback is a testament to our commitment to quality
+                and user satisfaction. Read what they have to say about their
+                journey with us.
+              </p>
+
+              <mat-divider></mat-divider>
+
+              <div class="d-flex align-items-center gap-10 m-t-8">
+                <button class="bg-light icon-32 d-flex align-items-center justify-content-center" mat-icon-button
+                  (click)="goPrev()">
+                  <i-tabler name="chevron-left"
+                    class="icon-18 d-flex align-items-center justify-content-center"></i-tabler>
+                </button>
+
+                <span class="f-s-14">{{ displayCount() }}</span>
+
+                <button class="bg-light icon-32 d-flex align-items-center justify-content-center" mat-icon-button
+                  (click)="goNext()">
+                  <i-tabler name="chevron-right"
+                    class="icon-18 d-flex align-items-center justify-content-center"></i-tabler>
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="exceptional position-relative">
+    <div class="custom-container">
+      <div class="bg-light-primary rounded-8 exceptional-content spacing-top-bottom">
+        <div class="row justify-content-center">
+          <div class="col-md-6">
+            <h2 class="lh-normal text-center f-s-40 m-b-30 section-sub-title">
+              Enjoy unparalleled features & exceptional flexibility.
+            </h2>
+          </div>
+        </div>
+
+        <div class="m-t-0">
+          <div class="demo-slider overflow-hidden d-flex gap-30">
+            <div class="row flex-nowrap overflow-auto gap-20">
+              @for (followercard of followercardsfirst; track followercard.title)
+              {
+              <div class="col-2">
+                <mat-card class="cardWithShadow demo-slide rounded-8">
+                  <mat-card-content>
+                    <div class="d-flex align-items-center justify-content-center x-20">
+                      <img [src]="followercard.imgSrc" alt="icon" />
+                      <h6 class="m-0 f-w-500 f-s-14 m-x-8">
+                        {{ followercard.title }}
+                      </h6>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+              }
+            </div>
+          </div>
+          <div class="demo-slider overflow-hidden d-flex gap-30 m-t-2">
+            <div class="row flex-nowrap overflow-auto gap-20">
+              @for (followercard of followercardsecond; track followercard.title)
+              {
+              <div class="col-2">
+                <mat-card class="cardWithShadow demo-slide-two rounded-8">
+                  <mat-card-content>
+                    <div class="d-flex align-items-center justify-content-center x-20">
+                      <img [src]="followercard.imgSrc" alt="icon" />
+                      <h6 class="m-0 f-w-500 f-s-14 m-x-8">
+                        {{ followercard.title }}
+                      </h6>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+              }
+            </div>
+          </div>
+          <div class="demo-slider overflow-hidden d-flex gap-30 m-t-2">
+            <div class="row flex-nowrap overflow-auto gap-20">
+              @for (followercard of followercardthird; track followercard.title) {
+              <div class="col-2">
+                <mat-card class="cardWithShadow demo-slide rounded-8">
+                  <mat-card-content>
+                    <div class="d-flex align-items-center justify-content-center x-20">
+                      <img [src]="followercard.imgSrc" alt="icon" />
+                      <h6 class="m-0 f-w-500 f-s-14 m-x-8">
+                        {{ followercard.title }}
+                      </h6>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="asked-questions spacing-top-bottom">
+    <div class="container">
+      <h2 class="f-s-40 text-center lh-normal m-b-48 section-sub-title">Frequently Asked Questions</h2>
+      <div class="row align-items-center justify-content-center">
+        <div class="col-md-8">
+          <mat-accordion multi class="faq-accordion m-b-48 d-block">
+            @for (item of faqList; track item) {
+            <mat-expansion-panel [expanded]="expandedIndex === $index" (opened)="expandedIndex = $index"
+              (closed)="expandedIndex = null" hideToggle class="b-1 expansion-panel m-b-16">
+              <mat-expansion-panel-header>
+                <mat-panel-title class="f-s-18 m-x-0">{{
+                  item.question
+                  }}</mat-panel-title>
+
+                <tabler-icon [name]="expandedIndex === $index ? 'minus' : 'plus'" class="m-s-auto icon-20 m-x-0 p-0">
+                </tabler-icon>
+              </mat-expansion-panel-header>
+
+              <p class="m-0">{{ item.answer }}</p>
+            </mat-expansion-panel>
+            }
+          </mat-accordion>
+        </div>
+      </div>
+      <div class="d-flex justify-content-center">
+        <div class="d-flex align-items-center justify-content-center gap-4 p-y-6 p-x-10 rounded border-dash">
+          <span class="f-s-14">Still have a question?</span>
+          <a target="_blank" href="https://discord.com/invite/XujgB8ww4n"
+            class="text-decoration-underline text-dark f-s-14">Ask on discord</a>
+          <span class="f-s-14">or</span>
+          <a target="_blank" href="https://adminmart.com/support/"
+            class="text-decoration-underline text-dark f-s-14">Submit a ticket</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>
+      <app-footer></app-footer>
+    </div>
+  </div>
+
+</div>

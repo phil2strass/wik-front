@@ -1,0 +1,55 @@
+<div class="banner-section bg-light-primary spacing-top-bottom">
+  <div class="container">
+    <p class="text-primary text-center text-uppercase f-s-14 m-t-0">
+      Blog Page
+    </p>
+    <h1 class="text-center f-s-48 section-sub-title lh-normal">Latest blog & news</h1>
+  </div>
+</div>
+
+<div class="spacing-top-bottom">
+  <div class="container">
+    <div class="row">
+      @for(cardimg of cardimgs; track cardimg.imgSrc) {
+      <div class="col-sm-6 col-lg-4">
+        <mat-card class="cardWithShadow card2 position-relative card-hover cursor-pointer" (click)="getNavigate(cardimg)">
+          <img mat-card-image src="{{ cardimg.imgSrc }}" alt="Photo of a Shiba Inu" />
+          <div class="card-overlay h-100 d-flex align-items-end justify-content-end">
+            <mat-chip class="m-r-16 bg-white">{{
+              cardimg.time
+              }}</mat-chip>
+          </div>
+
+          <mat-card-content class="p-y-24">
+            <div class="user-category">
+              <div>
+                <img src="{{ cardimg.user }}" class="rounded-circle" width="40" />
+              </div>
+              <mat-chip class="m-y-16 bg-light">{{
+                cardimg.category
+                }}</mat-chip>
+            </div>
+            <mat-card-title>{{ cardimg.title }}</mat-card-title>
+            <div class="d-flex align-items-center justify-content-center m-t-24">
+              <div class="d-flex align-items-center">
+                <span class="m-r-12 f-s-14 d-flex align-items-center"><i-tabler name="eye"
+                    class="icon-18 m-r-4"></i-tabler>{{ cardimg.views }}</span>
+                <span class="f-s-14 d-flex align-items-center"><i-tabler name="message-2"
+                    class="icon-18 m-r-4"></i-tabler>{{ cardimg.comments }}</span>
+              </div>
+              <span class="m-l-auto f-s-14 d-flex align-items-center">
+                <i-tabler name="point" class="icon-14 m-r-4 d-flex"></i-tabler>
+                {{ cardimg.date }}
+              </span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      }
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <app-footer></app-footer>
+</div>

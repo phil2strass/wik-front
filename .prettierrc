@@ -1,0 +1,24 @@
+{
+  "bracketSameLine": true,
+  "htmlWhitespaceSensitivity": "ignore",
+  "trailingComma": "none",
+  "printWidth": 160,
+  "semi": true,
+  "tabWidth": 4,
+  "arrowParens": "avoid",
+  "endOfLine": "auto",
+  "overrides": [
+    {
+      "files": "index.html",
+      "options": {
+        "parser": "html"
+      }
+    },
+    {
+      "files": "index.html",
+      "options": {
+        "parser": "angular"
+      }
+    }
+  ]
+}

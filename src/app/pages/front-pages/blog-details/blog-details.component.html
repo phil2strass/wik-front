@@ -1,0 +1,116 @@
+<div class="banner-section bg-light-primary spacing-top-bottom">
+  <div class="container">
+    <p class="text-primary text-center text-uppercase f-s-14 m-t-0">
+      Blog Page
+    </p>
+    <h1 class="text-center f-s-48 section-sub-title lh-normal">Latest blog & news</h1>
+  </div>
+</div>
+
+<div class="blog-details-content spacing-top-bottom">
+  <div class="container">
+    <!-- ----------------------------------------------------------------- -->
+    <!-- If Blog is available -->
+    <!-- ----------------------------------------------------------------- -->
+    @if(blogDetail()) {
+    <mat-card class="cardWithShadow">
+      <img mat-card-image src="{{ blogDetail()?.imgSrc }}" alt="Photo of a Shiba Inu" height="440" />
+      <div class="detail-card-overlay h-100 d-flex align-items-end justify-content-end">
+        <span class="f-s-12 m-y-16 f-w-600 bg-white rounded-pill p-x-8 m-r-16">2 mins Read</span>
+      </div>
+      <mat-card-content class="p-24 b-b-1">
+        <div class="user-category">
+          <div>
+            <img src="{{ blogDetail()?.user }}" class="rounded-circle" width="40" />
+          </div>
+          <span class="f-s-12 m-y-16 f-w-600 rounded-pill p-x-8 p-y-4 d-inline-block text-dark bg-light">{{
+            blogDetail()?.category }}</span>
+        </div>
+
+        <mat-card-title class="f-s-36 lh-normal section-sub-title">{{
+          blogDetail()?.title }}
+        </mat-card-title>
+        <div class="d-flex align-items-center justify-content-center m-t-24 justify-content-between">
+          <div class="d-flex align-items-center gap-24">
+            <span class="f-s-14 d-flex align-items-center gap-8"><i-tabler name="eye" class="icon-18"></i-tabler>{{
+              blogDetail()?.views }}</span>
+            <span class="f-s-14 d-flex align-items-center gap-8"><i-tabler name="message-2"
+                class="icon-18"></i-tabler>4</span>
+          </div>
+          <span class="f-s-14 d-flex align-items-center">
+            <i-tabler name="point" class="icon-18"></i-tabler>
+            {{ blogDetail()?.date }}
+          </span>
+        </div>
+      </mat-card-content>
+      <mat-card-content class="heading-section">
+        <h2 class="f-s-28 lh-normal m-y-12 section-sub-title">Main Heading & Points</h2>
+        <p class="f-s-14">
+          Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the
+          industry's standard dummy text ever since
+          the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It
+          has survived not only five centuries,
+          but also the leap into electronic typesetting,
+          remaining essentially unchanged. It was popularised in the
+        </p>
+        <ul>
+          <li class="f-s-14">Vivamus eu lacus scelerisque, placerat commodo lectus.</li>
+          <li class="f-s-14">Etiam et ante at ex porta fringilla.</li>
+          <li class="f-s-14">Nullam dignissim sem eu magna aliquet, sit amet volutpat tellus</li>
+        </ul>
+        <p class="f-s-14">
+          Unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not
+          only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was
+          popularised in the
+        </p>
+        <mat-divider></mat-divider>
+        <p class="f-s-14">
+          We are a dedicated team of passionate product managers, developers, UX/UI designers, QA engineers experts
+          helping businesses from new startups
+        </p>
+        <mat-divider></mat-divider>
+        <p class="f-s-14">
+          There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in
+          some form, by injected humour, or randomised words which don't look even slightly believable making this the
+          first true generator on the Internet. It uses a dictionary
+        </p>
+        <mat-divider class="m-b-16"></mat-divider>
+        <h2 class="f-s-21 lh-normal">Tags</h2>
+        <ul>
+          <li class="f-s-14">Trends</li>
+          <li class="f-s-14">Design</li>
+          <li class="f-s-14">Research</li>
+        </ul>
+
+        <mat-divider class="m-b-16"></mat-divider>
+        <h2 class="f-s-21 lh-normal">Share</h2>
+        <ul class="text-primary">
+          <li class="f-s-14"><a class="text-primary text-decoration-none" href="javascript:void(0)">Facebook</a></li>
+          <li class="f-s-14"><a class="text-primary text-decoration-none" href="javascript:void(0)">Twitter</a></li>
+          <li class="f-s-14"><a class="text-primary text-decoration-none" href="javascript:void(0)">Linkedin</a></li>
+        </ul>
+
+        <mat-divider class="m-b-16"></mat-divider>
+        <h2 class="f-s-21 lh-normal">Join our newsletter</h2>
+        <p class="f-s-14">Email address : <a href="javascript:void(0)" class="f-s-14 text-primary text-decoration-none">Subscribe</a></p>
+      </mat-card-content>
+    </mat-card>
+    }
+
+    <!-- ----------------------------------------------------------------- -->
+    <!-- If Blog isn't available -->
+    <!-- ----------------------------------------------------------------- -->
+
+    @if (!blogDetail() || blogDetail().length === 0) {
+    <mat-card class="cardWithShadow">
+      <mat-card-content>
+        <p>No blog post available.</p>
+      </mat-card-content>
+    </mat-card>
+    }
+  </div>
+</div>
+
+<div class="footer">
+  <app-footer></app-footer>
+</div>

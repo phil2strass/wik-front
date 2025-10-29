@@ -1,0 +1,32 @@
+.landing-page {
+  .custom-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 15px;
+  }
+
+  .heightToolbar {
+    height: 46px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-image: url(../../../../assets/images/front-pages/topbar-bg.png);
+  }
+
+  .toolBarContent {
+    .nav-item {
+      &.selected {
+        background-color: var(--mat-sys-primary-fixed-dim);
+        color: var(--mat-sys-primary); // optional for visibility
+        transition: background-color 0.3s ease;
+      }
+
+      &:hover {
+        color: var(--mat-sys-primary);
+        transition: color 0.3s ease;
+      }
+    }
+
+  }
+
+}

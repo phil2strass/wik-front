@@ -1,0 +1,68 @@
+<div class="row justify-content-center">
+  <div class="col-lg-7 col-sm-11">
+    <h2 class="f-s-40 text-center m-b-48 lh-normal section-sub-title">
+      111,476+ Trusted developers & many tech giants as well
+    </h2>
+  </div>
+</div>
+<div class="row">
+  @for(plan of plans;track plan){
+  <div class="col-lg-3 col-md-4 col-sm-6">
+    <mat-card class="cardWithShadow b-1">
+      <mat-card-content>
+
+        <div class="m-b-16 d-flex align-items-center">
+          <h6 class="f-s-20 f-w-600  ">
+            {{ plan.title }}
+            @if (plan.popular) {
+            <span class="bg-light-primary text-primary rounded f-w-600 f-s-12 p-y-2  p-x-8">
+              Popular
+            </span>
+            }
+          </h6>
+        </div>
+        <p class="f-s-12 m-b-32 m-t-0">{{ plan.description }}</p>
+        <mat-divider></mat-divider>
+
+        <div class="price-line m-t-32">
+          <span class="f-s-40 f-w-600">${{ plan.price }}</span>
+          <span class="f-s-14">/{{ plan.period }}</span>
+        </div>
+        <div class="m-y-32">
+          @for(feature of plan.features; track feature) {
+          <div class="d-flex align-items-center gap-8 m-b-12">
+            <img
+              [src]="feature.included ? '/assets/images/front-pages/icon-circle-check.svg' : '/assets/images/front-pages/icon-circle-x.svg'"
+              alt="icon-facebook-dark" width="21" height="21" />
+
+            <span [ngClass]="{
+                                'f-w-600': feature.bold,
+                                'f-s-14 op-5': !feature.included,
+                                'f-s-14': feature.included
+                              }">
+              {{ feature.text }}
+            </span>
+          </div>
+          }
+        </div>
+
+        <button mat-flat-button color="primary" class="w-100 ">
+          Purchase Now
+        </button>
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+  }
+
+
+</div>
+<div class="m-t-32">
+  <p class="text-center f-s-14 m-b-0">Secured payment with PayPal & Razorpay</p>
+  <div class="d-flex align-items-center justify-content-center m-t-32 m-x-0 gap-48 flex-wrap">
+    @for( logo of paymentLogos;track logo){
+    <img class="cursor-pointer" [src]="logo.src" [alt]="logo.alt" [matTooltip]="logo.tooltip"
+      matTooltipPosition="below">
+    }
+  </div>
+</div>

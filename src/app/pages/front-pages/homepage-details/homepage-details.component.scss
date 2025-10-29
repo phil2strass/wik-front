@@ -1,0 +1,189 @@
+.home-page {
+  .custom-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 0 15px;
+  }
+
+  .home-page-header {
+
+    .header-container-content {
+
+      .cardPosition {
+        .float-image {
+          animation: floatUpDown 6s ease-in-out infinite;
+        }
+      }
+
+      .cardPositionTwo {
+
+        .float-image {
+          animation: floatUpDown 6s ease-in-out infinite;
+        }
+      }
+
+      .loginBtn {
+        .play-button {
+          background-color: transparent;
+          border: 2px solid var(--mat-sys-primary); // or use your theme color
+          color: var(--mat-sys-primary);
+          box-shadow: none;
+        }
+
+        .textSee {
+          cursor: pointer;
+
+          &:hover {
+            color: var(--mat-sys-primary);
+          }
+        }
+      }
+    }
+  }
+
+  .dashboardCards {
+
+    .card-container {
+
+      mat-card-content {
+        padding: 0px !important;
+      }
+    }
+  }
+
+  .tab-header {
+    box-shadow: 0px 6px 12px rgba(127, 145, 156, 0.12);
+
+    .profileTabs {
+      background-color: var(--mdc-elevated-card-container-color) !important;
+
+      .mat-mdc-tab.mdc-tab-indicator--active {
+        .mdc-tab__text-label {
+          color: var(--mat-sys-primary);
+        }
+      }
+    }
+
+  }
+
+  .template-slider {
+    .template-slider-content {
+      .demo-slider {
+        .demo-slide {
+          animation: slide3d 15s linear infinite;
+        }
+      }
+    }
+  }
+
+  .features {
+
+    .cardWithShadow {
+      mat-card-content {
+        padding: 0px !important;
+      }
+    }
+  }
+
+  .exceptional {
+    .exceptional-content {
+      .demo-slider {
+        .demo-slide {
+          animation: slide3d 20s linear infinite;
+        }
+
+        .demo-slide-two {
+          animation: slide3dTwo 20s linear infinite;
+        }
+      }
+    }
+  }
+
+  .expansion-panel {
+    box-shadow: none;
+    background: transparent;
+    border-radius: 0 !important;
+    border-bottom: 1px solid var(--mat-sys-outline);
+
+    .mat-expansion-panel-header {
+      padding: 18px 0 !important;
+      height: auto;
+    }
+  }
+
+  .sliderImg {
+    max-width: 380px;
+    height: 300px;
+  }
+
+  .img-border {
+    border: 2px solid var(--mat-sys-secondary);
+    /* Blue border, change color as needed */
+    cursor: pointer;
+  }
+
+  .img-border:hover {
+    border-color: var(--mat-sys-secondary);
+  }
+
+  .border-dash {
+    border: 1px dashed var(--mat-sys-outline); // Initial border color (Bootstrap primary)
+    transition: border-color 0.3s ease;
+    flex-wrap: wrap;
+
+    &:hover {
+      border-color: var(--mat-sys-primary); // Use your Angular Material primary variable or a custom color
+    }
+  }
+
+  .faq-accordion {
+    .mat-expansion-panel {
+      border-radius: 8px !important;
+
+      .mat-expansion-panel-header {
+        padding: 20px 21px !important;
+      }
+    }
+  }
+}
+
+@keyframes floatUpDown {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-6px); // smaller bounce
+  }
+}
+
+@keyframes slide3d {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(-2028px, 0, 0); // adjust based on actual slide width
+  }
+}
+
+@keyframes slide3dTwo {
+  from {
+    transform: translate3d(-2028px, 0, 0); // Rightward (starts left)
+  }
+
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+
+
+@media (max-width: 1199px) {
+  .home-page-header {
+    padding-bottom: 48px;
+  }
+}

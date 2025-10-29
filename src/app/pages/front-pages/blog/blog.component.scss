@@ -1,0 +1,24 @@
+
+
+.social-btns {
+  margin-top: 20px;
+
+  .btn-icon {
+    width: 25px !important;
+    height: 25px !important;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    tabler-icon {
+      width: 16px !important;
+      height: 16px !important;
+    }
+  }
+
+  .btn-add-story {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+  }
+}

@@ -1,0 +1,22 @@
+[
+    { "id": 2, "name": "Anglais", "iso": "en", "genders": [] },
+    {
+        "id": 1,
+        "name": "Allemand",
+        "iso": "de",
+        "genders": [
+            { "id": 1, "name": "masculin" },
+            { "id": 2, "name": "féminin" },
+            { "id": 3, "name": "neutre" }
+        ]
+    },
+    {
+        "id": 3,
+        "name": "Français",
+        "iso": "fr",
+        "genders": [
+            { "id": 1, "name": "masculin" },
+            { "id": 2, "name": "féminin" }
+        ]
+    }
+]

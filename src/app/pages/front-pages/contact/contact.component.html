@@ -1,0 +1,103 @@
+<div class="contact-content">
+  <!-- Light Blue Section -->
+  <div class="banner-section bg-light-primary p-y-80">
+    <div class="container m-b-80 p-b-80">
+      <div class="container-content">
+        <p class="text-primary text-center text-uppercase f-s-14 m-t-0"> Contact us</p>
+        <h1 class="text-center f-s-48 section-sub-title lh-normal">We'd love to hear from you</h1>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-content">
+    <form>
+      <div class="container">
+        <!-- Map stays inside, but will visually float out -->
+        <div class="map-container overflow-hidden rounded">
+          <iframe class="overflow-hidden rounded"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6335071.017601874!2d7.472741070779207!3d34.000243243063756!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x126c2c82aeb63e77%3A0xb5b3d1a2f1304c8e!2sTunisia!5e0!3m2!1sen!2stn!4v1715499362503!5m2!1sen!2stn"
+            width="100%" height="400" style="border: 0" allowfullscreen="" loading="lazy"
+            referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+        <div class="spacing-top-bottom">
+          <div class="row">
+            <div class="col-md-8 m-b-30">
+              <div class="row ">
+                <div class="col-md-6">
+                  <!-- input -->
+                  <mat-label class="f-s-14 f-w-600 m-b-8 d-block">First Name<span>*</span></mat-label>
+                  <mat-form-field appearance="outline" class="w-100" color="primary">
+                    <input matInput type="text" placeholder="First Name" />
+                  </mat-form-field>
+                  <!-- input -->
+                  <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Phone Number<span>*</span></mat-label>
+                  <mat-form-field appearance="outline" class="w-100" color="primary">
+                    <input matInput type="tel" placeholder="xxx xxx xxxx" />
+                  </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                  <!-- input -->
+                  <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Last Name<span>*</span></mat-label>
+                  <mat-form-field appearance="outline" class="w-100" color="primary">
+                    <input matInput type="text" placeholder="Last Name" />
+                  </mat-form-field>
+                  <!-- input -->
+                  <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Email<span>*</span></mat-label>
+                  <mat-form-field appearance="outline" class="w-100" color="primary">
+                    <input matInput type="mail" placeholder="Email address" />
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-lg-12">
+                  <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Enquire related to<span>*</span>
+                  </mat-label>
+                  <mat-form-field appearance="outline" class="w-100">
+                    <mat-select value="General Enquiry">
+                      <mat-option value="General Enquiry">General Enquiry</mat-option>
+                      <mat-option value="General Enquiry 2">General Enquiry 2</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-lg-12">
+                  <mat-label class="f-s-14 f-w-600 m-b-8 d-block">Message</mat-label>
+                  <mat-form-field appearance="outline" class="w-100" color="primary">
+                    <textarea matInput rows="5" placeholder="Write your message here"></textarea>
+                  </mat-form-field>
+                </div>
+              </div>
+              <button mat-flat-button>Submit</button>
+            </div>
+            <div class="col-md-4 right-side-content">
+              <mat-card class="shadow-none bg-primary rounded-8 p-8">
+                <mat-card-content>
+                  <div>
+                    <h6 class="f-s-20 m-b-16 text-white">Reach Out Today</h6>
+                    <p class="f-s-14 m-0 text-white">
+                      Have questions or need assistance? We're just a message
+                      away.
+                    </p>
+                  </div>
+                  <mat-divider class="m-y-30"></mat-divider>
+                  <div>
+                    <h6 class="f-s-20 m-b-16 text-white">Our Location</h6>
+                    <p class="f-s-14 m-0 text-white">
+                      Visit us in person or find our contact details to connect
+                      with us directly.
+                    </p>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="footer">
+    <app-footer></app-footer>
+  </div>
+</div>

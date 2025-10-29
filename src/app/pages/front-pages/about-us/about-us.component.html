@@ -1,0 +1,169 @@
+<div class="contact-page">
+  <div class="banner-section bg-light-primary contact-herder spacing-top-bottom">
+    <div class="container p-y-20">
+      <div class="row align-items-center">
+        <div class="col-lg-6">
+          <h1 class="m-b-24 f-s-48 lh-normal section-sub-title">
+            Get to know Modernize Dashboard Template
+          </h1>
+          <div class="hstack">
+            <a mat-flat-button color="primary">Create an account</a>
+            <a mat-stroked-button color="primary" class="border-primary">View Open
+              Positions</a>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <p class="lh-base m-t-32">
+            Do you need a highly customizable and developer friendly premium
+            Angular admin template packed with numerous features? Modernize
+            Angular Admin Template has everything you need. This bootstrap based
+            admin template is designed in accordance with industry standards and
+            best practices to provide you.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="spacing-top-bottom setup-process">
+    <div class="container">
+      <h2 class="text-center section-sub-title m-b-48 f-s-40 lh-normal">
+        The hassle-free setup process
+      </h2>
+      <div class="row">
+        @for(topcard of setupCards; track topcard.title) {
+        <div class="col-lg-3 col-sm-6 d-flex align-items-stretch">
+          <mat-card class="shadow-none text-center w-100 bg-light-{{
+              topcard.color
+            }} rounded-8 ">
+            <mat-card-content>
+              <div class="m-t-16">
+                @if(topcard.id!==2){
+                <img [src]="topcard.img" alt="users" width="40" class="rounded-circle" />
+                }
+
+                <h6 class="f-s-16 m-t-16">
+                  {{ topcard.title }}
+                </h6>
+                <p class="f-s-14 m-t-16 m-b-0">
+                  {{ topcard.subtitle }}
+                </p>
+                @if(topcard.id===2){
+                <img [src]="topcard.imgMain" alt="image" class="img-fluid w-100 m-t-10 m-b--32" />
+                }
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <div class="spacing-top-bottom key-metric">
+    <div class="container">
+      <div class="row justify-content-between">
+        <div class="col-md-5">
+          <div class="m-b-32">
+            <h2 class="f-s-40 m-b-16 section-sub-title f-s-40 lh-normal">Key metric at a glance</h2>
+            <p class="f-s-14 m-0 lh-base">
+              From the year we were founded to the impressive customer base
+              we've built, and the growth percentages that reflect our
+              continuous improvement, these numbers tell our story at a glance.
+              Explore the data that drives our mission and underscores our
+              commitment to excellence.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="row stat-section">
+            @for (stat of stats; track stat) {
+            <div class="col-6 m-b-32">
+              <div class="stat-block">
+                <p class="stat-label f-s-12 f-w-400 text-uppercase text-primary m-y-0">
+                  {{ stat.label }}
+                </p>
+                <h2 class="stat-value f-s-48 lh-normal section-sub-title">
+                  {{ stat.value }}
+                </h2>
+                <p class="f-s-14 m-y-0">{{ stat.description }}</p>
+              </div>
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="our-leadership spacing-top p-b-48">
+    <app-image-slider></app-image-slider>
+  </div>
+
+  <div class="features spacing-bottom">
+    <div class="container">
+      <div class="row align-items-center justify-content-between">
+        <!--row-->
+        <div class="col-md-5 m-b-30">
+          <div class="client-margin">
+            <h2 class="lh-normal f-s-40 m-b-16 section-sub-title">
+              What our clients <br> think <img src="assets/images/front-pages/logoIcon.svg" alt="logo" />
+              about us?
+            </h2>
+            <p class="m-0">
+              Our users' feedback is a testament to our commitment to quality
+              and user satisfaction. Read what they have to say about their
+              journey with us.
+            </p>
+          </div>
+        </div>
+        <div class="col-md-5">
+          <mat-card class="cardWithShadow b-1 rounded-8 m-b-0 p-48">
+            <mat-card-content>
+              <mat-card-title class="f-s-24 f-w-600 m-b-24">Features availability</mat-card-title>
+
+              <div class="d-flex align-items-center gap-16 m-b-24">
+                <div>
+                  <img [src]="currentUser().img" [alt]="currentUser().name" class="rounded-circle" width="40" />
+                </div>
+                <h6 class="f-s-14 f-w-600">{{ currentUser().name }}</h6>
+              </div>
+
+              <p class="f-s-14 m-b-16 m-t-0">
+                Our users' feedback is a testament to our commitment to quality
+                and user satisfaction. Read what they have to say about their
+                journey with us.
+              </p>
+
+              <mat-divider></mat-divider>
+
+              <div class="d-flex align-items-center gap-10 m-t-8">
+                <button class="bg-light icon-32 d-flex align-items-center justify-content-center" mat-icon-button
+                  (click)="goPrev()">
+                  <i-tabler name="chevron-left"
+                    class="icon-18 d-flex align-items-center justify-content-center"></i-tabler>
+                </button>
+
+                <span class="f-s-14">{{ displayCount() }}</span>
+
+                <button class="bg-light icon-32 d-flex align-items-center justify-content-center" mat-icon-button
+                  (click)="goNext()">
+                  <i-tabler name="chevron-right"
+                    class="icon-18 d-flex align-items-center justify-content-center"></i-tabler>
+                </button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <app-footer></app-footer>
+  </div>
+
+</div>

@@ -1,0 +1,11 @@
+<svg width="300" height="80" viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Livre gauche -->
+  <path d="M10 10C25 10 40 20 45 35V70C30 55 15 50 0 50V20C0 15 5 10 10 10Z" fill="#615DFF"/>
+  <!-- Livre droit -->
+  <path d="M70 10C55 10 40 20 45 35V70C60 55 75 50 90 50V20C90 15 85 10 70 10Z" fill="#3DD9EB"/>
+
+  <!-- Texte WordsIKnow -->
+  <text x="150" y="50" font-family="Verdana, Geneva, sans-serif" font-size="36" font-weight="bold" fill="#11142D">
+    WordsIKnow
+  </text>
+</svg>
