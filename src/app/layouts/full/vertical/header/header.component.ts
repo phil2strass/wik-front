@@ -174,20 +174,6 @@ export class HeaderComponent {
             title: 'My Profile',
             subtitle: 'Account Settings',
             link: '/user/profil'
-        },
-        {
-            id: 2,
-            img: '/assets/images/svgs/icon-inbox.svg',
-            title: 'My Inbox',
-            subtitle: 'Messages & Email',
-            link: '/apps/email/inbox'
-        },
-        {
-            id: 3,
-            img: '/assets/images/svgs/icon-tasks.svg',
-            title: 'My Tasks',
-            subtitle: 'To-do and Daily Tasks',
-            link: '/apps/taskboard'
         }
     ];
 
