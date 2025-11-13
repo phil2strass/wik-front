@@ -17,6 +17,10 @@ export const routes: Routes = [
                 loadChildren: () => import('./user/user.routes')
             },
             {
+                path: 'word',
+                loadChildren: () => import('./word/word.routes')
+            },
+            {
                 path: 'starter',
                 loadChildren: () => import('./pages/pages.routes').then(m => m.PagesRoutes)
             },

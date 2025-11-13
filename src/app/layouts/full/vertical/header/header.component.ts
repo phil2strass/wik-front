@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, Input, ViewEncapsulation, inject } from '@angular/core';
+import { Component, Output, EventEmitter, Input, ViewEncapsulation, inject, effect, computed } from '@angular/core';
 import { CoreService } from 'src/app/services/core.service';
 import { MatDialog } from '@angular/material/dialog';
 import { navItems } from '../sidebar/sidebar-data';
@@ -12,6 +12,8 @@ import { NgScrollbarModule } from 'ngx-scrollbar';
 import { AppSettings } from 'src/app/config';
 import { SecurityStore } from '../../../../shared/security/security-store';
 import { environment } from '@root/environments/environment';
+import { DataStore } from '@shared/data/data-store';
+import { Langue } from '@shared/data/models/langue.model';
 
 interface notifications {
     id: number;
@@ -58,6 +60,15 @@ export class HeaderComponent {
     readonly #securityStore = inject(SecurityStore);
     protected readonly user = this.#securityStore.loadedUser;
 
+    protected readonly languagesId = computed(() => this.#securityStore.langues() ?? []);
+    protected readonly langueSelectedId = this.#securityStore.langueSelected;
+
+    readonly #dataStore = inject(DataStore);
+    protected readonly languesData = this.#dataStore.langues;
+
+    languageSelected: Langue | undefined;
+    languagesFiltered: Langue[];
+
     basePhotoUrl = environment.basePhotoUrl;
 
     public selectedLanguage: any = {
@@ -100,6 +111,15 @@ export class HeaderComponent {
         private translate: TranslateService
     ) {
         translate.setDefaultLang('en');
+
+        effect(() => {
+            this.languagesFiltered = this.languesData().filter(langue => this.languagesId().includes(langue.id) && langue.id != this.langueSelectedId());
+            this.languageSelected = this.languesData().find(langue => langue.id === this.langueSelectedId());
+        });
+    }
+
+    updateLangueSelected(langue: Langue) {
+        this.#securityStore.updateLangueSelected(langue);
     }
 
     options = this.settings.getOptions();

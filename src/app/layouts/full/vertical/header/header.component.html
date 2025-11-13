@@ -28,28 +28,31 @@
         <!-- --------------------------------------------------------------- -->
         <!--  Links -->
         <!-- --------------------------------------------------------------- -->
-        <button mat-button [matMenuTriggerFor]="appsmenu" aria-label="Notifications">
-            <div class="d-flex align-items-center">
-                Apps
-                <i-tabler name="chevron-down" class="icon-16 m-l-4"></i-tabler>
-            </div>
-        </button>
-        <mat-menu #appsmenu="matMenu" class="apps-dd cardWithShadow">
-            <div class="row">
-                <div class="col-sm-12">
-                    <div class="p-x-16 p-y-32">
-                        <h4 class="f-s-18 f-w-600 m-b-16">Quick Links</h4>
-                        @for (quicklink of quicklinks; track quicklink.title) {
-                            <div class="text-hover-primary">
-                                <a [routerLink]="[quicklink.link]" class="hover-text text-decoration-none f-s-14 f-w-600 d-block p-y-8">
-                                    {{ quicklink.title }}
-                                </a>
-                            </div>
-                        }
+        @if (languageSelected) {
+            <button mat-button [matMenuTriggerFor]="appsmenu" aria-label="Notifications">
+                <div class="d-flex align-items-center">
+                    {{ languageSelected.name }}
+                    <i-tabler name="chevron-down" class="icon-16 m-l-4"></i-tabler>
+                </div>
+            </button>
+            <mat-menu #appsmenu="matMenu" class="apps-dd cardWithShadow">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <div class="p-x-16 p-y-32">
+                            <h4 class="f-s-18 f-w-600 m-b-16">Choix des langues:</h4>
+                            @for (language of languagesFiltered; track language) {
+                                <div class="text-hover-primary">
+                                    <a (click)="updateLangueSelected(language)" class="hover-text text-decoration-none f-s-14 f-w-600 d-block p-y-8">
+                                      {{ language.name }}
+                                    </a>
+                                </div>
+                            }
+                        </div>
                     </div>
                 </div>
-            </div>
-        </mat-menu>
+            </mat-menu>
+        }
+
         <!--
         <a mat-button [routerLink]="['/apps/chat']">Chat</a>
         <a mat-button [routerLink]="['/apps/calendar']">Calendar</a>

@@ -1,5 +1,5 @@
 import { getState, signalStoreFeature, withHooks } from '@ngrx/signals';
-import { effect, inject } from '@angular/core';
+import { Signal, effect, inject } from '@angular/core';
 import { LoadingService } from './loading.service';
 
 export function withLoader() {
@@ -8,11 +8,14 @@ export function withLoader() {
             onInit(store) {
                 const loadingService = inject(LoadingService);
                 effect(() => {
-                    const state = getState(store) as MyState;
-
-                    if (state.status == 'loading') {
+                    const state = getState(store);
+                    if (!hasLoaderState(state)) {
+                        return;
+                    }
+                    const status = state.status();
+                    if (status === 'loading') {
                         loadingService.start();
-                    } else if (state.status == 'loaded') {
+                    } else if (status === 'loaded') {
                         loadingService.stop();
                     }
                 });
@@ -21,7 +24,10 @@ export function withLoader() {
     );
 }
 
-interface MyState {
-    status: string;
-    [key: string]: any;
+interface LoaderState {
+    status: Signal<'init' | 'loading' | 'loaded'>;
+}
+
+function hasLoaderState(state: unknown): state is LoaderState {
+    return !!state && typeof (state as LoaderState).status === 'function';
 }

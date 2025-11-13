@@ -2,18 +2,19 @@ import { NavItem } from './nav-item/nav-item';
 
 export const navItems: NavItem[] = [
   {
-    navCap: 'Home',
+    navCap: 'Vocabulaire',
   },
   {
-    displayName: 'Analytical',
+    displayName: 'Nouveau',
     iconName: 'aperture',
-    route: '/dashboards/dashboard1',
+    route: '/word/new',
   },
   {
-    displayName: 'eCommerce',
+    displayName: 'Liste',
     iconName: 'shopping-cart',
-    route: '/dashboards/dashboard2',
+    route: '/word/list',
   },
+    /*
   {
     displayName: 'Frontend pages',
     iconName: 'app-window',
@@ -37,7 +38,7 @@ export const navItems: NavItem[] = [
       {
         displayName: 'Blog Details',
         iconName: 'point',
-        route: 'front-pages/blog-details', 
+        route: 'front-pages/blog-details',
       } ,
       {
         displayName: 'Portfolio',
@@ -55,7 +56,7 @@ export const navItems: NavItem[] = [
         route: 'front-pages/contact',
       }
     ]
-  }, 
+  },
   {
     navCap: 'Apps',
   },
@@ -702,4 +703,6 @@ export const navItems: NavItem[] = [
     route: 'https://www.google.com/',
     external: true,
   },
+
+     */
 ];

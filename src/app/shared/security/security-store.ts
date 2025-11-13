@@ -69,6 +69,17 @@ export const SecurityStore = signalStore(
                     user: state.user ? { ...state.user, profil: profilStorage } : undefined
                 }));
             },
+            updateLangueSelected(langue: Langue) {
+                patchState(store, state => ({
+                    user: state.user
+                        ? { ...state.user, profil: state.user.profil ? { ...state.user.profil, langueSelected: langue.id } : undefined }
+                        : undefined
+                }));
+                if (store.user()?.profil) {
+                    localStorage.setItem('profil', JSON.stringify(store.user()?.profil));
+                }
+                httpClient.put(baseUrl + 'user/profil/langue', langue.id).subscribe();
+            },
             async loadProfil() {
                 httpClient
                     .get<ProfilStorage>(baseUrl + 'user')
