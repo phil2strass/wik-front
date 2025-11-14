@@ -10,12 +10,31 @@ import { Configuration } from '../shared/config/configuration';
 import { Word } from './models/word.model';
 import { SecurityStore } from '@shared/security/security-store';
 
+const WORD_GRID_PAGE_SIZE_KEY = 'word-grid-page-size';
+const DEFAULT_PAGE_SIZE = 10;
+
+const readStoredPageSize = (): number => {
+    if (typeof window === 'undefined') {
+        return DEFAULT_PAGE_SIZE;
+    }
+    const stored = window.localStorage.getItem(WORD_GRID_PAGE_SIZE_KEY);
+    const parsed = stored ? Number(stored) : NaN;
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_PAGE_SIZE;
+};
+
+const persistPageSize = (size: number): void => {
+    if (typeof window === 'undefined') {
+        return;
+    }
+    window.localStorage.setItem(WORD_GRID_PAGE_SIZE_KEY, size.toString());
+};
+
 export const WordGridStore = signalStore(
     { providedIn: 'root' },
     withState({
         status: 'init' as 'init' | 'loading' | 'loaded',
         pageIndex: 0,
-        pageSize: 10,
+        pageSize: readStoredPageSize(),
         sortField: 'name',
         sortDirection: 'asc',
         resultsLength: 0,
@@ -53,9 +72,9 @@ export const WordGridStore = signalStore(
                     mapResponse({
                         next: (response: any) => {
                             const data = response.body;
-                            const resultsLength = response.headers.get('X-Total-Count');
-                            patchState(store, { data });
-                            patchState(store, { resultsLength });
+                            const totalCountHeader = response.headers.get('X-Total-Count');
+                            const resultsLength = totalCountHeader ? Number(totalCountHeader) : 0;
+                            patchState(store, { data, resultsLength });
                         },
                         error: (err: any) => {
                             messageService.error(err.error);
@@ -74,6 +93,9 @@ export const WordGridStore = signalStore(
                 load();
             },
             setPage: (pageIndex: number, pageSize: number) => {
+                if (store.pageSize() !== pageSize) {
+                    persistPageSize(pageSize);
+                }
                 patchState(store, { pageIndex, pageSize });
                 load();
             },

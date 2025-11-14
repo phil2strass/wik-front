@@ -1,71 +1,102 @@
 import { Component, inject, ViewChild } from '@angular/core';
-import { MatTableModule } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSort, MatSortModule } from '@angular/material/sort';
-import { animate, style, transition, trigger } from '@angular/animations';
-import { MatSelectModule } from '@angular/material/select';
-import { DataStore } from '../../../shared/data/data-store';
-import { ReactiveFormsModule } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
+import { DataStore } from '@shared/data/data-store';
 import { MatDialog } from '@angular/material/dialog';
 import { Word } from '../../models/word.model';
 import { WordDeleteDialog } from '../word-delete.component';
 import { WordGridStore } from '../../word-grid-store';
 import { WordEditDialog } from '../word-edit.component';
+import { IconModule } from '@root/app/icon/icon.module';
+import { MaterialModule } from '@root/app/material.module';
+import { CommonModule } from '@angular/common';
+import { SelectionModel } from '@angular/cdk/collections';
+import { Element } from '@root/app/pages/apps/ecommerce/ecommerceData';
 
 @Component({
     selector: 'app-word-list',
     template: `
-        <h1 class="text-2xl font-medium text-gray-900">Les mots</h1>
+        <div class="b-1 rounded">
 
-        <div class="example-container mat-elevation-z8">
-            @if (status() == 'loading') {
-                <div class="example-loading-shade">
-                    <mat-spinner @fadeInOut></mat-spinner>
+            @if (selection.selected.length === 0) {
+                <div class="row justify-content-between gap-16 m-x-15">
+                    <div class="col-sm-4 m-t-14">
+                        <mat-form-field appearance="outline" class="w-30" color="primary">
+                            <mat-icon matPrefix>search</mat-icon>
+                            <input matInput (keyup)="applyFilter($event)" placeholder="Search Product" />
+                        </mat-form-field>
+                    </div>
+                    <div class="col-sm-6 d-flex align-items-center justify-content-end">
+                        <button mat-flat-button (click)="getAddProductNavigate()">Add Product</button>
+                    </div>
+                </div>
+            }
+            @if (selection.selected.length > 0) {
+                <div class="d-flex justify-content-between align-items-center  m-10 ">
+                    <div class="m-x-15">Selected: {{ selection.selected.length }}</div>
+                    <button mat-icon-button color="warn" class="m-r-10" (click)="deleteSelected()">
+                        <tabler-icon name="trash"></tabler-icon>
+                    </button>
                 </div>
             }
 
-            <div class="example-table-container">
-                <!--
-                <mat-select (selectionChange)="onTypeChange($event.value)">
-                    @for (type of types(); track type) {
-                        <mat-option [value]="type.id">{{ type.name }}</mat-option>
-                    }
-                </mat-select>
-                
-                <mat-form-field appearance="fill">
-                    <mat-label>Filter</mat-label>
-                    <input matInput (keyup)="applyFilter($event)" placeholder="Filter" #input />
-                    <button mat-icon-button matSuffix aria-label="Effacer le filtre">
-                        <mat-icon>close</mat-icon>
-                    </button>
-                </mat-form-field>
-                -->
+            <div class="table-responsive b-t-1 p-1 example-container">
+                @if (status() == 'loading') {
+                    <div class="example-loading-shade">
+                        <mat-spinner class="word-grid-loader"></mat-spinner>
+                    </div>
+                }
 
-                <table mat-table [dataSource]="data()" class="example-table" matSort matSortActive="name" matSortDisableClear matSortDirection="asc">
+                <table mat-table [dataSource]="data()" class="w-100 word-grid-table" matSort matSortActive="name" matSortDisableClear matSortDirection="asc">
+                    <!-- Checkbox Column -->
+                    <ng-container matColumnDef="select">
+                        <th mat-header-cell *matHeaderCellDef class="p-l-0 ">
+                            <mat-checkbox
+                                (change)="$event ? masterToggle() : null"
+                                [checked]="selection.hasValue() && isAllSelected()"
+                                color="primary"
+                                [indeterminate]="selection.hasValue() && !isAllSelected()"
+                                [aria-label]="checkboxLabel()"
+                                class="m-l-16"></mat-checkbox>
+                        </th>
+                        <td mat-cell *matCellDef="let row" class="p-l-0">
+                            <mat-checkbox
+                                (click)="$event.stopPropagation()"
+                                (change)="$event ? selection.toggle(row) : null"
+                                color="primary"
+                                [checked]="selection.isSelected(row)"
+                                [aria-label]="checkboxLabel(row)"
+                                class="m-l-16"></mat-checkbox>
+                        </td>
+                    </ng-container>
                     <ng-container matColumnDef="name">
-                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-                        <td mat-cell *matCellDef="let row">{{ row.name }}</td>
+                        <th mat-header-cell *matHeaderCellDef sticky class="f-w-600 mat-subtitle-1 f-s-14">Name</th>
+                        <td mat-cell *matCellDef="let row" class="f-s-14">{{ row.name }}</td>
                     </ng-container>
 
-                    <!-- Star Column -->
-                    <ng-container matColumnDef="star" stickyEnd>
-                        <th mat-header-cell *matHeaderCellDef style="width: 50px;" aria-label="row actions">&nbsp;</th>
-                        <td mat-cell *matCellDef="let row">
-                            <div class="flex gap-2">
-                                <a
-                                    (click)="openEdit(row)"
-                                    class="w-[50px] h-[50px] flex items-center justify-center rounded-lg hover:bg-gray-100 transition duration-200 cursor-pointer text-gray-500 border border-gray-200">
-                                    <i class="fa-regular fa-pen-to-square text-xl text-sky-600" aria-hidden="true"></i>
-                                </a>
-
-                                <a
-                                    (click)="openDelete(row)"
-                                    class="w-[50px] h-[50px] flex items-center justify-center rounded-lg hover:bg-gray-100 transition duration-200 cursor-pointer text-gray-500 border border-gray-200">
-                                    <i class="fa-regular fa-trash-can text-xl text-sky-600" aria-hidden="true"></i>
-                                </a>
-                            </div>
+                    <!-- Actions Column -->
+                    <ng-container matColumnDef="actions" stickyEnd>
+                        <th mat-header-cell *matHeaderCellDef sticky class="f-w-600 mat-subtitle-1 f-s-14">Action</th>
+                        <td mat-cell *matCellDef="let row" class="f-s-14" (click)="$event.stopPropagation()">
+                            <button mat-icon-button [matMenuTriggerFor]="menu" type="button" aria-label="Example icon-button with a menu">
+                                <mat-icon>
+                                    <tabler-icon name="dots-vertical"></tabler-icon>
+                                </mat-icon>
+                            </button>
+                            <mat-menu #menu="matMenu" class="cardWithShadow">
+                                <button mat-menu-item>
+                                    <div class="d-flex align-items-center" (click)="openEdit(row)">
+                                        <tabler-icon name="pencil" class="m-x-6"></tabler-icon>
+                                        <span>Edit</span>
+                                    </div>
+                                </button>
+                                <button mat-menu-item>
+                                    <div class="d-flex align-items-center text-error" (click)="openDelete(row)">
+                                        <tabler-icon name="trash" class="m-x-6"></tabler-icon>
+                                        <span>Delete</span>
+                                    </div>
+                                </button>
+                            </mat-menu>
                         </td>
                     </ng-container>
 
@@ -79,15 +110,62 @@ import { WordEditDialog } from '../word-edit.component';
                 [pageSize]="pageSize()"
                 [length]="resultsLength()"
                 showFirstLastButtons
-                aria-label="Sélection page des mots"></mat-paginator>
+                aria-label="Sélection page des mots"
+                class="b-t-1 p-x-48"></mat-paginator>
         </div>
     `,
-    imports: [MatProgressSpinnerModule, MatTableModule, MatSortModule, MatPaginatorModule, MatFormFieldModule, MatSelectModule, ReactiveFormsModule],
-    animations: [
-        trigger('fadeInOut', [
-            transition(':enter', [style({ opacity: 0 }), animate('400ms ease-in', style({ opacity: 1 }))]),
-            transition(':leave', [animate('400ms ease-out', style({ opacity: 0 }))])
-        ])
+    imports: [MaterialModule, CommonModule, IconModule],
+    styles: [
+        `
+            .example-container {
+                position: relative;
+                min-height: 240px;
+            }
+
+            .example-loading-shade {
+                position: absolute;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.15);
+                z-index: 2;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                backdrop-filter: blur(1px);
+            }
+
+            .word-grid-loader {
+                animation: fadeIn 200ms ease-in-out forwards;
+            }
+
+            .word-grid-table {
+                width: 100%;
+                table-layout: fixed;
+            }
+
+            .word-grid-table .mat-column-select {
+                width: 56px;
+                max-width: 56px;
+            }
+
+            .word-grid-table .mat-column-actions {
+                width: 92px;
+                max-width: 92px;
+            }
+
+            .word-grid-table .mat-column-name {
+                width: calc(100% - 148px);
+                word-break: break-word;
+            }
+
+            @keyframes fadeIn {
+                from {
+                    opacity: 0;
+                }
+                to {
+                    opacity: 1;
+                }
+            }
+        `
     ]
 })
 export class WordGridComponent {
@@ -102,12 +180,14 @@ export class WordGridComponent {
 
     readonly dialog = inject(MatDialog);
 
-    displayedColumns: string[] = ['name', 'star'];
+    displayedColumns: string[] = ['select', 'name', 'actions'];
 
     langueId: number = -1;
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild(MatSort) sort: MatSort;
+
+    selection = new SelectionModel<Element>(true, []);
 
     constructor() {}
 
@@ -151,4 +231,30 @@ export class WordGridComponent {
             }
         });
     }
+
+    /** The label for the checkbox on the passed row */
+    checkboxLabel(row?: Element): string {
+        if (!row) {
+            return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
+        }
+        return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.id + 1}`;
+    }
+
+    /** Whether the number of selected elements matches the total number of rows. */
+    isAllSelected(): any {
+        const numSelected = this.selection.selected.length;
+        const numRows = this.data().length;
+        return numSelected === numRows;
+    }
+
+    /** Selects all rows if they are not all selected; otherwise clear selection. */
+    masterToggle(): void {
+        this.isAllSelected() ? this.selection.clear() : this.data().forEach(row => this.selection.select(row));
+    }
+
+    getAddProductNavigate() {
+        //this.router.navigate(['apps/product/add-product'])
+    }
+
+    deleteSelected(): void {}
 }

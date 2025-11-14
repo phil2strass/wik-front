@@ -14,7 +14,6 @@ export const navItems: NavItem[] = [
     iconName: 'shopping-cart',
     route: '/word/list',
   },
-    /*
   {
     displayName: 'Frontend pages',
     iconName: 'app-window',
@@ -703,6 +702,4 @@ export const navItems: NavItem[] = [
     route: 'https://www.google.com/',
     external: true,
   },
-
-     */
 ];
