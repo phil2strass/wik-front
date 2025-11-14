@@ -10,13 +10,19 @@ import { Word } from '../models/word.model';
     selector: 'word-delete-dialog',
     template: `
         <h2 mat-dialog-title>Suppression {{ data.name }}</h2>
-        <mat-dialog-content>
+        <mat-dialog-content class="mat-typography">
             <p>Êtes-vous sûr de vouloir supprimer ce mot ?</p>
         </mat-dialog-content>
+        <div mat-dialog-actions class="d-flex justify-content-end gap-12">
+            <button mat-button (click)="onNoClick()">Annuler</button>
+            <button color="warn" mat-flat-button [mat-dialog-close]="wordId()">Supprimer</button>
+        </div>
+        <!--
         <mat-dialog-actions>
             <button matButton (click)="onNoClick()">Annuler</button>
             <button matButton [mat-dialog-close]="wordId()" cdkFocusInitial>Supprimer</button>
         </mat-dialog-actions>
+        -->
     `,
     imports: [MatFormFieldModule, MatInputModule, FormsModule, MatButtonModule, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose]
 })

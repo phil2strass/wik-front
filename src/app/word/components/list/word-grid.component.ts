@@ -17,7 +17,6 @@ import { Element } from '@root/app/pages/apps/ecommerce/ecommerceData';
     selector: 'app-word-list',
     template: `
         <div class="b-1 rounded">
-
             @if (selection.selected.length === 0) {
                 <div class="row justify-content-between gap-16 m-x-15">
                     <div class="col-sm-4 m-t-14">
@@ -222,7 +221,10 @@ export class WordGridComponent {
 
     openDelete(word: Word) {
         const dialogRef = this.dialog.open(WordDeleteDialog, {
-            data: word
+            data: word,
+            position: {
+                top: '25vh'
+            }
         });
 
         dialogRef.afterClosed().subscribe(wordId => {

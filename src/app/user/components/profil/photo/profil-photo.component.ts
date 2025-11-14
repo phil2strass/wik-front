@@ -71,7 +71,10 @@ export class ProfilPhotoComponent {
     openProfilPhotoDialog(): void {
         const dialogRef = this.dialog.open(ProfilPhotoDialogComponent, {
             width: '500px',
-            autoFocus: false
+            autoFocus: false,
+            position: {
+                top: '25vh'
+            }
         });
         dialogRef.afterClosed().subscribe(result => {
             if (result) {
@@ -84,7 +87,13 @@ export class ProfilPhotoComponent {
     }
 
     confirmDelete() {
-        const ref = this.dialog.open(ConfirmDeletePhotoComponent, { width: '420px', autoFocus: false });
+        const ref = this.dialog.open(ConfirmDeletePhotoComponent, {
+            width: '420px',
+            autoFocus: false,
+            position: {
+                top: '25vh'
+            }
+        });
         ref.afterClosed().subscribe(result => {
             if (result) {
                 this.addPhoto.emit(null);
