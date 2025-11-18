@@ -111,6 +111,7 @@ export const WordStore = signalStore(
             effect(() => {
                 const langueId = langueSelectedId();
                 const langues = dataStore.langues();
+
                 if (langues.length > 0 && langueId && langueId != langueIdActuelle) {
                     langueIdActuelle = langueId;
                     const genders = langues.filter((langue: any) => langue.id === langueIdActuelle)?.[0]?.genders;

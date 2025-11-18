@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { userGuard } from '../user/services/user.guard';
-import { WordNewComponent } from './components/new/word-new.component';
+import { WordNewComponent } from './components/word-new.component';
 import { WordGridComponent } from './components/list/word-grid.component';
 import { WordComponent } from './components/word.component';
 import { ProfilSidebarComponent } from '../user/components/profil-sidebar.component';
