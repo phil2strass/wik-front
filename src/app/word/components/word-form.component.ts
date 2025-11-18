@@ -17,64 +17,111 @@ import { NgxDropzoneModule } from 'ngx-dropzone';
 @Component({
     selector: 'app-word-form',
     template: `
-        <form [formGroup]="formGroup" (ngSubmit)="save()">
-            @if (useCard) {
-                <div class="row">
-                    <div class="col-lg-8">
-                        <mat-card class="cardWithShadow b-1 rounded p-30">
-                            <ng-container *ngTemplateOutlet="formFields"></ng-container>
-                        </mat-card>
+        @if (formReady) {
+            <form [formGroup]="formGroup" (ngSubmit)="save()">
+                @if (useCard) {
+                    <div class="row">
+                        <div class="col-lg-8">
+                            <mat-card class="cardWithShadow b-1 rounded p-30">
+                                <h4 Ctitle>{{ titleTranslationKey | translate }}</h4>
+                                <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">
+                                    Mot
+                                    <span class="text-error">*</span>
+                                </mat-label>
+                                <mat-form-field appearance="outline" class="w-100 p-0" color="primary">
+                                    <input #nameInput type="text" matInput formControlName="name" />
+                                    <mat-error *ngIf="showError('name', 'required')">Veuillez saisir un mot.</mat-error>
+                                </mat-form-field>
+                                @if (selectedType()) {
+                                    <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">Pluriel</mat-label>
+                                    <mat-form-field appearance="outline" class="w-100 p-0" color="primary">
+                                        <input type="text" matInput formControlName="plural" />
+                                    </mat-form-field>
+                                }
+                                <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">
+                                    Type
+                                    <span class="text-error">*</span>
+                                </mat-label>
+                                <mat-form-field appearance="outline" class="w-100">
+                                    <mat-select formControlName="typeId" disableOptionCentering>
+                                        @for (type of types(); track type) {
+                                            <mat-option [value]="type.id">{{ type.name }}</mat-option>
+                                        }
+                                    </mat-select>
+                                    <mat-error *ngIf="showError('typeId', 'required')">Veuillez saisir un type.</mat-error>
+                                </mat-form-field>
+                                @if (selectedType()) {
+                                    <mat-radio-group
+                                        formControlName="genderId"
+                                        aria-labelledby="example-radio-group-label"
+                                        class="d-flex flex-wrap gap-24 justify-content-start 100 mt-2">
+                                        @for (gender of genders(); track gender) {
+                                            <mat-card
+                                                class="cardWithShadow b-1 rounded d-flex gap-30 align-items-center flex-row">
+                                                <mat-radio-button
+                                                    class="p-r-16 p-l-6 p-y-2"
+                                                    color="primary"
+                                                    [value]="gender.id">
+                                                    {{ gender.name }}
+                                                </mat-radio-button>
+                                            </mat-card>
+                                        }
+                                    </mat-radio-group>
+                                }
+                            </mat-card>
+                        </div>
                     </div>
-                </div>
-            } @else {
-                <div class="word-form__content w-100">
-                    <ng-container *ngTemplateOutlet="formFields"></ng-container>
-                </div>
-            }
-        </form>
-        <ng-template #formFields>
-            <h4 Ctitle>{{ titleTranslationKey | translate }}</h4>
-            <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">
-                Mot
-                <span class="text-error">*</span>
-            </mat-label>
-            <mat-form-field appearance="outline" class="w-100 p-0" color="primary">
-                <input #nameInput type="text" matInput formControlName="name" />
-                <mat-error *ngIf="showError('name', 'required')">Veuillez saisir un mot.</mat-error>
-            </mat-form-field>
-            @if (selectedType()) {
-                <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">Pluriel</mat-label>
-                <mat-form-field appearance="outline" class="w-100 p-0" color="primary">
-                    <input type="text" matInput formControlName="plural" />
-                </mat-form-field>
-            }
-            <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">
-                Type
-                <span class="text-error">*</span>
-            </mat-label>
-            <mat-form-field appearance="outline" class="w-100">
-                <mat-select formControlName="typeId" disableOptionCentering>
-                    @for (type of types(); track type) {
-                        <mat-option [value]="type.id">{{ type.name }}</mat-option>
-                    }
-                </mat-select>
-                <mat-error *ngIf="showError('typeId', 'required')">Veuillez saisir un type.</mat-error>
-            </mat-form-field>
-            @if (selectedType()) {
-                <mat-radio-group
-                    formControlName="genderId"
-                    aria-labelledby="example-radio-group-label"
-                    class="d-flex flex-wrap gap-24 justify-content-start 100 mt-2">
-                    @for (gender of genders(); track gender) {
-                        <mat-card class="cardWithShadow b-1 rounded d-flex gap-30 align-items-center flex-row">
-                            <mat-radio-button class="p-r-16 p-l-6 p-y-2" color="primary" [value]="gender.id">
-                                {{ gender.name }}
-                            </mat-radio-button>
-                        </mat-card>
-                    }
-                </mat-radio-group>
-            }
-        </ng-template>
+                } @else {
+                    <div class="word-form__content w-100">
+                        <h4 Ctitle>{{ titleTranslationKey | translate }}</h4>
+                        <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">
+                            Mot
+                            <span class="text-error">*</span>
+                        </mat-label>
+                        <mat-form-field appearance="outline" class="w-100 p-0" color="primary">
+                            <input #nameInput type="text" matInput formControlName="name" />
+                            <mat-error *ngIf="showError('name', 'required')">Veuillez saisir un mot.</mat-error>
+                        </mat-form-field>
+                        @if (selectedType()) {
+                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">Pluriel</mat-label>
+                            <mat-form-field appearance="outline" class="w-100 p-0" color="primary">
+                                <input type="text" matInput formControlName="plural" />
+                            </mat-form-field>
+                        }
+                        <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">
+                            Type
+                            <span class="text-error">*</span>
+                        </mat-label>
+                        <mat-form-field appearance="outline" class="w-100">
+                            <mat-select formControlName="typeId" disableOptionCentering>
+                                @for (type of types(); track type) {
+                                    <mat-option [value]="type.id">{{ type.name }}</mat-option>
+                                }
+                            </mat-select>
+                            <mat-error *ngIf="showError('typeId', 'required')">Veuillez saisir un type.</mat-error>
+                        </mat-form-field>
+                        @if (selectedType()) {
+                            <mat-radio-group
+                                formControlName="genderId"
+                                aria-labelledby="example-radio-group-label"
+                                class="d-flex flex-wrap gap-24 justify-content-start 100 mt-2">
+                                @for (gender of genders(); track gender) {
+                                    <mat-card
+                                        class="cardWithShadow b-1 rounded d-flex gap-30 align-items-center flex-row">
+                                        <mat-radio-button
+                                            class="p-r-16 p-l-6 p-y-2"
+                                            color="primary"
+                                            [value]="gender.id">
+                                            {{ gender.name }}
+                                        </mat-radio-button>
+                                    </mat-card>
+                                }
+                            </mat-radio-group>
+                        }
+                    </div>
+                }
+            </form>
+        }
     `,
     encapsulation: ViewEncapsulation.None,
     imports: [
@@ -97,12 +144,14 @@ export class WordFormComponent implements AfterViewInit, OnChanges {
     @ViewChild(FormGroupDirective) formDirective?: FormGroupDirective;
     submitted = false;
     #form!: FormGroup;
+    formReady = false;
     @Input({ required: true })
     set form(value: FormGroup) {
         if (!value) {
             throw new Error('WordFormComponent requires a FormGroup input.');
         }
         this.#form = value;
+        this.formReady = true;
     }
     get formGroup(): FormGroup {
         if (!this.#form) {

@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { WordStore } from '../word-store';
 import { WordFormComponent } from './word-form.component';
 
@@ -25,13 +26,41 @@ interface WordDialogData {
         <mat-dialog-content>
             <app-word-form #wordFormRef [form]="form" mode="update" [useCard]="false"></app-word-form>
         </mat-dialog-content>
+        <div class="word-edit-dialog__loader-slot">
+            <mat-progress-bar *ngIf="isLoading()" mode="indeterminate"></mat-progress-bar>
+        </div>
         <mat-dialog-actions class="d-flex gap-10 align-items-center">
             <button mat-button (click)="onNoClick()">Annuler</button>
-            <button mat-flat-button color="primary" (click)="onSave()" [disabled]="form.invalid || isLoading()">Enregistrer</button>
-            <mat-progress-spinner *ngIf="isLoading()" diameter="24" mode="indeterminate"></mat-progress-spinner>
+            <button
+                mat-flat-button
+                color="primary"
+                (click)="onSave()"
+                [disabled]="form.invalid || !form.dirty || isLoading()">
+                <span>Enregistrer</span>
+            </button>
         </mat-dialog-actions>
     `,
-    imports: [CommonModule, MatButtonModule, MatDialogTitle, MatDialogContent, MatDialogActions, MatProgressSpinnerModule, WordFormComponent]
+    imports: [
+        CommonModule,
+        MatButtonModule,
+        MatDialogTitle,
+        MatDialogContent,
+        MatDialogActions,
+        MatProgressSpinnerModule,
+        MatProgressBarModule,
+        WordFormComponent
+    ],
+    styles: [
+        `
+            .word-edit-dialog__loader-slot {
+                height: 4px;
+            }
+
+            .word-edit-dialog__loader-slot mat-progress-bar {
+                height: 4px;
+            }
+        `
+    ]
 })
 export class WordEditDialog {
     @ViewChild('wordFormRef') wordFormComponent?: WordFormComponent;
