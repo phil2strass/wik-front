@@ -117,6 +117,25 @@ export const WordGridStore = signalStore(
                         )
                     )
                 )
+            ),
+            deleteMany: rxMethod<number[]>(
+                pipe(
+                    tap(() => patchState(store, { status: 'loading' })),
+                    switchMap(wordTypeIds =>
+                        httpClient.post(`${baseUrl}word/bulk-delete`, wordTypeIds).pipe(
+                            mapResponse({
+                                next: () => {
+                                    messageService.info('Suppression réussie');
+                                    load();
+                                },
+                                error: (err: any) => {
+                                    messageService.error(err.error);
+                                }
+                            }),
+                            tap(() => patchState(store, { status: 'loaded' }))
+                        )
+                    )
+                )
             )
         };
     }),

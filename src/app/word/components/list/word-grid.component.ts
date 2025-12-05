@@ -12,8 +12,8 @@ import { IconModule } from '@root/app/icon/icon.module';
 import { MaterialModule } from '@root/app/material.module';
 import { CommonModule } from '@angular/common';
 import { SelectionModel } from '@angular/cdk/collections';
-import { Element } from '@root/app/pages/apps/ecommerce/ecommerceData';
 import { TranslateModule } from '@ngx-translate/core';
+import { WordDeleteSelectedDialogComponent } from '../word-delete-selected-dialog.component';
 
 @Component({
     selector: 'app-word-list',
@@ -188,7 +188,7 @@ export class WordGridComponent {
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild(MatSort) sort: MatSort;
 
-    selection = new SelectionModel<Element>(true, []);
+    selection = new SelectionModel<Word>(true, []);
 
     constructor() {}
 
@@ -237,11 +237,11 @@ export class WordGridComponent {
     }
 
     /** The label for the checkbox on the passed row */
-    checkboxLabel(row?: Element): string {
+    checkboxLabel(row?: Word): string {
         if (!row) {
             return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
         }
-        return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.id + 1}`;
+        return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.wordTypeId}`;
     }
 
     /** Whether the number of selected elements matches the total number of rows. */
@@ -267,5 +267,23 @@ export class WordGridComponent {
         });
     }
 
-    deleteSelected(): void {}
+    deleteSelected(): void {
+        const selectedWords = [...this.selection.selected];
+        if (selectedWords.length === 0) {
+            return;
+        }
+
+        const dialogRef = this.dialog.open(WordDeleteSelectedDialogComponent, {
+            data: { count: selectedWords.length },
+            width: '420px'
+        });
+
+        dialogRef.afterClosed().subscribe(confirm => {
+            if (confirm) {
+                const ids = selectedWords.map(word => word.wordTypeId);
+                this.#wordGridStore.deleteMany(ids);
+                this.selection.clear();
+            }
+        });
+    }
 }

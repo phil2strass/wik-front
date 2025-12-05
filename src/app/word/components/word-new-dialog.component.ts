@@ -60,6 +60,15 @@ export class WordNewDialog {
         });
 
         effect(() => {
+            const loading = this.isLoading();
+            if (loading && this.form.enabled) {
+                this.form.disable({ emitEvent: false });
+            } else if (!loading && this.form.disabled) {
+                this.form.enable({ emitEvent: false });
+            }
+        });
+
+        effect(() => {
             if (this.action() === 'created') {
                 this.#wordStore.actionInit();
                 this.dialogRef.close(true);
@@ -79,4 +88,3 @@ export class WordNewDialog {
         return this.status() === 'loading';
     }
 }
-
