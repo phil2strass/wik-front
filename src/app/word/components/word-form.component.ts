@@ -1,9 +1,9 @@
 import { CommonModule, NgTemplateOutlet } from '@angular/common';
 import { AfterViewInit, Component, OnChanges, SimpleChanges, effect, ElementRef, inject, Input, ViewChild, ViewEncapsulation } from '@angular/core';
-import { FormGroup, FormGroupDirective, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, FormGroupDirective, NgForm, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatOption } from '@angular/material/core';
+import { ErrorStateMatcher, MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
 import { WordStore } from '../word-store';
 import { DataStore } from '@shared/data/data-store';
@@ -13,6 +13,17 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { SecurityStore } from '@shared/security/security-store';
 import { MatCard } from '@angular/material/card';
 import { NgxDropzoneModule } from 'ngx-dropzone';
+
+class WordFormErrorStateMatcher implements ErrorStateMatcher {
+    constructor(private readonly isSubmitted: () => boolean) {}
+
+    isErrorState(control: FormControl | null, form: FormGroupDirective | NgForm | null): boolean {
+        if (!control) return false;
+        const interacted = control.touched && control.dirty;
+        const submitted = form?.submitted || this.isSubmitted();
+        return control.invalid && (interacted || submitted);
+    }
+}
 
 @Component({
     selector: 'app-word-form',
@@ -29,13 +40,22 @@ import { NgxDropzoneModule } from 'ngx-dropzone';
                                     <span class="text-error">*</span>
                                 </mat-label>
                                 <mat-form-field appearance="outline" class="w-100 p-0" color="primary">
-                                    <input #nameInput type="text" matInput formControlName="name" />
+                                    <input
+                                        #nameInput
+                                        type="text"
+                                        matInput
+                                        [errorStateMatcher]="errorMatcher"
+                                        formControlName="name" />
                                     <mat-error *ngIf="showError('name', 'required')">Veuillez saisir un mot.</mat-error>
                                 </mat-form-field>
                                 @if (selectedType()) {
                                     <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">Pluriel</mat-label>
                                     <mat-form-field appearance="outline" class="w-100 p-0" color="primary">
-                                        <input type="text" matInput formControlName="plural" />
+                                        <input
+                                            type="text"
+                                            matInput
+                                    [errorStateMatcher]="errorMatcher"
+                                formControlName="plural" />
                                     </mat-form-field>
                                 }
                                 <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">
@@ -43,7 +63,10 @@ import { NgxDropzoneModule } from 'ngx-dropzone';
                                     <span class="text-error">*</span>
                                 </mat-label>
                                 <mat-form-field appearance="outline" class="w-100">
-                                    <mat-select formControlName="typeId" disableOptionCentering>
+                                    <mat-select
+                                        formControlName="typeId"
+                                        disableOptionCentering
+                                        [errorStateMatcher]="errorMatcher">
                                         @for (type of types(); track type) {
                                             <mat-option [value]="type.id">{{ type.name }}</mat-option>
                                         }
@@ -79,13 +102,22 @@ import { NgxDropzoneModule } from 'ngx-dropzone';
                             <span class="text-error">*</span>
                         </mat-label>
                         <mat-form-field appearance="outline" class="w-100 p-0" color="primary">
-                            <input #nameInput type="text" matInput formControlName="name" />
+                            <input
+                                #nameInput
+                                type="text"
+                                matInput
+                                [errorStateMatcher]="errorMatcher"
+                                formControlName="name" />
                             <mat-error *ngIf="showError('name', 'required')">Veuillez saisir un mot.</mat-error>
                         </mat-form-field>
                         @if (selectedType()) {
                             <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">Pluriel</mat-label>
                             <mat-form-field appearance="outline" class="w-100 p-0" color="primary">
-                                <input type="text" matInput formControlName="plural" />
+                                <input
+                                    type="text"
+                                    matInput
+                                    [errorStateMatcher]="errorMatcher"
+                                    formControlName="plural" />
                             </mat-form-field>
                         }
                         <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">
@@ -93,7 +125,10 @@ import { NgxDropzoneModule } from 'ngx-dropzone';
                             <span class="text-error">*</span>
                         </mat-label>
                         <mat-form-field appearance="outline" class="w-100">
-                            <mat-select formControlName="typeId" disableOptionCentering>
+                            <mat-select
+                                formControlName="typeId"
+                                disableOptionCentering
+                                [errorStateMatcher]="errorMatcher">
                                 @for (type of types(); track type) {
                                     <mat-option [value]="type.id">{{ type.name }}</mat-option>
                                 }
@@ -143,6 +178,7 @@ export class WordFormComponent implements AfterViewInit, OnChanges {
     @ViewChild('nameInput') nameInput!: ElementRef;
     @ViewChild(FormGroupDirective) formDirective?: FormGroupDirective;
     submitted = false;
+    protected readonly errorMatcher = new WordFormErrorStateMatcher(() => this.submitted);
     #form!: FormGroup;
     formReady = false;
     @Input({ required: true })
@@ -233,7 +269,8 @@ export class WordFormComponent implements AfterViewInit, OnChanges {
 
     showError(controlName: string, error: string) {
         const control = this.formGroup?.get(controlName);
-        return !!control && control.hasError(error) && (control.touched || this.submitted);
+        const interacted = control?.touched && control?.dirty;
+        return !!control && control.hasError(error) && (interacted || this.submitted);
     }
 
     private focusOnName() {

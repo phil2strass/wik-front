@@ -6,12 +6,14 @@ import { MatDialog } from '@angular/material/dialog';
 import { Word } from '../../models/word.model';
 import { WordDeleteDialog } from '../word-delete.component';
 import { WordGridStore } from '../../word-grid-store';
-import { WordEditDialog } from '../word-edit.component';
+import { WordEditDialog } from '../word-edit-dialog.component';
+import { WordNewDialog } from '../word-new-dialog.component';
 import { IconModule } from '@root/app/icon/icon.module';
 import { MaterialModule } from '@root/app/material.module';
 import { CommonModule } from '@angular/common';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Element } from '@root/app/pages/apps/ecommerce/ecommerceData';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-word-list',
@@ -26,7 +28,7 @@ import { Element } from '@root/app/pages/apps/ecommerce/ecommerceData';
                         </mat-form-field>
                     </div>
                     <div class="col-sm-6 d-flex align-items-center justify-content-end">
-                        <button mat-flat-button (click)="getAddProductNavigate()">Add Product</button>
+                        <button mat-flat-button (click)="openCreate()">{{ 'word.create' | translate }}</button>
                     </div>
                 </div>
             }
@@ -113,7 +115,7 @@ import { Element } from '@root/app/pages/apps/ecommerce/ecommerceData';
                 class="b-t-1 p-x-48"></mat-paginator>
         </div>
     `,
-    imports: [MaterialModule, CommonModule, IconModule],
+    imports: [MaterialModule, CommonModule, IconModule, TranslateModule],
     styles: [
         `
             .example-container {
@@ -254,8 +256,15 @@ export class WordGridComponent {
         this.isAllSelected() ? this.selection.clear() : this.data().forEach(row => this.selection.select(row));
     }
 
-    getAddProductNavigate() {
-        //this.router.navigate(['apps/product/add-product'])
+    openCreate() {
+        const dialogRef = this.dialog.open(WordNewDialog, {
+            width: '800px'
+        });
+        dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+                this.#wordGridStore.load();
+            }
+        });
     }
 
     deleteSelected(): void {}
