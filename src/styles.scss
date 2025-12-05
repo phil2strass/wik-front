@@ -6,3 +6,46 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
 .custom-card > .mat-mdc-card-content.custom-content {
     padding-bottom: 0 !important;
 }
+
+.snackbar-error .mdc-snackbar__surface {
+    background: linear-gradient(135deg, #c62828, #8e0000);
+    color: #fff;
+    min-width: 420px;
+    border-radius: 14px;
+    padding: 0;
+    box-shadow: 0 20px 40px rgba(198, 40, 40, 0.45);
+}
+
+.snackbar-error__container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 28px;
+    position: relative;
+}
+
+.snackbar-error__icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    color: #fff9f0;
+    margin-left: -8px;
+}
+
+.snackbar-error__content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.snackbar-error__title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.snackbar-error__message {
+    font-size: 0.98rem;
+    font-weight: 500;
+}

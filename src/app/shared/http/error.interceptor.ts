@@ -14,8 +14,9 @@ export const errorInterceptor: HttpInterceptorFn = (req, handle) => {
                 return throwError(() => err);
             }
 
-            const errorMessageContext = req.context.get(ERROR_MESSAGE_CONTEXT);
-            uiMessage.error(errorMessageContext);
+            const fallbackMessage = req.context.get(ERROR_MESSAGE_CONTEXT);
+            const serverMessage = err?.error || err?.message;
+            uiMessage.error(serverMessage ?? fallbackMessage);
             return throwError(() => err);
         })
     );

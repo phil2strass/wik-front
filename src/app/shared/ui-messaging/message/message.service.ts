@@ -1,22 +1,29 @@
 import { inject, Injectable } from '@angular/core';
-import { MessageStore } from './message.store';
-import { MatDialog } from '@angular/material/dialog';
-import { ConfirmationComponent } from './confirmation.component';
-import { map, Observable } from 'rxjs';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ErrorSnackbarComponent } from './error-snackbar.component';
 
 @Injectable({ providedIn: 'root' })
 export class MessageService {
-    #messageStore = inject(MessageStore);
+    #snackBar = inject(MatSnackBar);
 
     info(message: string) {
-        this.#messageStore.add({ text: message, type: 'info' });
+        this.#snackBar.open(message, 'Fermer', {
+            duration: 3000,
+            horizontalPosition: 'right',
+            panelClass: ['snackbar-info']
+        });
     }
 
     error(error: any) {
-        if (error.message) {
-            this.#messageStore.add({ text: error.message, type: 'error' });
-        } else {
-            this.#messageStore.add({ text: "Une erreur s'est produite", type: 'error' });
-        }
+        const text =
+            typeof error === 'string'
+                ? error
+                : error?.message || error?.error?.message || "Une erreur s'est produite";
+        this.#snackBar.openFromComponent(ErrorSnackbarComponent, {
+            data: { message: text },
+            duration: 5000,
+            horizontalPosition: 'right',
+            panelClass: ['snackbar-error']
+        });
     }
 }

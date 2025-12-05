@@ -1,5 +1,5 @@
 import { CommonModule, NgTemplateOutlet } from '@angular/common';
-import { AfterViewInit, Component, OnChanges, SimpleChanges, effect, ElementRef, inject, Input, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, Component, OnChanges, OnDestroy, SimpleChanges, effect, ElementRef, inject, Input, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, FormGroupDirective, NgForm, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -13,6 +13,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { SecurityStore } from '@shared/security/security-store';
 import { MatCard } from '@angular/material/card';
 import { NgxDropzoneModule } from 'ngx-dropzone';
+import { Subscription } from 'rxjs';
 
 class WordFormErrorStateMatcher implements ErrorStateMatcher {
     constructor(private readonly isSubmitted: () => boolean) {}
@@ -47,6 +48,9 @@ class WordFormErrorStateMatcher implements ErrorStateMatcher {
                                         [errorStateMatcher]="errorMatcher"
                                         formControlName="name" />
                                     <mat-error *ngIf="showError('name', 'required')">Veuillez saisir un mot.</mat-error>
+                                    <mat-error *ngIf="showError('name', 'duplicate')">
+                                        Ce mot existe déjà pour ce type.
+                                    </mat-error>
                                 </mat-form-field>
                                 @if (selectedType()) {
                                     <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">Pluriel</mat-label>
@@ -109,6 +113,9 @@ class WordFormErrorStateMatcher implements ErrorStateMatcher {
                                 [errorStateMatcher]="errorMatcher"
                                 formControlName="name" />
                             <mat-error *ngIf="showError('name', 'required')">Veuillez saisir un mot.</mat-error>
+                            <mat-error *ngIf="showError('name', 'duplicate')">
+                                Ce mot existe déjà pour ce type.
+                            </mat-error>
                         </mat-form-field>
                         @if (selectedType()) {
                             <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">Pluriel</mat-label>
@@ -174,13 +181,14 @@ class WordFormErrorStateMatcher implements ErrorStateMatcher {
         NgxDropzoneModule
     ]
 })
-export class WordFormComponent implements AfterViewInit, OnChanges {
+export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
     @ViewChild('nameInput') nameInput!: ElementRef;
     @ViewChild(FormGroupDirective) formDirective?: FormGroupDirective;
     submitted = false;
     protected readonly errorMatcher = new WordFormErrorStateMatcher(() => this.submitted);
     #form!: FormGroup;
     formReady = false;
+    #nameChangesSub?: Subscription;
     @Input({ required: true })
     set form(value: FormGroup) {
         if (!value) {
@@ -188,6 +196,7 @@ export class WordFormComponent implements AfterViewInit, OnChanges {
         }
         this.#form = value;
         this.formReady = true;
+        this.registerNameValueChanges();
     }
     get formGroup(): FormGroup {
         if (!this.#form) {
@@ -197,6 +206,7 @@ export class WordFormComponent implements AfterViewInit, OnChanges {
     }
     @Input() mode: 'create' | 'update' = 'update';
     @Input() useCard = true;
+    @Input() translationForms: FormGroup[] | undefined;
 
     readonly #dataStore = inject(DataStore);
     protected readonly langues = this.#dataStore.langues;
@@ -208,6 +218,7 @@ export class WordFormComponent implements AfterViewInit, OnChanges {
     readonly #wordStore = inject(WordStore);
     protected readonly action = this.#wordStore.action;
     protected readonly genders = this.#wordStore.genders;
+    protected readonly storeError = this.#wordStore.error;
 
     messageService = inject(MessageService);
 
@@ -216,6 +227,27 @@ export class WordFormComponent implements AfterViewInit, OnChanges {
             if (this.mode === 'create' && this.action() == 'created') {
                 this.clean();
                 this.#wordStore.actionInit();
+            }
+        });
+
+        effect(() => {
+            const duplicateError = this.storeError();
+            if (this.mode !== 'create' || !this.formReady) {
+                return;
+            }
+            const control = this.formGroup?.get('name');
+            if (!control) {
+                return;
+            }
+            const currentErrors = { ...(control.errors ?? {}) };
+            if (duplicateError === 'mot.exists') {
+                currentErrors['duplicate'] = true;
+                control.setErrors(currentErrors);
+                control.markAsTouched();
+            } else if (currentErrors['duplicate']) {
+                delete currentErrors['duplicate'];
+                const hasErrors = Object.keys(currentErrors).length > 0;
+                control.setErrors(hasErrors ? currentErrors : null);
             }
         });
     }
@@ -233,6 +265,9 @@ export class WordFormComponent implements AfterViewInit, OnChanges {
             throw new Error('WordFormComponent requires a FormGroup input.');
         }
     }
+    ngOnDestroy() {
+        this.#nameChangesSub?.unsubscribe();
+    }
 
     selectedType(): boolean {
         return this.formGroup?.get('typeId')?.value === 1;
@@ -245,9 +280,25 @@ export class WordFormComponent implements AfterViewInit, OnChanges {
             return;
         }
         this.submitted = false;
-        const data = { ...this.formGroup.getRawValue() };
+        const data: any = { ...this.formGroup.getRawValue() };
         if (this.mode === 'create') {
             data.langueId = this.langueSelectedId();
+            if (this.translationForms?.length) {
+                const typeId = data.typeId;
+                const translations = this.translationForms
+                    .map(group => group.getRawValue())
+                    .filter(value => value && value.name && value.name.trim().length > 0)
+                    .map(value => ({
+                        name: value.name.trim(),
+                        langueId: value.langueId,
+                        plural: value.plural ?? '',
+                        genderId: value.genderId ?? null,
+                        typeId
+                    }));
+                if (translations.length > 0) {
+                    data.trads = translations;
+                }
+            }
             this.#wordStore.create(data);
         } else {
             this.#wordStore.update(data);
@@ -277,5 +328,14 @@ export class WordFormComponent implements AfterViewInit, OnChanges {
         if (this.nameInput) {
             this.nameInput.nativeElement.focus();
         }
+    }
+
+    private registerNameValueChanges() {
+        this.#nameChangesSub?.unsubscribe();
+        const control = this.formGroup?.get('name');
+        if (!control) return;
+        this.#nameChangesSub = control.valueChanges.subscribe(() => {
+            this.#wordStore.clearError();
+        });
     }
 }

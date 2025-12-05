@@ -13,6 +13,14 @@ import { SecurityStore } from '@shared/security/security-store';
 import { Validators } from '@angular/forms';
 import { DataStore } from '@shared/data/data-store';
 
+export interface WordTranslation {
+    name: string;
+    langueId: number;
+    typeId: number | undefined;
+    genderId: number | undefined;
+    plural: string;
+}
+
 export interface Word {
     name: string;
     langueId: number | undefined;
@@ -20,6 +28,7 @@ export interface Word {
     genderId: number | undefined;
     plural: string;
     genders: Gender[];
+    trads?: WordTranslation[];
 }
 
 const initialWordState: Word = {
@@ -36,7 +45,8 @@ export const WordStore = signalStore(
     withState({
         word: initialWordState,
         status: 'init' as 'init' | 'loading' | 'loaded',
-        action: 'wait' as 'wait' | 'created' | 'updated'
+        action: 'wait' as 'wait' | 'created' | 'updated',
+        error: null as string | null
     }),
     withComputed(state => ({
         status: computed(() => state.status()),
@@ -44,7 +54,8 @@ export const WordStore = signalStore(
             if (state.status() === 'loading') return 'wait';
             return state.action();
         }),
-        genders: computed(() => state.word().genders)
+        genders: computed(() => state.word().genders),
+        error: computed(() => state.error())
     })),
     withMethods(store => {
         const httpClient = inject(HttpClient);
@@ -55,9 +66,12 @@ export const WordStore = signalStore(
             actionInit: () => {
                 patchState(store, { action: 'wait' });
             },
+            clearError: () => {
+                patchState(store, { error: null });
+            },
             create: rxMethod<Word>(
                 pipe(
-                    tap(() => patchState(store, { status: 'loading' })),
+                    tap(() => patchState(store, { status: 'loading', error: null })),
                     switchMap(word =>
                         httpClient.post<Word>(baseUrl + 'word', word).pipe(
                             mapResponse({
@@ -67,6 +81,11 @@ export const WordStore = signalStore(
                                 },
                                 error: (err: any) => {
                                     messageService.error(err.error);
+                                    const errorCode =
+                                        typeof err?.error === 'string'
+                                            ? err.error
+                                            : err?.error?.message ?? err?.message ?? null;
+                                    patchState(store, { error: errorCode });
                                 }
                             }),
                             tap(() => patchState(store, { status: 'loaded' }))
@@ -76,7 +95,7 @@ export const WordStore = signalStore(
             ),
             update: rxMethod<Word>(
                 pipe(
-                    tap(() => patchState(store, { status: 'loading' })),
+                    tap(() => patchState(store, { status: 'loading', error: null })),
                     switchMap(word =>
                         httpClient.put<Word>(baseUrl + 'word', word).pipe(
                             mapResponse({
