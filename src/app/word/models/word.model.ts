@@ -8,4 +8,5 @@ export interface Word {
     type: Type;
     gender: Gender;
     plural: string;
+    translations?: Record<number, string>;
 }

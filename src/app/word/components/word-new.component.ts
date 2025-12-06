@@ -31,29 +31,41 @@ import { ProfilStorage } from '@shared/models/user.model';
                 <section *ngIf="shouldShowTranslationBlocks()" class="word-new__translations">
                     <h5 class="word-new__translations-title">Traductions</h5>
                     <div class="word-new__translations-grid">
-                        <div class="word-new__translation-card" *ngFor="let block of translationBlocks" [formGroup]="block.form">
+                        <mat-card
+                            class="word-new__translation-card cardWithShadow b-1 rounded p-24"
+                            *ngFor="let block of translationBlocks"
+                            [formGroup]="block.form">
                             <div class="word-new__translation-title">
                                 {{ block.langueName }}
                                 <span *ngIf="block.isMotherTongue" class="word-new__translation-badge">Langue maternelle</span>
                             </div>
-                            <mat-form-field appearance="outline" class="w-100">
-                                <mat-label>Mot</mat-label>
-                                <input matInput formControlName="name" />
+                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">
+                                Mot
+                                <span class="text-error">*</span>
+                            </mat-label>
+                            <mat-form-field appearance="outline" class="w-100 p-0" color="primary">
+                                <input type="text" matInput formControlName="name" />
                             </mat-form-field>
                             <ng-container *ngIf="showTranslationDetails()">
-                                <mat-form-field appearance="outline" class="w-100">
-                                    <mat-label>Pluriel</mat-label>
-                                    <input matInput formControlName="plural" />
+                                <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">Pluriel</mat-label>
+                                <mat-form-field appearance="outline" class="w-100 p-0" color="primary">
+                                    <input type="text" matInput formControlName="plural" />
                                 </mat-form-field>
                                 <div *ngIf="block.genders.length" class="word-new__translation-genders">
-                                    <mat-radio-group formControlName="genderId" class="d-flex flex-wrap gap-16">
-                                        <mat-radio-button *ngFor="let gender of block.genders" [value]="gender.id">
-                                            {{ gender.name }}
-                                        </mat-radio-button>
+                                    <mat-radio-group
+                                        formControlName="genderId"
+                                        class="d-flex flex-wrap gap-24 justify-content-start mt-2">
+                                        <mat-card
+                                            *ngFor="let gender of block.genders"
+                                            class="cardWithShadow b-1 rounded d-flex gap-30 align-items-center flex-row">
+                                            <mat-radio-button class="p-r-16 p-l-6 p-y-2" color="primary" [value]="gender.id">
+                                                {{ gender.name }}
+                                            </mat-radio-button>
+                                        </mat-card>
                                     </mat-radio-group>
                                 </div>
                             </ng-container>
-                        </div>
+                        </mat-card>
                     </div>
                 </section>
                 <div class="word-new__footer w-100">
@@ -121,13 +133,6 @@ import { ProfilStorage } from '@shared/models/user.model';
                 display: flex;
                 flex-direction: column;
                 gap: 16px;
-            }
-
-            .word-new__translation-card {
-                border: 1px solid rgba(0, 0, 0, 0.08);
-                border-radius: 12px;
-                padding: 16px;
-                background: #fff;
             }
 
             .word-new__translation-title {

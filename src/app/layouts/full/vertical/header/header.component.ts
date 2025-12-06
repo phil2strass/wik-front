@@ -60,14 +60,14 @@ export class HeaderComponent {
     readonly #securityStore = inject(SecurityStore);
     protected readonly user = this.#securityStore.loadedUser;
 
-    protected readonly languagesId = computed(() => this.#securityStore.langues() ?? []);
     protected readonly langueSelectedId = this.#securityStore.langueSelected;
+    protected readonly profil = this.#securityStore.loadedProfil;
 
     readonly #dataStore = inject(DataStore);
     protected readonly languesData = this.#dataStore.langues;
 
     languageSelected: Langue | undefined;
-    languagesFiltered: Langue[];
+    languagesFiltered: Langue[] = [];
 
     basePhotoUrl = environment.basePhotoUrl;
 
@@ -113,8 +113,15 @@ export class HeaderComponent {
         translate.setDefaultLang('en');
 
         effect(() => {
-            this.languagesFiltered = this.languesData().filter(langue => this.languagesId().includes(langue.id) && langue.id != this.langueSelectedId());
-            this.languageSelected = this.languesData().find(langue => langue.id === this.langueSelectedId());
+            const profil = this.profil();
+            const langueIds = new Set(profil?.langues ?? []);
+            if (profil?.langueMaternelle) {
+                langueIds.add(profil.langueMaternelle);
+            }
+            const allLangues = this.languesData();
+            const selectedId = this.langueSelectedId();
+            this.languagesFiltered = allLangues.filter(langue => langueIds.has(langue.id) && langue.id !== selectedId);
+            this.languageSelected = allLangues.find(langue => langue.id === selectedId);
         });
     }
 

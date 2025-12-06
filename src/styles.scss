@@ -16,7 +16,24 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     box-shadow: 0 20px 40px rgba(198, 40, 40, 0.45);
 }
 
+.snackbar-success .mdc-snackbar__surface {
+    background: linear-gradient(135deg, #66bb6a, #43a047);
+    color: #fff;
+    min-width: 420px;
+    border-radius: 14px;
+    padding: 0;
+    box-shadow: 0 20px 40px rgba(102, 187, 106, 0.45);
+}
+
 .snackbar-error__container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 28px;
+    position: relative;
+}
+
+.snackbar-success__container {
     display: flex;
     align-items: center;
     gap: 20px;
@@ -30,9 +47,31 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     height: 36px;
     color: #fff9f0;
     margin-left: -8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 36px;
+}
+
+.snackbar-success__icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    color: #e8f5e9;
+    margin-left: -8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 36px;
 }
 
 .snackbar-error__content {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.snackbar-success__content {
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -45,7 +84,19 @@ body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
     letter-spacing: 0.04em;
 }
 
+.snackbar-success__title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
 .snackbar-error__message {
+    font-size: 0.98rem;
+    font-weight: 500;
+}
+
+.snackbar-success__message {
     font-size: 0.98rem;
     font-weight: 500;
 }

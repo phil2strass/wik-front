@@ -38,13 +38,15 @@ export const WordGridStore = signalStore(
         sortField: 'name',
         sortDirection: 'asc',
         resultsLength: 0,
-        data: []
+        data: [],
+        typeFilter: null as number | null
     }),
     withComputed(state => ({
         status: computed(() => state.status()),
         data: computed(() => state.data()),
         pageSize: computed(() => state.pageSize()),
-        resultsLength: computed(() => state.resultsLength())
+        resultsLength: computed(() => state.resultsLength()),
+        typeFilter: computed(() => state.typeFilter())
     })),
     withMethods(store => {
         const httpClient = inject(HttpClient);
@@ -60,6 +62,10 @@ export const WordGridStore = signalStore(
             let params = new HttpParams();
             if (langueSelectedId != null) {
                 params = params.set('langueId', langueSelectedId.toString());
+            }
+            const typeFilter = store.typeFilter();
+            if (typeFilter != null) {
+                params = params.set('typeId', typeFilter.toString());
             }
             params = params
                 .set('page', store.pageIndex().toString())
@@ -97,6 +103,10 @@ export const WordGridStore = signalStore(
                     persistPageSize(pageSize);
                 }
                 patchState(store, { pageIndex, pageSize });
+                load();
+            },
+            setTypeFilter: (typeId: number | null) => {
+                patchState(store, { typeFilter: typeId, pageIndex: 0 });
                 load();
             },
             delete: rxMethod<number>(

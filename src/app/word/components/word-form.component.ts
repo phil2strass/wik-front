@@ -69,6 +69,7 @@ class WordFormErrorStateMatcher implements ErrorStateMatcher {
                                 <mat-form-field appearance="outline" class="w-100">
                                     <mat-select
                                         formControlName="typeId"
+                                        [disabled]="disableTypeSelection"
                                         disableOptionCentering
                                         [errorStateMatcher]="errorMatcher">
                                         @for (type of types(); track type) {
@@ -131,9 +132,10 @@ class WordFormErrorStateMatcher implements ErrorStateMatcher {
                             Type
                             <span class="text-error">*</span>
                         </mat-label>
-                        <mat-form-field appearance="outline" class="w-100">
+                                <mat-form-field appearance="outline" class="w-100">
                             <mat-select
                                 formControlName="typeId"
+                                [disabled]="disableTypeSelection"
                                 disableOptionCentering
                                 [errorStateMatcher]="errorMatcher">
                                 @for (type of types(); track type) {
@@ -207,6 +209,7 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
     @Input() mode: 'create' | 'update' = 'update';
     @Input() useCard = true;
     @Input() translationForms: FormGroup[] | undefined;
+    @Input() disableTypeSelection = false;
 
     readonly #dataStore = inject(DataStore);
     protected readonly langues = this.#dataStore.langues;
@@ -314,6 +317,18 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
         };
         this.formGroup?.reset(defaultValue);
         this.formDirective?.resetForm(defaultValue);
+        this.translationForms?.forEach(group => {
+            const langueId = group.get('langueId')?.value;
+            group.reset(
+                {
+                    langueId,
+                    name: '',
+                    plural: '',
+                    genderId: null
+                },
+                { emitEvent: false }
+            );
+        });
         this.submitted = false;
         setTimeout(() => this.focusOnName());
     }
