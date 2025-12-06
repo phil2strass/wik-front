@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject, ViewEncapsulation } from '@angular/core';
+import { Component, OnDestroy, effect, inject, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { WordFormComponent } from '@root/app/word/components/word-form.component';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,6 +15,7 @@ import { DataStore } from '@shared/data/data-store';
 import { SecurityStore } from '@shared/security/security-store';
 import { Gender, Langue } from '@shared/data/models/langue.model';
 import { ProfilStorage } from '@shared/models/user.model';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-word-new',
@@ -63,6 +64,11 @@ import { ProfilStorage } from '@shared/models/user.model';
                                             </mat-radio-button>
                                         </mat-card>
                                     </mat-radio-group>
+                                    <div
+                                        class="mat-error word-form__gender-error"
+                                        *ngIf="block.form.get('genderId')?.hasError('required') && block.form.get('genderId')?.touched">
+                                        Veuillez sélectionner un genre.
+                                    </div>
                                 </div>
                             </ng-container>
                         </mat-card>
@@ -157,7 +163,7 @@ import { ProfilStorage } from '@shared/models/user.model';
         `
     ]
 })
-export class WordNewComponent {
+export class WordNewComponent implements OnDestroy {
     protected readonly form: FormGroup;
     #formBuilder = inject(FormBuilder);
     #wordStore = inject(WordStore);
@@ -166,6 +172,8 @@ export class WordNewComponent {
     protected readonly status = this.#wordStore.status;
     translationBlocks: TranslationBlock[] = [];
     #translationFormsByLangue = new Map<number, FormGroup>();
+    #translationFormSubscriptions = new Map<number, Subscription>();
+    #typeSubscription?: Subscription;
 
     constructor() {
         this.form = this.#formBuilder.group({
@@ -174,6 +182,10 @@ export class WordNewComponent {
             genderId: [null],
             plural: ['']
         });
+        const typeControl = this.form.get('typeId');
+        if (typeControl) {
+            this.#typeSubscription = typeControl.valueChanges.subscribe(() => this.updateTranslationGenderValidators());
+        }
 
         effect(() => {
             const loading = this.isLoading();
@@ -212,6 +224,7 @@ export class WordNewComponent {
         if (!profil || !langues || langues.length === 0) {
             this.translationBlocks = [];
             this.#translationFormsByLangue.clear();
+            this.clearTranslationFormSubscriptions();
             return;
         }
 
@@ -255,9 +268,11 @@ export class WordNewComponent {
                 });
                 this.#translationFormsByLangue.set(definition.id, form);
             }
+            this.trackTranslationFormSubscription(definition.id, form);
             blocks.push({
                 langueId: definition.id,
                 langueName: langueData.name,
+                langueIso: langueData.iso,
                 genders: langueData.genders ?? [],
                 isMotherTongue: definition.isMotherTongue,
                 form
@@ -267,11 +282,13 @@ export class WordNewComponent {
         Array.from(this.#translationFormsByLangue.keys()).forEach(id => {
             if (!seen.has(id)) {
                 this.#translationFormsByLangue.delete(id);
+                this.releaseTranslationFormSubscription(id);
             }
         });
 
         this.translationBlocks = blocks;
         this.setTranslationFormsDisabled(this.isLoading());
+        this.updateTranslationGenderValidators();
     }
 
     private setTranslationFormsDisabled(disabled: boolean) {
@@ -282,12 +299,71 @@ export class WordNewComponent {
                 block.form.enable({ emitEvent: false });
             }
         });
+        this.updateTranslationGenderValidators();
+    }
+
+    ngOnDestroy(): void {
+        this.#typeSubscription?.unsubscribe();
+        this.clearTranslationFormSubscriptions();
+    }
+
+    private trackTranslationFormSubscription(langueId: number, form: FormGroup): void {
+        this.releaseTranslationFormSubscription(langueId);
+        const sub = form.valueChanges.subscribe(() => this.updateTranslationGenderValidators());
+        this.#translationFormSubscriptions.set(langueId, sub);
+    }
+
+    private releaseTranslationFormSubscription(langueId: number): void {
+        const sub = this.#translationFormSubscriptions.get(langueId);
+        sub?.unsubscribe();
+        this.#translationFormSubscriptions.delete(langueId);
+    }
+
+    private clearTranslationFormSubscriptions(): void {
+        Array.from(this.#translationFormSubscriptions.values()).forEach(sub => sub.unsubscribe());
+        this.#translationFormSubscriptions.clear();
+    }
+
+    private updateTranslationGenderValidators(): void {
+        const typeId = this.form.get('typeId')?.value;
+        const requiresGenderByType = Number(typeId) === 1;
+        this.translationBlocks.forEach(block => {
+            const genderControl = block.form.get('genderId');
+            const nameControl = block.form.get('name');
+            if (!genderControl || !nameControl) {
+                return;
+            }
+            const hasName = this.hasNameValue(nameControl.value);
+            const shouldRequire = requiresGenderByType && this.requiresGenderForIso(block.langueIso) && hasName;
+            if (shouldRequire) {
+                genderControl.setValidators([Validators.required]);
+            } else {
+                genderControl.clearValidators();
+            }
+            genderControl.updateValueAndValidity({ emitEvent: false });
+        });
+    }
+
+    private hasNameValue(value: unknown): boolean {
+        if (typeof value === 'string') {
+            return value.trim().length > 0;
+        }
+        return false;
+    }
+
+    private requiresGenderForIso(iso?: string | null): boolean {
+        if (!iso) {
+            return false;
+        }
+        const normalized = iso.trim().toUpperCase();
+        return normalized === 'FR' || normalized === 'DE';
     }
 }
 
 type TranslationBlock = {
     langueId: number;
     langueName: string;
+    langueIso: string;
     genders: Gender[];
     isMotherTongue: boolean;
     form: FormGroup;

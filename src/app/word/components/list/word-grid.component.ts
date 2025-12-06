@@ -14,7 +14,7 @@ import { CommonModule } from '@angular/common';
 import { SelectionModel } from '@angular/cdk/collections';
 import { TranslateModule } from '@ngx-translate/core';
 import { WordDeleteSelectedDialogComponent } from '../word-delete-selected-dialog.component';
-import { Langue } from '@shared/data/models/langue.model';
+import { Gender, Langue } from '@shared/data/models/langue.model';
 import { SecurityStore } from '@shared/security/security-store';
 
 @Component({
@@ -70,9 +70,7 @@ export class WordGridComponent {
                 rows.forEach(row => this.collectTranslationLangues(row.translations, pushLangue));
             }
 
-            this.translationLanguages = orderedLangueIds
-                .map(id => langues.find(langue => langue.id === id))
-                .filter((lang): lang is Langue => !!lang);
+            this.translationLanguages = orderedLangueIds.map(id => langues.find(langue => langue.id === id)).filter((lang): lang is Langue => !!lang);
 
             const dynamicColumns: string[] = [];
             if (typeFilterValue == null) {
@@ -83,10 +81,7 @@ export class WordGridComponent {
         });
     }
 
-    private collectTranslationLangues(
-        translations: Word['translations'],
-        pushLangue: (langueId?: number | null) => void
-    ): void {
+    private collectTranslationLangues(translations: Word['translations'], pushLangue: (langueId?: number | null) => void): void {
         if (!translations) {
             return;
         }
@@ -135,7 +130,8 @@ export class WordGridComponent {
 
     formatDisplayName(row: Word): string {
         const langue = this.getLangueById(row.langue);
-        return this.formatLocalizedValue(row.displayName ?? row.name ?? '', langue);
+        const baseName = row.name ?? row.displayName ?? '';
+        return this.formatLocalizedValue(baseName, langue, row.gender);
     }
 
     formatTranslationValue(row: Word, langue: Langue): string | undefined {
@@ -170,11 +166,17 @@ export class WordGridComponent {
         return byString[String(langueId)];
     }
 
-    private formatLocalizedValue(value: string, langue?: Langue): string {
+    private formatLocalizedValue(value: string, langue?: Langue, gender?: Gender): string {
         let result = this.cleanGenderCode(value ?? '');
         if (!langue?.iso) {
             return result;
         }
+
+        const article = this.resolveArticle(langue.iso, gender?.id);
+        if (article) {
+            result = `${article} ${result}`.trim();
+        }
+
         if (langue.iso.trim().toUpperCase() === 'DE') {
             result = this.capitalizeLastWord(result);
         }
@@ -182,7 +184,10 @@ export class WordGridComponent {
     }
 
     private cleanGenderCode(value: string): string {
-        return value.replace(/\s*\(\d+\)/g, '').replace(/\s+/g, ' ').trim();
+        return value
+            .replace(/\s*\(\d+\)/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
     }
 
     private capitalizeLastWord(value: string): string {
@@ -201,6 +206,36 @@ export class WordGridComponent {
         }
         const langues = this.langues();
         return langues ? langues.find(langue => langue.id === id) : undefined;
+    }
+
+    private resolveArticle(iso: string, genderId?: number): string | null {
+        if (!genderId) {
+            return null;
+        }
+        const normalizedIso = iso.trim().toUpperCase();
+        if (normalizedIso === 'DE') {
+            switch (genderId) {
+                case 1:
+                    return 'der';
+                case 2:
+                    return 'die';
+                case 3:
+                    return 'das';
+                default:
+                    return null;
+            }
+        }
+        if (normalizedIso === 'FR') {
+            switch (genderId) {
+                case 1:
+                    return 'le';
+                case 2:
+                    return 'la';
+                default:
+                    return null;
+            }
+        }
+        return null;
     }
 
     openEdit(word: Word) {

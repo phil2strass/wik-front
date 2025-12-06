@@ -1,6 +1,6 @@
 import { CommonModule, NgTemplateOutlet } from '@angular/common';
 import { AfterViewInit, Component, OnChanges, OnDestroy, SimpleChanges, effect, ElementRef, inject, Input, ViewChild, ViewEncapsulation } from '@angular/core';
-import { FormControl, FormGroup, FormGroupDirective, NgForm, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, FormGroupDirective, NgForm, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ErrorStateMatcher, MatOption } from '@angular/material/core';
@@ -90,13 +90,16 @@ class WordFormErrorStateMatcher implements ErrorStateMatcher {
                                                     class="p-r-16 p-l-6 p-y-2"
                                                     color="primary"
                                                     [value]="gender.id">
-                                                    {{ gender.name }}
-                                                </mat-radio-button>
-                                            </mat-card>
-                                        }
-                                    </mat-radio-group>
-                                }
-                            </mat-card>
+                                                {{ gender.name }}
+                                            </mat-radio-button>
+                                        </mat-card>
+                                    }
+                                </mat-radio-group>
+                                <div class="mat-error word-form__gender-error" *ngIf="showError('genderId', 'required')">
+                                    Veuillez sélectionner un genre.
+                                </div>
+                            }
+                        </mat-card>
                         </div>
                     </div>
                 } @else {
@@ -161,9 +164,12 @@ class WordFormErrorStateMatcher implements ErrorStateMatcher {
                                     </mat-card>
                                 }
                             </mat-radio-group>
+                            <div class="mat-error word-form__gender-error" *ngIf="showError('genderId', 'required')">
+                                Veuillez sélectionner un genre.
+                            </div>
+                                }
+                            </div>
                         }
-                    </div>
-                }
             </form>
         }
     `,
@@ -191,6 +197,8 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
     #form!: FormGroup;
     formReady = false;
     #nameChangesSub?: Subscription;
+    #typeChangesSub?: Subscription;
+    #langueChangesSub?: Subscription;
     @Input({ required: true })
     set form(value: FormGroup) {
         if (!value) {
@@ -199,6 +207,8 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
         this.#form = value;
         this.formReady = true;
         this.registerNameValueChanges();
+        this.registerGenderValidationListeners();
+        this.updateGenderRequirement();
     }
     get formGroup(): FormGroup {
         if (!this.#form) {
@@ -253,6 +263,15 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
                 control.setErrors(hasErrors ? currentErrors : null);
             }
         });
+
+        effect(() => {
+            if (!this.formReady) {
+                return;
+            }
+            this.langueSelectedId();
+            this.langues();
+            this.updateGenderRequirement();
+        });
     }
 
     get titleTranslationKey(): string {
@@ -270,6 +289,8 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
     }
     ngOnDestroy() {
         this.#nameChangesSub?.unsubscribe();
+        this.#typeChangesSub?.unsubscribe();
+        this.#langueChangesSub?.unsubscribe();
     }
 
     selectedType(): boolean {
@@ -277,9 +298,10 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
     }
 
     save() {
-        if (this.formGroup?.invalid) {
+        const translationInvalid = this.ensureTranslationFormsValid();
+        if (this.formGroup?.invalid || translationInvalid) {
             this.submitted = true;
-            this.formGroup.markAllAsTouched();
+            this.formGroup?.markAllAsTouched();
             return;
         }
         this.submitted = false;
@@ -352,5 +374,96 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
         this.#nameChangesSub = control.valueChanges.subscribe(() => {
             this.#wordStore.clearError();
         });
+    }
+
+    private ensureTranslationFormsValid(): boolean {
+        if (!this.translationForms || this.translationForms.length === 0) {
+            return false;
+        }
+        let invalid = false;
+        this.translationForms.forEach(group => {
+            if (group.invalid) {
+                invalid = true;
+                group.markAllAsTouched();
+            }
+        });
+        return invalid;
+    }
+
+    private registerGenderValidationListeners() {
+        this.#typeChangesSub?.unsubscribe();
+        this.#langueChangesSub?.unsubscribe();
+        const typeControl = this.formGroup?.get('typeId');
+        if (typeControl) {
+            this.#typeChangesSub = typeControl.valueChanges.subscribe(() => this.updateGenderRequirement());
+        }
+        const langueControl = this.formGroup?.get('langueId');
+        if (langueControl) {
+            this.#langueChangesSub = langueControl.valueChanges.subscribe(() => this.updateGenderRequirement());
+        }
+    }
+
+    private updateGenderRequirement() {
+        if (!this.formReady) {
+            return;
+        }
+        const genderControl = this.formGroup?.get('genderId');
+        if (!genderControl) {
+            return;
+        }
+        const requireGender = this.shouldRequireGenderSelection();
+        if (requireGender) {
+            genderControl.setValidators([Validators.required]);
+        } else {
+            genderControl.clearValidators();
+        }
+        genderControl.updateValueAndValidity({ emitEvent: false });
+    }
+
+    private shouldRequireGenderSelection(): boolean {
+        const typeValue = this.formGroup?.get('typeId')?.value;
+        if (typeValue == null) {
+            return false;
+        }
+        const typeId = Number(typeValue);
+        if (!Number.isFinite(typeId) || typeId !== 1) {
+            return false;
+        }
+        const langueIso = this.findLangueIso(this.resolveActiveLangueId());
+        return this.requiresGenderForIso(langueIso);
+    }
+
+    private resolveActiveLangueId(): number | null {
+        const langueControl = this.formGroup?.get('langueId');
+        if (langueControl) {
+            const value = langueControl.value;
+            if (typeof value === 'number') {
+                return value;
+            }
+            if (value != null) {
+                const parsed = Number(value);
+                return Number.isFinite(parsed) ? parsed : null;
+            }
+            return null;
+        }
+        const selected = this.langueSelectedId();
+        return selected ?? null;
+    }
+
+    private findLangueIso(langueId: number | null): string | null {
+        if (langueId == null) {
+            return null;
+        }
+        const langues = this.langues();
+        const langue = langues?.find(l => l.id === langueId);
+        return langue?.iso ?? null;
+    }
+
+    private requiresGenderForIso(iso?: string | null): boolean {
+        if (!iso) {
+            return false;
+        }
+        const normalized = iso.trim().toUpperCase();
+        return normalized === 'FR' || normalized === 'DE';
     }
 }
