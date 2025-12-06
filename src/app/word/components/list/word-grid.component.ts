@@ -16,6 +16,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { WordDeleteSelectedDialogComponent } from '../word-delete-selected-dialog.component';
 import { Gender, Langue } from '@shared/data/models/langue.model';
 import { SecurityStore } from '@shared/security/security-store';
+import { WordTranslationEditDialogComponent } from '../word-translation-view-dialog.component';
 
 @Component({
     selector: 'app-word-list',
@@ -175,12 +176,20 @@ export class WordGridComponent {
             const maybe = value as Partial<WordTranslationValue>;
             return {
                 name: typeof maybe.name === 'string' ? maybe.name : '',
-                genderId: typeof maybe.genderId === 'number' ? maybe.genderId : null
+                genderId: typeof maybe.genderId === 'number' ? maybe.genderId : null,
+                wordTypeId: typeof maybe.wordTypeId === 'number' ? maybe.wordTypeId : null,
+                langueId: typeof maybe.langueId === 'number' ? maybe.langueId : null,
+                typeId: typeof maybe.typeId === 'number' ? maybe.typeId : null,
+                plural: typeof maybe.plural === 'string' ? maybe.plural : ''
             };
         }
         return {
             name: String(value),
-            genderId: null
+            genderId: null,
+            wordTypeId: null,
+            langueId: null,
+            typeId: null,
+            plural: ''
         };
     }
 
@@ -224,6 +233,30 @@ export class WordGridComponent {
         }
         const langues = this.langues();
         return langues ? langues.find(langue => langue.id === id) : undefined;
+    }
+
+    hasTranslation(row: Word, langue: Langue): boolean {
+        return !!this.extractTranslationValue(row, langue.id);
+    }
+
+    openTranslationDialog(row: Word, langue: Langue): void {
+        const translationValue = this.extractTranslationValue(row, langue.id);
+        this.dialog
+            .open(WordTranslationEditDialogComponent, {
+                width: '520px',
+                data: {
+                    parentWord: row,
+                    langue,
+                    translation: translationValue,
+                    typeId: translationValue?.typeId ?? row.type?.id ?? null
+                }
+            })
+            .afterClosed()
+            .subscribe(updated => {
+                if (updated) {
+                    this.#wordGridStore.load();
+                }
+            });
     }
 
     private resolveArticle(iso: string, genderId?: number): string | null {

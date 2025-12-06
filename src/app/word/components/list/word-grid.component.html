@@ -101,6 +101,15 @@
                                 <span>Delete</span>
                             </div>
                         </button>
+                        <mat-divider *ngIf="translationLanguages.length"></mat-divider>
+                        @for (lang of translationLanguages; track lang.id) {
+                            <button mat-menu-item (click)="openTranslationDialog(row, lang)" [disabled]="!hasTranslation(row, lang)">
+                                <div class="d-flex align-items-center">
+                                    <tabler-icon name="book" class="m-x-6"></tabler-icon>
+                                    <span>Traduction {{ lang.name }}</span>
+                                </div>
+                            </button>
+                        }
                     </mat-menu>
                 </td>
             </ng-container>
