@@ -3,7 +3,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { DataStore } from '@shared/data/data-store';
 import { MatDialog } from '@angular/material/dialog';
-import { Word } from '../../models/word.model';
+import { Word, WordTranslationValue } from '../../models/word.model';
 import { WordDeleteDialog } from '../word-delete.component';
 import { WordGridStore } from '../../word-grid-store';
 import { WordEditDialog } from '../word-edit-dialog.component';
@@ -139,10 +139,11 @@ export class WordGridComponent {
         if (!value) {
             return undefined;
         }
-        return this.formatLocalizedValue(value, langue);
+        const gender = value.genderId != null ? ({ id: value.genderId, name: '' } as Gender) : undefined;
+        return this.formatLocalizedValue(value.name, langue, gender);
     }
 
-    private extractTranslationValue(row: Word, langueId: number): string | undefined {
+    private extractTranslationValue(row: Word, langueId: number): WordTranslationValue | undefined {
         const translations = row.translations;
         if (!translations) {
             return undefined;
@@ -152,18 +153,35 @@ export class WordGridComponent {
                 if (Array.isArray(entry) && entry.length >= 2) {
                     const key = Number(entry[0]);
                     if (!Number.isNaN(key) && key === langueId) {
-                        return String(entry[1]);
+                        return this.normalizeTranslationValue(entry[1]);
                     }
                 }
             }
             return undefined;
         }
-        const byNumber = translations as Record<number, string>;
+        const byNumber = translations as Record<number, WordTranslationValue>;
         if (byNumber[langueId] !== undefined) {
-            return byNumber[langueId];
+            return this.normalizeTranslationValue(byNumber[langueId]);
         }
-        const byString = translations as Record<string, string>;
-        return byString[String(langueId)];
+        const byString = translations as Record<string, WordTranslationValue>;
+        return this.normalizeTranslationValue(byString[String(langueId)]);
+    }
+
+    private normalizeTranslationValue(value: unknown): WordTranslationValue | undefined {
+        if (value == null) {
+            return undefined;
+        }
+        if (typeof value === 'object' && !Array.isArray(value)) {
+            const maybe = value as Partial<WordTranslationValue>;
+            return {
+                name: typeof maybe.name === 'string' ? maybe.name : '',
+                genderId: typeof maybe.genderId === 'number' ? maybe.genderId : null
+            };
+        }
+        return {
+            name: String(value),
+            genderId: null
+        };
     }
 
     private formatLocalizedValue(value: string, langue?: Langue, gender?: Gender): string {
