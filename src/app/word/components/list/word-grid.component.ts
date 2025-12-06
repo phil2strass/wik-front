@@ -56,7 +56,6 @@ export class WordGridComponent {
             const selectedId = this.langueSelectedId();
             const typeFilterValue = this.typeFilter();
             const rows = this.data();
-
             const orderedLangueIds: number[] = [];
             const pushLangue = (langueId?: number | null) => {
                 if (langueId == null) return;
@@ -68,9 +67,7 @@ export class WordGridComponent {
             pushLangue(profil?.langueMaternelle);
             profil?.langues?.forEach(id => pushLangue(id));
             if (Array.isArray(rows)) {
-                rows.forEach((row: Word) => {
-                    this.collectTranslationLangues(row.translations, pushLangue);
-                });
+                rows.forEach(row => this.collectTranslationLangues(row.translations, pushLangue));
             }
 
             this.translationLanguages = orderedLangueIds
@@ -84,54 +81,6 @@ export class WordGridComponent {
             dynamicColumns.push(...this.translationLanguages.map(lang => this.translationColumnId(lang.id)));
             this.displayedColumns = ['select', 'name', ...dynamicColumns, 'actions'];
         });
-    }
-
-    ngAfterViewInit(): void {
-        this.sort.sortChange.subscribe(sort => {
-            this.#wordGridStore.setSort(sort.active, sort.direction as 'asc' | 'desc');
-            this.paginator.pageIndex = 0;
-        });
-        this.paginator.page.subscribe(pageEvent => {
-            this.#wordGridStore.setPage(pageEvent.pageIndex, pageEvent.pageSize);
-        });
-        this.#wordGridStore.load();
-    }
-
-    applyFilter(event: Event) {
-        const filterValue = (event.target as HTMLInputElement).value;
-        //this.dataSource.filter = filterValue.trim().toLowerCase();
-    }
-
-    onTypeFilterChange(typeId: number | null) {
-        this.#wordGridStore.setTypeFilter(typeId ?? null);
-    }
-
-    translationColumnId(langueId: number): string {
-        return `translation-${langueId}`;
-    }
-
-    translationValue(row: Word, langueId: number): string | undefined {
-        const translations = row.translations;
-        if (!translations) {
-            return undefined;
-        }
-        if (Array.isArray(translations)) {
-            for (const entry of translations) {
-                if (Array.isArray(entry) && entry.length >= 2) {
-                    const key = Number(entry[0]);
-                    if (!Number.isNaN(key) && key === langueId) {
-                        return entry[1] as string;
-                    }
-                }
-            }
-            return undefined;
-        }
-        const direct = translations[langueId as number];
-        if (direct !== undefined) {
-            return direct;
-        }
-        const stringKey = translations[String(langueId)];
-        return stringKey;
     }
 
     private collectTranslationLangues(
@@ -158,6 +107,100 @@ export class WordGridComponent {
                 }
             });
         }
+    }
+
+    ngAfterViewInit(): void {
+        this.sort.sortChange.subscribe(sort => {
+            this.#wordGridStore.setSort(sort.active, sort.direction as 'asc' | 'desc');
+            this.paginator.pageIndex = 0;
+        });
+        this.paginator.page.subscribe(pageEvent => {
+            this.#wordGridStore.setPage(pageEvent.pageIndex, pageEvent.pageSize);
+        });
+        this.#wordGridStore.load();
+    }
+
+    applyFilter(event: Event) {
+        const filterValue = (event.target as HTMLInputElement).value;
+        //this.dataSource.filter = filterValue.trim().toLowerCase();
+    }
+
+    onTypeFilterChange(typeId: number | null) {
+        this.#wordGridStore.setTypeFilter(typeId ?? null);
+    }
+
+    translationColumnId(langueId: number): string {
+        return `translation-${langueId}`;
+    }
+
+    formatDisplayName(row: Word): string {
+        const langue = this.getLangueById(row.langue);
+        return this.formatLocalizedValue(row.displayName ?? row.name ?? '', langue);
+    }
+
+    formatTranslationValue(row: Word, langue: Langue): string | undefined {
+        const value = this.extractTranslationValue(row, langue.id);
+        if (!value) {
+            return undefined;
+        }
+        return this.formatLocalizedValue(value, langue);
+    }
+
+    private extractTranslationValue(row: Word, langueId: number): string | undefined {
+        const translations = row.translations;
+        if (!translations) {
+            return undefined;
+        }
+        if (Array.isArray(translations)) {
+            for (const entry of translations) {
+                if (Array.isArray(entry) && entry.length >= 2) {
+                    const key = Number(entry[0]);
+                    if (!Number.isNaN(key) && key === langueId) {
+                        return String(entry[1]);
+                    }
+                }
+            }
+            return undefined;
+        }
+        const byNumber = translations as Record<number, string>;
+        if (byNumber[langueId] !== undefined) {
+            return byNumber[langueId];
+        }
+        const byString = translations as Record<string, string>;
+        return byString[String(langueId)];
+    }
+
+    private formatLocalizedValue(value: string, langue?: Langue): string {
+        let result = this.cleanGenderCode(value ?? '');
+        if (!langue?.iso) {
+            return result;
+        }
+        if (langue.iso.trim().toUpperCase() === 'DE') {
+            result = this.capitalizeLastWord(result);
+        }
+        return result;
+    }
+
+    private cleanGenderCode(value: string): string {
+        return value.replace(/\s*\(\d+\)/g, '').replace(/\s+/g, ' ').trim();
+    }
+
+    private capitalizeLastWord(value: string): string {
+        if (!value) return '';
+        const parts = value.split(' ');
+        const lastIndex = parts.length - 1;
+        const word = parts[lastIndex];
+        if (!word) return value;
+        parts[lastIndex] = word.substring(0, 1).toUpperCase() + word.substring(1);
+        return parts.join(' ');
+    }
+
+    private getLangueById(id?: number): Langue | undefined {
+        if (id == null) {
+            return undefined;
+        }
+        const langues = this.langues();
+        return langues ? langues.find(langue => langue.id === id) : undefined;
     }
 
     openEdit(word: Word) {
