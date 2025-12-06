@@ -1,0 +1,120 @@
+<div class="b-1 rounded">
+    @if (selection.selected.length === 0) {
+        <div class="row justify-content-between gap-16 m-x-15 word-grid__toolbar">
+            <div class="col-sm-12 col-md-4 m-t-14">
+                <mat-form-field appearance="outline" class="w-100" color="primary">
+                    <mat-icon matPrefix>search</mat-icon>
+                    <input matInput (keyup)="applyFilter($event)" placeholder="Search Product" />
+                </mat-form-field>
+            </div>
+            <div class="col-sm-12 col-md-3 m-t-14">
+                <mat-form-field appearance="outline" class="w-100 word-grid__type-field" color="primary">
+                    <mat-label>Type</mat-label>
+                    <mat-select [value]="typeFilter()" (selectionChange)="onTypeFilterChange($event.value)">
+                        <mat-option [value]="null">Tous</mat-option>
+                        @for (type of types(); track type.id) {
+                            <mat-option [value]="type.id">{{ type.name }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+            </div>
+            <div class="col-sm-12 col-md-3 d-flex align-items-center justify-content-end m-t-14">
+                <button mat-flat-button (click)="openCreate()">{{ "word.create" | translate }}</button>
+            </div>
+        </div>
+    }
+    @if (selection.selected.length > 0) {
+        <div class="d-flex justify-content-between align-items-center m-10">
+            <div class="m-x-15">Selected: {{ selection.selected.length }}</div>
+            <button mat-icon-button color="warn" class="m-r-10" (click)="deleteSelected()">
+                <tabler-icon name="trash"></tabler-icon>
+            </button>
+        </div>
+    }
+
+    <div class="table-responsive b-t-1 p-1 example-container">
+        @if (status() == "loading") {
+            <div class="example-loading-shade">
+                <mat-spinner class="word-grid-loader"></mat-spinner>
+            </div>
+        }
+
+        <table mat-table [dataSource]="data()" class="w-100 word-grid-table" matSort matSortActive="name" matSortDisableClear matSortDirection="asc">
+            <!-- Checkbox Column -->
+            <ng-container matColumnDef="select">
+                <th mat-header-cell *matHeaderCellDef class="p-l-0">
+                    <mat-checkbox
+                        (change)="$event ? masterToggle() : null"
+                        [checked]="selection.hasValue() && isAllSelected()"
+                        color="primary"
+                        [indeterminate]="selection.hasValue() && !isAllSelected()"
+                        [aria-label]="checkboxLabel()"
+                        class="m-l-16"></mat-checkbox>
+                </th>
+                <td mat-cell *matCellDef="let row" class="p-l-0">
+                    <mat-checkbox
+                        (click)="$event.stopPropagation()"
+                        (change)="$event ? selection.toggle(row) : null"
+                        color="primary"
+                        [checked]="selection.isSelected(row)"
+                        [aria-label]="checkboxLabel(row)"
+                        class="m-l-16"></mat-checkbox>
+                </td>
+            </ng-container>
+            <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef sticky class="f-w-600 mat-subtitle-1 f-s-14">Name</th>
+                <td mat-cell *matCellDef="let row" class="f-s-14">{{ row.displayName ?? row.name }}</td>
+            </ng-container>
+            <ng-container matColumnDef="type">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 mat-subtitle-1 f-s-14">Type</th>
+                <td mat-cell *matCellDef="let row" class="f-s-14">{{ row.type?.name ?? '-' }}</td>
+            </ng-container>
+
+            @for (lang of translationLanguages; track lang.id) {
+                <ng-container [matColumnDef]="translationColumnId(lang.id)">
+                    <th mat-header-cell *matHeaderCellDef class="f-w-600 mat-subtitle-1 f-s-14">{{ lang.name }}</th>
+                    <td mat-cell *matCellDef="let row" class="f-s-14">
+                        {{ translationValue(row, lang.id) ?? '-' }}
+                    </td>
+                </ng-container>
+            }
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions" stickyEnd>
+                <th mat-header-cell *matHeaderCellDef sticky class="f-w-600 mat-subtitle-1 f-s-14">Action</th>
+                <td mat-cell *matCellDef="let row" class="f-s-14" (click)="$event.stopPropagation()">
+                    <button mat-icon-button [matMenuTriggerFor]="menu" type="button" aria-label="Example icon-button with a menu">
+                        <mat-icon>
+                            <tabler-icon name="dots-vertical"></tabler-icon>
+                        </mat-icon>
+                    </button>
+                    <mat-menu #menu="matMenu" class="cardWithShadow">
+                        <button mat-menu-item>
+                            <div class="d-flex align-items-center" (click)="openEdit(row)">
+                                <tabler-icon name="pencil" class="m-x-6"></tabler-icon>
+                                <span>Edit</span>
+                            </div>
+                        </button>
+                        <button mat-menu-item>
+                            <div class="d-flex align-items-center text-error" (click)="openDelete(row)">
+                                <tabler-icon name="trash" class="m-x-6"></tabler-icon>
+                                <span>Delete</span>
+                            </div>
+                        </button>
+                    </mat-menu>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+    </div>
+
+    <mat-paginator
+        [pageSizeOptions]="[5, 10, 20]"
+        [pageSize]="pageSize()"
+        [length]="resultsLength()"
+        showFirstLastButtons
+        aria-label="Sélection page des mots"
+        class="b-t-1 p-x-48"></mat-paginator>
+</div>

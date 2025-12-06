@@ -55,6 +55,7 @@ export class WordGridComponent {
             const langues = this.langues() ?? [];
             const selectedId = this.langueSelectedId();
             const typeFilterValue = this.typeFilter();
+            const rows = this.data();
 
             const orderedLangueIds: number[] = [];
             const pushLangue = (langueId?: number | null) => {
@@ -66,6 +67,11 @@ export class WordGridComponent {
 
             pushLangue(profil?.langueMaternelle);
             profil?.langues?.forEach(id => pushLangue(id));
+            if (Array.isArray(rows)) {
+                rows.forEach((row: Word) => {
+                    this.collectTranslationLangues(row.translations, pushLangue);
+                });
+            }
 
             this.translationLanguages = orderedLangueIds
                 .map(id => langues.find(langue => langue.id === id))
@@ -102,6 +108,56 @@ export class WordGridComponent {
 
     translationColumnId(langueId: number): string {
         return `translation-${langueId}`;
+    }
+
+    translationValue(row: Word, langueId: number): string | undefined {
+        const translations = row.translations;
+        if (!translations) {
+            return undefined;
+        }
+        if (Array.isArray(translations)) {
+            for (const entry of translations) {
+                if (Array.isArray(entry) && entry.length >= 2) {
+                    const key = Number(entry[0]);
+                    if (!Number.isNaN(key) && key === langueId) {
+                        return entry[1] as string;
+                    }
+                }
+            }
+            return undefined;
+        }
+        const direct = translations[langueId as number];
+        if (direct !== undefined) {
+            return direct;
+        }
+        const stringKey = translations[String(langueId)];
+        return stringKey;
+    }
+
+    private collectTranslationLangues(
+        translations: Word['translations'],
+        pushLangue: (langueId?: number | null) => void
+    ): void {
+        if (!translations) {
+            return;
+        }
+        if (Array.isArray(translations)) {
+            translations.forEach(entry => {
+                if (Array.isArray(entry) && entry.length >= 1) {
+                    const key = Number(entry[0]);
+                    if (!Number.isNaN(key)) {
+                        pushLangue(key);
+                    }
+                }
+            });
+        } else if (typeof translations === 'object') {
+            Object.keys(translations).forEach(key => {
+                const numericKey = Number(key);
+                if (!Number.isNaN(numericKey)) {
+                    pushLangue(numericKey);
+                }
+            });
+        }
     }
 
     openEdit(word: Word) {

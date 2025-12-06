@@ -38,7 +38,7 @@ export const WordGridStore = signalStore(
         sortField: 'name',
         sortDirection: 'asc',
         resultsLength: 0,
-        data: [],
+        data: [] as Word[],
         typeFilter: null as number | null
     }),
     withComputed(state => ({
@@ -77,7 +77,7 @@ export const WordGridStore = signalStore(
                 .pipe(
                     mapResponse({
                         next: (response: any) => {
-                            const data = response.body;
+                            const data = Array.isArray(response.body) ? (response.body as Word[]) : [];
                             const totalCountHeader = response.headers.get('X-Total-Count');
                             const resultsLength = totalCountHeader ? Number(totalCountHeader) : 0;
                             patchState(store, { data, resultsLength });

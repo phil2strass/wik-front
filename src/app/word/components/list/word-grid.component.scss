@@ -1,0 +1,63 @@
+.example-container {
+    position: relative;
+    min-height: 240px;
+}
+
+.example-loading-shade {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.15);
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(1px);
+}
+
+.word-grid-loader {
+    animation: fadeIn 200ms ease-in-out forwards;
+}
+
+.word-grid-table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.word-grid-table .mat-column-select {
+    width: 56px;
+    max-width: 56px;
+}
+
+.word-grid-table .mat-column-actions {
+    width: 92px;
+    max-width: 92px;
+}
+
+.word-grid-table .mat-column-name {
+    width: calc(100% - 148px);
+    word-break: break-word;
+}
+
+.word-grid__toolbar {
+    align-items: center;
+}
+
+.word-grid__type-field {
+    min-width: 180px;
+    max-width: 260px;
+}
+
+.word-grid__toolbar button[mat-flat-button] {
+    height: 37px;
+    line-height: 37px;
+    margin-bottom: 19.5px
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
