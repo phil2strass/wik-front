@@ -34,41 +34,45 @@ import { Subscription } from 'rxjs';
                     <div class="word-new__translations-grid">
                         <mat-card
                             class="word-new__translation-card cardWithShadow b-1 rounded p-24"
-                            *ngFor="let block of translationBlocks"
-                            [formGroup]="block.form">
+                            *ngFor="let block of translationBlocks">
                             <div class="word-new__translation-title">
                                 {{ block.langueName }}
                                 <span *ngIf="block.isMotherTongue" class="word-new__translation-badge">Langue maternelle</span>
+                                <button mat-stroked-button type="button" (click)="addTranslation(block)">Ajouter une traduction</button>
                             </div>
-                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">
-                                Mot
-                                <span class="text-error">*</span>
-                            </mat-label>
-                            <mat-form-field appearance="outline" class="w-100 p-0" color="primary">
-                                <input type="text" matInput formControlName="name" />
-                            </mat-form-field>
-                            <ng-container *ngIf="showTranslationDetails()">
-                                <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">Pluriel</mat-label>
-                                <mat-form-field appearance="outline" class="w-100 p-0" color="primary">
-                                    <input type="text" matInput formControlName="plural" />
-                                </mat-form-field>
-                                <div *ngIf="block.genders.length" class="word-new__translation-genders">
-                                    <mat-radio-group
-                                        formControlName="genderId"
-                                        class="d-flex flex-wrap gap-24 justify-content-start mt-2">
-                                        <mat-card
-                                            *ngFor="let gender of block.genders"
-                                            class="cardWithShadow b-1 rounded d-flex gap-30 align-items-center flex-row">
-                                            <mat-radio-button class="p-r-16 p-l-6 p-y-2" color="primary" [value]="gender.id">
-                                                {{ gender.name }}
-                                            </mat-radio-button>
-                                        </mat-card>
-                                    </mat-radio-group>
-                                    <div
-                                        class="mat-error word-form__gender-error"
-                                        *ngIf="block.form.get('genderId')?.hasError('required') && block.form.get('genderId')?.touched">
-                                        Veuillez sélectionner un genre.
+                            <ng-container *ngFor="let formGroup of block.forms; let idx = index">
+                                <div class="word-new__translation-form" [formGroup]="formGroup">
+                                    <div class="word-new__translation-form-header" *ngIf="block.forms.length > 1">
+                                        Traduction {{ idx + 1 }}
                                     </div>
+                                    <mat-form-field appearance="outline" class="w-100 p-0 m-t-20" color="primary">
+                                        <mat-label>Mot</mat-label>
+                                        <input type="text" matInput formControlName="name" />
+                                    </mat-form-field>
+                                    <ng-container *ngIf="showTranslationDetails()">
+                                        <mat-form-field appearance="outline" class="w-100 p-0 m-t-20" color="primary">
+                                            <mat-label>Pluriel</mat-label>
+                                            <input type="text" matInput formControlName="plural" />
+                                        </mat-form-field>
+                                        <div *ngIf="block.genders.length" class="word-new__translation-genders">
+                                            <mat-radio-group
+                                                formControlName="genderId"
+                                                class="d-flex flex-wrap gap-24 justify-content-start mt-2">
+                                                <mat-card
+                                                    *ngFor="let gender of block.genders"
+                                                    class="cardWithShadow b-1 rounded d-flex gap-30 align-items-center flex-row">
+                                                    <mat-radio-button class="p-r-16 p-l-6 p-y-2" color="primary" [value]="gender.id">
+                                                        {{ gender.name }}
+                                                    </mat-radio-button>
+                                                </mat-card>
+                                            </mat-radio-group>
+                                            <div
+                                                class="mat-error word-form__gender-error"
+                                                *ngIf="formGroup.get('genderId')?.hasError('required') && formGroup.get('genderId')?.touched">
+                                                Veuillez sélectionner un genre.
+                                            </div>
+                                        </div>
+                                    </ng-container>
                                 </div>
                             </ng-container>
                         </mat-card>
@@ -160,6 +164,20 @@ import { Subscription } from 'rxjs';
             .word-new__translation-genders {
                 margin-top: 8px;
             }
+
+            .word-new__translation-form {
+                margin-top: 12px;
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                padding-top: 8px;
+                border-top: 1px solid rgba(0, 0, 0, 0.08);
+            }
+
+            .word-new__translation-form-header {
+                font-weight: 600;
+                font-size: 0.9rem;
+            }
         `
     ]
 })
@@ -171,8 +189,8 @@ export class WordNewComponent implements OnDestroy {
     #securityStore = inject(SecurityStore);
     protected readonly status = this.#wordStore.status;
     translationBlocks: TranslationBlock[] = [];
-    #translationFormsByLangue = new Map<number, FormGroup>();
-    #translationFormSubscriptions = new Map<number, Subscription>();
+    #translationFormsByLangue = new Map<number, FormGroup[]>();
+    #translationFormSubscriptions = new Map<FormGroup, Subscription>();
     #typeSubscription?: Subscription;
 
     constructor() {
@@ -205,7 +223,7 @@ export class WordNewComponent implements OnDestroy {
     }
 
     protected get translationFormGroups(): FormGroup[] {
-        return this.translationBlocks.map(block => block.form);
+        return this.translationBlocks.flatMap(block => block.forms);
     }
 
     shouldShowTranslationBlocks(): boolean {
@@ -218,6 +236,15 @@ export class WordNewComponent implements OnDestroy {
 
     isLoading(): boolean {
         return this.status() === 'loading';
+    }
+
+    private createTranslationForm(langueId: number): FormGroup {
+        return this.#formBuilder.group({
+            langueId: [langueId],
+            name: [''],
+            plural: [''],
+            genderId: [null]
+        });
     }
 
     private updateTranslationBlocks(profil: ProfilStorage | undefined, langues: Langue[]) {
@@ -258,31 +285,26 @@ export class WordNewComponent implements OnDestroy {
                 continue;
             }
             seen.add(definition.id);
-            let form = this.#translationFormsByLangue.get(definition.id);
-            if (!form) {
-                form = this.#formBuilder.group({
-                    langueId: [definition.id],
-                    name: [''],
-                    plural: [''],
-                    genderId: [null]
-                });
-                this.#translationFormsByLangue.set(definition.id, form);
+            let forms = this.#translationFormsByLangue.get(definition.id);
+            if (!forms || forms.length === 0) {
+                forms = [this.createTranslationForm(definition.id)];
+                this.#translationFormsByLangue.set(definition.id, forms);
             }
-            this.trackTranslationFormSubscription(definition.id, form);
+            forms.forEach(form => this.trackTranslationFormSubscription(form));
             blocks.push({
                 langueId: definition.id,
                 langueName: langueData.name,
                 langueIso: langueData.iso,
                 genders: langueData.genders ?? [],
                 isMotherTongue: definition.isMotherTongue,
-                form
+                forms: [...forms]
             });
         }
 
-        Array.from(this.#translationFormsByLangue.keys()).forEach(id => {
+        Array.from(this.#translationFormsByLangue.entries()).forEach(([id, forms]) => {
             if (!seen.has(id)) {
+                forms.forEach(form => this.releaseTranslationFormSubscription(form));
                 this.#translationFormsByLangue.delete(id);
-                this.releaseTranslationFormSubscription(id);
             }
         });
 
@@ -293,13 +315,28 @@ export class WordNewComponent implements OnDestroy {
 
     private setTranslationFormsDisabled(disabled: boolean) {
         this.translationBlocks.forEach(block => {
-            if (disabled && block.form.enabled) {
-                block.form.disable({ emitEvent: false });
-            } else if (!disabled && block.form.disabled) {
-                block.form.enable({ emitEvent: false });
-            }
+            block.forms.forEach(form => {
+                if (disabled && form.enabled) {
+                    form.disable({ emitEvent: false });
+                } else if (!disabled && form.disabled) {
+                    form.enable({ emitEvent: false });
+                }
+            });
         });
         this.updateTranslationGenderValidators();
+    }
+
+    addTranslation(block: TranslationBlock): void {
+        const form = this.createTranslationForm(block.langueId);
+        const forms = this.#translationFormsByLangue.get(block.langueId) ?? [];
+        forms.push(form);
+        this.#translationFormsByLangue.set(block.langueId, forms);
+        this.trackTranslationFormSubscription(form);
+        const updatedBlocks = this.translationBlocks.map(b =>
+            b.langueId === block.langueId ? { ...b, forms: [...forms] } : b
+        );
+        this.translationBlocks = updatedBlocks;
+        this.setTranslationFormsDisabled(this.isLoading());
     }
 
     ngOnDestroy(): void {
@@ -307,16 +344,16 @@ export class WordNewComponent implements OnDestroy {
         this.clearTranslationFormSubscriptions();
     }
 
-    private trackTranslationFormSubscription(langueId: number, form: FormGroup): void {
-        this.releaseTranslationFormSubscription(langueId);
+    private trackTranslationFormSubscription(form: FormGroup): void {
+        this.releaseTranslationFormSubscription(form);
         const sub = form.valueChanges.subscribe(() => this.updateTranslationGenderValidators());
-        this.#translationFormSubscriptions.set(langueId, sub);
+        this.#translationFormSubscriptions.set(form, sub);
     }
 
-    private releaseTranslationFormSubscription(langueId: number): void {
-        const sub = this.#translationFormSubscriptions.get(langueId);
+    private releaseTranslationFormSubscription(form: FormGroup): void {
+        const sub = this.#translationFormSubscriptions.get(form);
         sub?.unsubscribe();
-        this.#translationFormSubscriptions.delete(langueId);
+        this.#translationFormSubscriptions.delete(form);
     }
 
     private clearTranslationFormSubscriptions(): void {
@@ -328,19 +365,21 @@ export class WordNewComponent implements OnDestroy {
         const typeId = this.form.get('typeId')?.value;
         const requiresGenderByType = Number(typeId) === 1;
         this.translationBlocks.forEach(block => {
-            const genderControl = block.form.get('genderId');
-            const nameControl = block.form.get('name');
-            if (!genderControl || !nameControl) {
-                return;
-            }
-            const hasName = this.hasNameValue(nameControl.value);
-            const shouldRequire = requiresGenderByType && this.requiresGenderForIso(block.langueIso) && hasName;
-            if (shouldRequire) {
-                genderControl.setValidators([Validators.required]);
-            } else {
-                genderControl.clearValidators();
-            }
-            genderControl.updateValueAndValidity({ emitEvent: false });
+            block.forms.forEach(formGroup => {
+                const genderControl = formGroup.get('genderId');
+                const nameControl = formGroup.get('name');
+                if (!genderControl || !nameControl) {
+                    return;
+                }
+                const hasName = this.hasNameValue(nameControl.value);
+                const shouldRequire = requiresGenderByType && this.requiresGenderForIso(block.langueIso) && hasName;
+                if (shouldRequire) {
+                    genderControl.setValidators([Validators.required]);
+                } else {
+                    genderControl.clearValidators();
+                }
+                genderControl.updateValueAndValidity({ emitEvent: false });
+            });
         });
     }
 
@@ -366,5 +405,5 @@ type TranslationBlock = {
     langueIso: string;
     genders: Gender[];
     isMotherTongue: boolean;
-    form: FormGroup;
+    forms: FormGroup[];
 };

@@ -10,7 +10,9 @@ export interface WordTranslationValue {
     plural: string;
 }
 
-export type WordTranslations = Record<number | string, WordTranslationValue> | Array<[number | string, WordTranslationValue]>;
+export type WordTranslations =
+    | Record<number | string, WordTranslationValue[]>
+    | Array<[number | string, WordTranslationValue[]]>;
 
 export interface Word {
     wordTypeId: number;

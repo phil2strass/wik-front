@@ -7,6 +7,7 @@ import { ErrorStateMatcher, MatOption } from '@angular/material/core';
 import { MatSelect } from '@angular/material/select';
 import { WordStore } from '../word-store';
 import { DataStore } from '@shared/data/data-store';
+import { Gender } from '@shared/data/models/langue.model';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { MessageService } from '@shared/ui-messaging/message/message.service';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -30,17 +31,14 @@ class WordFormErrorStateMatcher implements ErrorStateMatcher {
     selector: 'app-word-form',
     template: `
         @if (formReady) {
-            <form [formGroup]="formGroup" (ngSubmit)="save()">
+            <form [formGroup]="formGroup" (ngSubmit)="onFormSubmit($event)">
                 @if (useCard) {
                     <div class="row">
                         <div class="col-lg-8">
                             <mat-card class="cardWithShadow b-1 rounded p-30">
                                 <h4 Ctitle>{{ titleTranslationKey | translate }}</h4>
-                                <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">
-                                    Mot
-                                    <span class="text-error">*</span>
-                                </mat-label>
-                                <mat-form-field appearance="outline" class="w-100 p-0" color="primary">
+                                <mat-form-field appearance="outline" class="w-100 p-0 m-t-20" color="primary">
+                                    <mat-label>Mot</mat-label>
                                     <input
                                         #nameInput
                                         type="text"
@@ -52,9 +50,9 @@ class WordFormErrorStateMatcher implements ErrorStateMatcher {
                                         Ce mot existe déjà pour ce type.
                                     </mat-error>
                                 </mat-form-field>
-                                @if (selectedType()) {
-                                    <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">Pluriel</mat-label>
-                                    <mat-form-field appearance="outline" class="w-100 p-0" color="primary">
+                                @if (selectedType() && showPlural) {
+                                    <mat-form-field appearance="outline" class="w-100 p-0 m-t-20" color="primary">
+                                        <mat-label>Pluriel</mat-label>
                                         <input
                                             type="text"
                                             matInput
@@ -62,22 +60,21 @@ class WordFormErrorStateMatcher implements ErrorStateMatcher {
                                 formControlName="plural" />
                                     </mat-form-field>
                                 }
-                                <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">
-                                    Type
-                                    <span class="text-error">*</span>
-                                </mat-label>
-                                <mat-form-field appearance="outline" class="w-100">
-                                    <mat-select
-                                        formControlName="typeId"
-                                        [disabled]="disableTypeSelection"
-                                        disableOptionCentering
-                                        [errorStateMatcher]="errorMatcher">
-                                        @for (type of types(); track type) {
-                                            <mat-option [value]="type.id">{{ type.name }}</mat-option>
-                                        }
-                                    </mat-select>
-                                    <mat-error *ngIf="showError('typeId', 'required')">Veuillez saisir un type.</mat-error>
-                                </mat-form-field>
+                                @if (showTypeField) {
+                                    <mat-form-field appearance="outline" class="w-100 m-t-20">
+                                        <mat-label>Type</mat-label>
+                                        <mat-select
+                                            formControlName="typeId"
+                                            [disabled]="disableTypeSelection"
+                                            disableOptionCentering
+                                            [errorStateMatcher]="errorMatcher">
+                                            @for (type of types(); track type) {
+                                                <mat-option [value]="type.id">{{ type.name }}</mat-option>
+                                            }
+                                        </mat-select>
+                                        <mat-error *ngIf="showError('typeId', 'required')">Veuillez saisir un type.</mat-error>
+                                    </mat-form-field>
+                                }
                                 @if (selectedType()) {
                                     <mat-radio-group
                                         formControlName="genderId"
@@ -105,11 +102,8 @@ class WordFormErrorStateMatcher implements ErrorStateMatcher {
                 } @else {
                     <div class="word-form__content w-100">
                         <h4 Ctitle>{{ titleTranslationKey | translate }}</h4>
-                        <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">
-                            Mot
-                            <span class="text-error">*</span>
-                        </mat-label>
-                        <mat-form-field appearance="outline" class="w-100 p-0" color="primary">
+                        <mat-form-field appearance="outline" class="w-100 p-0 m-t-20" color="primary">
+                            <mat-label>Mot</mat-label>
                             <input
                                 #nameInput
                                 type="text"
@@ -121,9 +115,9 @@ class WordFormErrorStateMatcher implements ErrorStateMatcher {
                                 Ce mot existe déjà pour ce type.
                             </mat-error>
                         </mat-form-field>
-                        @if (selectedType()) {
-                            <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">Pluriel</mat-label>
-                            <mat-form-field appearance="outline" class="w-100 p-0" color="primary">
+                        @if (selectedType() && showPlural) {
+                            <mat-form-field appearance="outline" class="w-100 p-0 m-t-20" color="primary">
+                                <mat-label>Pluriel</mat-label>
                                 <input
                                     type="text"
                                     matInput
@@ -131,22 +125,21 @@ class WordFormErrorStateMatcher implements ErrorStateMatcher {
                                     formControlName="plural" />
                             </mat-form-field>
                         }
-                        <mat-label class="f-s-14 f-w-600 m-b-8 d-block m-t-20">
-                            Type
-                            <span class="text-error">*</span>
-                        </mat-label>
-                                <mat-form-field appearance="outline" class="w-100">
-                            <mat-select
-                                formControlName="typeId"
-                                [disabled]="disableTypeSelection"
-                                disableOptionCentering
-                                [errorStateMatcher]="errorMatcher">
-                                @for (type of types(); track type) {
-                                    <mat-option [value]="type.id">{{ type.name }}</mat-option>
-                                }
-                            </mat-select>
-                            <mat-error *ngIf="showError('typeId', 'required')">Veuillez saisir un type.</mat-error>
-                        </mat-form-field>
+                        @if (showTypeField) {
+                            <mat-form-field appearance="outline" class="w-100 m-t-20">
+                                <mat-label>Type</mat-label>
+                                    <mat-select
+                                        formControlName="typeId"
+                                        [disabled]="disableTypeSelection"
+                                    disableOptionCentering
+                                    [errorStateMatcher]="errorMatcher">
+                                    @for (type of types(); track type) {
+                                        <mat-option [value]="type.id">{{ type.name }}</mat-option>
+                                    }
+                                </mat-select>
+                                <mat-error *ngIf="showError('typeId', 'required')">Veuillez saisir un type.</mat-error>
+                            </mat-form-field>
+                        }
                         @if (selectedType()) {
                             <mat-radio-group
                                 formControlName="genderId"
@@ -220,6 +213,18 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
     @Input() useCard = true;
     @Input() translationForms: FormGroup[] | undefined;
     @Input() disableTypeSelection = false;
+    @Input() showTypeField = true;
+    @Input() showPlural = true;
+    @Input() genderOptional = false;
+    @Input() handleSubmit = true;
+    private _gendersOverride: Gender[] | null = null;
+    @Input()
+    set gendersOverride(value: Gender[] | null | undefined) {
+        this._gendersOverride = value ?? null;
+        if (this.formReady) {
+            this.updateGenderRequirement();
+        }
+    }
 
     readonly #dataStore = inject(DataStore);
     protected readonly langues = this.#dataStore.langues;
@@ -230,10 +235,17 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
 
     readonly #wordStore = inject(WordStore);
     protected readonly action = this.#wordStore.action;
-    protected readonly genders = this.#wordStore.genders;
     protected readonly storeError = this.#wordStore.error;
 
     messageService = inject(MessageService);
+
+    protected genders(): Gender[] {
+        if (this._gendersOverride) {
+            return this._gendersOverride;
+        }
+        const storeGenders = this.#wordStore.genders();
+        return Array.isArray(storeGenders) ? storeGenders : [];
+    }
 
     constructor() {
         effect(() => {
@@ -294,6 +306,9 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
     }
 
     selectedType(): boolean {
+        if (this.genderOptional) {
+            return false;
+        }
         return this.formGroup?.get('typeId')?.value === 1;
     }
 
@@ -327,6 +342,15 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
             this.#wordStore.create(data);
         } else {
             this.#wordStore.update(data);
+        }
+    }
+
+    onFormSubmit(event: Event): void {
+        if (this.handleSubmit) {
+            this.save();
+        } else {
+            event.preventDefault();
+            event.stopPropagation();
         }
     }
 
@@ -411,7 +435,7 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
         if (!genderControl) {
             return;
         }
-        const requireGender = this.shouldRequireGenderSelection();
+        const requireGender = this.genderOptional ? false : this.shouldRequireGenderSelection();
         if (requireGender) {
             genderControl.setValidators([Validators.required]);
         } else {

@@ -88,18 +88,24 @@ export class WordGridComponent {
         }
         if (Array.isArray(translations)) {
             translations.forEach(entry => {
-                if (Array.isArray(entry) && entry.length >= 1) {
+                if (Array.isArray(entry) && entry.length >= 2) {
                     const key = Number(entry[0]);
                     if (!Number.isNaN(key)) {
-                        pushLangue(key);
+                        const bucket = this.normalizeTranslationBucket(entry[1]);
+                        if (bucket.length > 0) {
+                            pushLangue(key);
+                        }
                     }
                 }
             });
         } else if (typeof translations === 'object') {
-            Object.keys(translations).forEach(key => {
+            Object.entries(translations).forEach(([key, value]) => {
                 const numericKey = Number(key);
                 if (!Number.isNaN(numericKey)) {
-                    pushLangue(numericKey);
+                    const bucket = this.normalizeTranslationBucket(value);
+                    if (bucket.length > 0) {
+                        pushLangue(numericKey);
+                    }
                 }
             });
         }
@@ -136,36 +142,54 @@ export class WordGridComponent {
     }
 
     formatTranslationValue(row: Word, langue: Langue): string | undefined {
-        const value = this.extractTranslationValue(row, langue.id);
-        if (!value) {
+        const values = this.extractTranslationValues(row, langue.id);
+        if (!values.length) {
             return undefined;
         }
-        const gender = value.genderId != null ? ({ id: value.genderId, name: '' } as Gender) : undefined;
-        return this.formatLocalizedValue(value.name, langue, gender);
+        const formatted = values
+            .map(value => {
+                const gender = value.genderId != null ? ({ id: value.genderId, name: '' } as Gender) : undefined;
+                return this.formatLocalizedValue(value.name, langue, gender);
+            })
+            .filter(value => !!value);
+        return formatted.length ? formatted.join(', ') : undefined;
     }
 
-    private extractTranslationValue(row: Word, langueId: number): WordTranslationValue | undefined {
+    private extractTranslationValues(row: Word, langueId: number): WordTranslationValue[] {
         const translations = row.translations;
         if (!translations) {
-            return undefined;
+            return [];
         }
         if (Array.isArray(translations)) {
             for (const entry of translations) {
                 if (Array.isArray(entry) && entry.length >= 2) {
                     const key = Number(entry[0]);
                     if (!Number.isNaN(key) && key === langueId) {
-                        return this.normalizeTranslationValue(entry[1]);
+                        return this.normalizeTranslationBucket(entry[1]);
                     }
                 }
             }
-            return undefined;
+            return [];
         }
-        const byNumber = translations as Record<number, WordTranslationValue>;
+        const byNumber = translations as Record<number, WordTranslationValue[]>;
         if (byNumber[langueId] !== undefined) {
-            return this.normalizeTranslationValue(byNumber[langueId]);
+            return this.normalizeTranslationBucket(byNumber[langueId]);
         }
-        const byString = translations as Record<string, WordTranslationValue>;
-        return this.normalizeTranslationValue(byString[String(langueId)]);
+        const byString = translations as Record<string, WordTranslationValue[]>;
+        return this.normalizeTranslationBucket(byString[String(langueId)]);
+    }
+
+    private normalizeTranslationBucket(bucket: unknown): WordTranslationValue[] {
+        if (bucket == null) {
+            return [];
+        }
+        if (Array.isArray(bucket)) {
+            return bucket
+                .map(value => this.normalizeTranslationValue(value))
+                .filter((value): value is WordTranslationValue => !!value);
+        }
+        const single = this.normalizeTranslationValue(bucket);
+        return single ? [single] : [];
     }
 
     private normalizeTranslationValue(value: unknown): WordTranslationValue | undefined {
@@ -236,11 +260,15 @@ export class WordGridComponent {
     }
 
     hasTranslation(row: Word, langue: Langue): boolean {
-        return !!this.extractTranslationValue(row, langue.id);
+        return this.extractTranslationValues(row, langue.id).length > 0;
     }
 
     openTranslationDialog(row: Word, langue: Langue): void {
-        const translationValue = this.extractTranslationValue(row, langue.id);
+        const translationValues = this.extractTranslationValues(row, langue.id);
+        if (translationValues.length === 0) {
+            return;
+        }
+        const translationValue = translationValues[0];
         this.dialog
             .open(WordTranslationEditDialogComponent, {
                 width: '520px',
