@@ -1,0 +1,48 @@
+.example-dialog__translation-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.example-dialog__action-icons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.example-dialog__translation-display {
+    justify-content: space-between;
+    align-items: center;
+    display: flex;
+}
+
+.example-dialog__arrow {
+    display: inline-block;
+    margin-right: 6px;
+    font-weight: 600;
+}
+
+.example-dialog__translation-text {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.example-dialog__actions-bar {
+    align-items: center;
+    gap: 20px;
+    padding: 16px 24px;
+    justify-content: flex-end;
+}
+
+.example-dialog__translation-display .example-dialog__action-icons {
+    position: static;
+    top: auto;
+    right: auto;
+}
+
+.example-dialog__empty {
+    padding: 12px 4px;
+    color: var(--mat-sys-outline, #6f6f6f);
+    font-size: 14px;
+}

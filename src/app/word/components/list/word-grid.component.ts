@@ -20,6 +20,7 @@ import { WordTranslationEditDialogComponent } from '../word-translation-view-dia
 import { MatPaginatorIntl } from '@angular/material/paginator';
 import { Subscription } from 'rxjs';
 import { ExampleDialogComponent } from '../example-dialog/example-dialog.component';
+import { ExampleTranslationDialogComponent } from '../example-dialog/example-translation-dialog.component';
 
 @Component({
     selector: 'app-word-list',
@@ -189,14 +190,22 @@ export class WordGridComponent implements OnDestroy {
         return lang.name;
     }
 
-    openExamples(row: Word): void {
-        const dialogRef = this.dialog.open(ExampleDialogComponent, {
+    openExamples(row: Word, langue?: Langue): void {
+        const baseConfig = {
             width: '1000px',
             maxWidth: '1000px',
             autoFocus: false,
-            restoreFocus: false,
-            data: { wordTypeId: row.wordTypeId, wordLabel: this.formatDisplayName(row) }
-        });
+            restoreFocus: false
+        } as const;
+        const dialogRef = langue
+            ? this.dialog.open(ExampleTranslationDialogComponent, {
+                  ...baseConfig,
+                  data: { wordTypeId: row.wordTypeId, wordLabel: this.formatDisplayName(row), langue }
+              })
+            : this.dialog.open(ExampleDialogComponent, {
+                  ...baseConfig,
+                  data: { wordTypeId: row.wordTypeId, wordLabel: this.formatDisplayName(row) }
+              });
         dialogRef.afterClosed().subscribe();
     }
 

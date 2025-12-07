@@ -98,28 +98,40 @@
                     </button>
                     <mat-menu #menu="matMenu" class="cardWithShadow">
                         <button mat-menu-item>
-                            <div class="d-flex align-items-center" (click)="openEdit(row)">
-                                <tabler-icon name="pencil" class="m-x-6"></tabler-icon>
-                                <span>Edit</span>
-                            </div>
-                        </button>
-                        <button mat-menu-item (click)="openExamples(row)">
-                            <div class="d-flex align-items-center">
-                                <tabler-icon name="book-2" class="m-x-6"></tabler-icon>
-                                <span>{{ 'word.examples.menu' | translate }}</span>
-                            </div>
-                        </button>
-                        <button mat-menu-item>
-                            <div class="d-flex align-items-center text-error" (click)="openDelete(row)">
-                                <tabler-icon name="trash" class="m-x-6"></tabler-icon>
-                                <span>Delete</span>
-                            </div>
-                        </button>
-                        <mat-divider *ngIf="translationLanguages.length"></mat-divider>
-                        <div class="mat-menu-item word-grid__menu-section" *ngIf="translationLanguages.length">
-                            <span>{{ 'word.translation.section' | translate }}</span>
+                    <div class="d-flex align-items-center" (click)="openEdit(row)">
+                        <tabler-icon name="pencil" class="m-x-6"></tabler-icon>
+                        <span>Edit</span>
+                    </div>
+                </button>
+                <button mat-menu-item (click)="openExamples(row)">
+                    <div class="d-flex align-items-center">
+                        <tabler-icon name="book-2" class="m-x-6"></tabler-icon>
+                        <span>{{ 'word.examples.menu' | translate }}</span>
+                    </div>
+                </button>
+                <button mat-menu-item>
+                    <div class="d-flex align-items-center text-error" (click)="openDelete(row)">
+                        <tabler-icon name="trash" class="m-x-6"></tabler-icon>
+                        <span>Delete</span>
+                    </div>
+                </button>
+                <mat-divider *ngIf="translationLanguages.length"></mat-divider>
+                <div class="mat-menu-item word-grid__menu-section" *ngIf="translationLanguages.length">
+                    <span>{{ 'word.examples.section' | translate }}</span>
+                </div>
+                @for (lang of translationLanguages; track lang.id) {
+                    <button mat-menu-item (click)="openExamples(row, lang)">
+                        <div class="d-flex align-items-center">
+                            <tabler-icon name="book-2" class="m-x-6"></tabler-icon>
+                            <span>{{ langHeaderLabel(lang) }}</span>
                         </div>
-                        @for (lang of translationLanguages; track lang.id) {
+                    </button>
+                }
+                <mat-divider *ngIf="translationLanguages.length"></mat-divider>
+                <div class="mat-menu-item word-grid__menu-section" *ngIf="translationLanguages.length">
+                    <span>{{ 'word.translation.section' | translate }}</span>
+                </div>
+                @for (lang of translationLanguages; track lang.id) {
                             <button mat-menu-item (click)="openTranslationDialog(row, lang)">
                                 <div class="d-flex align-items-center">
                                     <tabler-icon name="book" class="m-x-6"></tabler-icon>

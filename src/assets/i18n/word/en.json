@@ -22,7 +22,10 @@
     },
     "word.examples": {
         "menu": "Examples",
+        "section": "Examples",
         "title": "Examples for {{word}}",
+        "titleByLang": "Examples in {{lang}} for {{word}}",
+        "titleByLangShort": "examples in {{lang}}",
         "add": "Add example",
         "label": "Example {{index}}",
         "placeholder": "Enter your example",
@@ -33,6 +36,14 @@
         "edit": "Edit",
         "delete": "Delete",
         "confirmDelete": "Delete this example?",
+        "empty": "No examples available",
+        "translation": {
+            "label": "Translation in {{lang}}",
+            "required": "Translation text is required",
+            "add": "Add translation",
+            "saved": "Translations saved",
+            "deleted": "Translation deleted"
+        },
         "errors": {
             "required": "Example text is required",
             "maxlength": "Maximum {{max}} characters"

@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Configuration } from '@shared/config/configuration';
 import { Observable } from 'rxjs';
-import { WordExample } from '../models/example.model';
+import { WordExample, WordExampleTranslation } from '../models/example.model';
 
 @Injectable({ providedIn: 'root' })
 export class ExampleService {
@@ -23,5 +23,33 @@ export class ExampleService {
 
     deleteExample(exampleId: number): Observable<void> {
         return this.#http.delete<void>(`${this.#baseUrl}examples/${exampleId}`);
+    }
+
+    getExampleTranslations(wordTypeId: number, langueId: number): Observable<WordExampleTranslation[]> {
+        return this.#http.get<WordExampleTranslation[]>(
+            `${this.#baseUrl}word/${wordTypeId}/examples/translations/${langueId}`
+        );
+    }
+
+    saveExampleTranslation(exampleId: number, langueId: number, content: string): Observable<WordExampleTranslation> {
+        return this.#http.put<WordExampleTranslation>(
+            `${this.#baseUrl}examples/${exampleId}/translations/${langueId}`,
+            { content }
+        );
+    }
+
+    saveExampleTranslations(
+        wordTypeId: number,
+        langueId: number,
+        translations: Partial<WordExampleTranslation>[]
+    ): Observable<WordExampleTranslation[]> {
+        return this.#http.put<WordExampleTranslation[]>(
+            `${this.#baseUrl}word/${wordTypeId}/examples/translations/${langueId}`,
+            translations
+        );
+    }
+
+    deleteExampleTranslation(exampleId: number, langueId: number): Observable<void> {
+        return this.#http.delete<void>(`${this.#baseUrl}examples/${exampleId}/translations/${langueId}`);
     }
 }

@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
+import { IconModule } from '@root/app/icon/icon.module';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ExampleService } from '../../services/example.service';
 import { WordExample } from '../../models/example.model';
@@ -13,10 +14,12 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { finalize } from 'rxjs/operators';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ExampleDeleteDialogComponent } from './example-delete-dialog.component';
+import { Langue } from '@shared/data/models/langue.model';
 
 export type ExampleDialogData = {
     wordTypeId: number;
     wordLabel: string;
+    langue?: Langue;
 };
 
 @Component({
@@ -37,7 +40,8 @@ export type ExampleDialogData = {
         MatTooltipModule,
         ReactiveFormsModule,
         TranslateModule,
-        ExampleDeleteDialogComponent
+        ExampleDeleteDialogComponent,
+        IconModule
     ]
 })
 export class ExampleDialogComponent {
@@ -50,6 +54,7 @@ export class ExampleDialogComponent {
     examplesForm: FormArray<FormGroup> = this.#fb.array<FormGroup>([]);
     loading = false;
     editingIndex: number | null = null;
+    addingNew = false;
 
     constructor(
         @Inject(MAT_DIALOG_DATA) public data: ExampleDialogData,
@@ -70,6 +75,7 @@ export class ExampleDialogComponent {
             })
         );
         this.editingIndex = this.forms.length - 1;
+        this.addingNew = true;
     }
 
     loadExamples(): void {
@@ -81,6 +87,7 @@ export class ExampleDialogComponent {
             .subscribe({
                 next: (examples: WordExample[]) => {
                     this.editingIndex = null;
+                    this.addingNew = false;
                     if (examples.length) {
                         examples.forEach(example =>
                             this.forms.push(
@@ -108,12 +115,17 @@ export class ExampleDialogComponent {
             const group = this.forms.at(idx);
             const id = group?.get('id')?.value;
             const content = (group?.get('content')?.value ?? '').toString().trim();
+            const contentControl = group?.get('content');
+            contentControl?.markAsPristine();
+            contentControl?.markAsUntouched();
+            contentControl?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
             if (group && !id) {
                 if (!content) {
                     this.forms.removeAt(idx);
                 } else {
                     group.get('content')?.setValue(content);
                 }
+                this.addingNew = false;
             }
         }
         this.editingIndex = null;
@@ -140,6 +152,7 @@ export class ExampleDialogComponent {
                 next: example => {
                     group.patchValue({ id: example.id });
                     this.#messageService.info('Exemple enregistré');
+                    this.addingNew = false;
                     this.editingIndex = null;
                 },
                 error: err => {
@@ -168,6 +181,7 @@ export class ExampleDialogComponent {
                 if (this.editingIndex === index) {
                     this.editingIndex = null;
                 }
+                this.addingNew = false;
                 return;
             }
             this.loading = true;

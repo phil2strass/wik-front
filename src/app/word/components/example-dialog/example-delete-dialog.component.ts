@@ -19,9 +19,9 @@ type ExampleDeleteDialogData = {
     selector: 'app-example-delete-dialog',
     standalone: true,
     template: `
-        <h2 mat-dialog-title>{{ 'word.examples.delete' | translate }}</h2>
+        <h2 mat-dialog-title>Attention!</h2>
         <mat-dialog-content class="mat-typography">
-            <p>{{ 'word.examples.confirmDelete' | translate }}</p>
+            <p>Êtes-vous sûr de vouloir supprimer ce exemple ?</p>
             <p *ngIf="data.content" class="example-delete-dialog__excerpt">“{{ data.content }}”</p>
         </mat-dialog-content>
         <div mat-dialog-actions class="d-flex justify-content-end gap-12">
