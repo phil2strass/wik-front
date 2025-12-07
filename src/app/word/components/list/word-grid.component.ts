@@ -19,6 +19,7 @@ import { SecurityStore } from '@shared/security/security-store';
 import { WordTranslationEditDialogComponent } from '../word-translation-view-dialog/word-translation-view-dialog.component';
 import { MatPaginatorIntl } from '@angular/material/paginator';
 import { Subscription } from 'rxjs';
+import { ExampleDialogComponent } from '../example-dialog/example-dialog.component';
 
 @Component({
     selector: 'app-word-list',
@@ -186,6 +187,13 @@ export class WordGridComponent implements OnDestroy {
             }
         }
         return lang.name;
+    }
+
+    openExamples(row: Word): void {
+        const dialogRef = this.dialog.open(ExampleDialogComponent, {
+            data: { wordTypeId: row.wordTypeId, wordLabel: this.formatDisplayName(row) }
+        });
+        dialogRef.afterClosed().subscribe();
     }
 
     formatDisplayName(row: Word): string {

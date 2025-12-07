@@ -20,6 +20,20 @@
             "label": "Type"
         }
     },
+    "word.examples": {
+        "menu": "Exemples",
+        "title": "Exemples pour {{word}}",
+        "add": "Ajouter un exemple",
+        "label": "Exemple {{index}}",
+        "save": "Enregistrer",
+        "close": "Fermer",
+        "cancel": "Annuler",
+        "edit": "Modifier",
+        "errors": {
+            "required": "Le texte de l'exemple est requis",
+            "maxlength": "Maximum {{max}} caractères"
+        }
+    },
     "word.table": {
         "column": {
             "name": "Nom",

@@ -103,6 +103,12 @@
                                 <span>Edit</span>
                             </div>
                         </button>
+                        <button mat-menu-item (click)="openExamples(row)">
+                            <div class="d-flex align-items-center">
+                                <tabler-icon name="book-2" class="m-x-6"></tabler-icon>
+                                <span>{{ 'word.examples.menu' | translate }}</span>
+                            </div>
+                        </button>
                         <button mat-menu-item>
                             <div class="d-flex align-items-center text-error" (click)="openDelete(row)">
                                 <tabler-icon name="trash" class="m-x-6"></tabler-icon>

@@ -1,0 +1,53 @@
+<div class="example-dialog__title-row" mat-dialog-title>
+    <h2 class="example-dialog__title">{{ 'word.examples.title' | translate:{ word: data.wordLabel } }}</h2>
+    <span class="flex-1"></span>
+    <button mat-stroked-button color="primary" type="button" (click)="addExample()">
+        {{ 'word.examples.add' | translate }}
+    </button>
+</div>
+<mat-dialog-content class="example-dialog__content">
+    <div class="example-dialog__list">
+        @for (group of forms.controls; track $index; let idx = $index) {
+            <div class="example-dialog__item" [formGroup]="group">
+                <ng-container *ngIf="editingIndex === idx; else viewMode">
+                    <mat-form-field appearance="outline" class="w-100 example-dialog__field" color="primary">
+                        <mat-label>{{ 'word.examples.label' | translate:{ index: idx + 1 } }}</mat-label>
+                        <textarea matInput formControlName="content" rows="3"></textarea>
+                        <mat-hint align="end">{{ group.get('content')?.value?.length || 0 }}/500</mat-hint>
+                        <mat-error *ngIf="group.get('content')?.hasError('required')">
+                            {{ 'word.examples.errors.required' | translate }}
+                        </mat-error>
+                        <mat-error *ngIf="group.get('content')?.hasError('maxlength')">
+                            {{ 'word.examples.errors.maxlength' | translate:{ max: 500 } }}
+                        </mat-error>
+                    </mat-form-field>
+                    <div class="example-dialog__actions">
+                        <div class="example-dialog__actions-left">
+                            <button mat-button type="button" (click)="cancelEdit()" [disabled]="loading">
+                                {{ 'word.examples.cancel' | translate }}
+                            </button>
+                        </div>
+                        <div class="example-dialog__actions-right">
+                            <button mat-flat-button color="primary" type="button" (click)="saveExample(idx)" [disabled]="loading">
+                                {{ 'word.examples.save' | translate }}
+                            </button>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-template #viewMode>
+                    <div class="example-dialog__view-row">
+                        <div class="example-dialog__text">
+                            {{ group.get('content')?.value }}
+                        </div>
+                        <button mat-icon-button type="button" (click)="startEdit(idx)">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                    </div>
+                </ng-template>
+            </div>
+        }
+    </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="close()" [disabled]="loading">{{ 'word.examples.close' | translate }}</button>
+</mat-dialog-actions>
