@@ -41,7 +41,8 @@
     "word.translation": {
         "add": "Hinzufügen",
         "new": "Neue Übersetzung",
-        "delete": "Löschen"
+        "delete": "Löschen",
+        "section": "Übersetzungen"
     },
     "gender": {
         "1": "Maskulinum",
