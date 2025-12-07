@@ -1,6 +1,4 @@
 {
-    "word.create": "Create word",
-    "word.edit": "Edit word",
     "Analytical": "Analytical",
     "eCommerce": "eCommerce",
     "Chat": "Chat",
@@ -58,7 +56,17 @@
     "Table Editing": "Table Editing",
     "Filter Table": "Filter Table",
     "Line": "Line",
+    "header.languages.title": "Language selection",
     "Gredient": "Gredient",
+    "common": {
+        "paginator": {
+            "itemsPerPage": "Items per page",
+            "nextPage": "Next page",
+            "previousPage": "Previous page",
+            "firstPage": "First page",
+            "lastPage": "Last page"
+        }
+    },
     "Area": "Area",
     "Candlestick": "Candlestick",
     "Column": "Column",

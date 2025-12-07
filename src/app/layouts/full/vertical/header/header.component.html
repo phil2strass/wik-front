@@ -31,7 +31,7 @@
         @if (languageSelected) {
             <button mat-button [matMenuTriggerFor]="appsmenu" aria-label="Notifications">
                 <div class="d-flex align-items-center">
-                    {{ languageSelected.name }}
+                    {{ langLabel(languageSelected) }}
                     <i-tabler name="chevron-down" class="icon-16 m-l-4"></i-tabler>
                 </div>
             </button>
@@ -39,11 +39,11 @@
                 <div class="row">
                     <div class="col-sm-12">
                         <div class="p-x-16 p-y-32">
-                            <h4 class="f-s-18 f-w-600 m-b-16">Choix des langues:</h4>
+                            <h4 class="f-s-18 f-w-600 m-b-16">{{ 'header.languages.title' | translate }}</h4>
                             @for (language of languagesFiltered; track language) {
                                 <div class="text-hover-primary">
                                     <a (click)="updateLangueSelected(language)" class="hover-text text-decoration-none f-s-14 f-w-600 d-block p-y-8">
-                                      {{ language.name }}
+                                      {{ langLabel(language) }}
                                     </a>
                                 </div>
                             }
@@ -78,7 +78,7 @@
             <button mat-menu-item (click)="changeLanguage(lang)">
                 <div class="d-flex align-items-center">
                     <img [src]="lang.icon" class="rounded-circle object-cover m-r-8 icon-20" />
-                    <span class="f-s-14">{{ lang.language }}</span>
+                    <span class="f-s-14">{{ langCodeLabel(lang.code) }}</span>
                 </div>
             </button>
         }

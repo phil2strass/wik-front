@@ -6,7 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { WordStore } from '../word-store';
-import { WordFormComponent } from './word-form.component';
+import { WordFormComponent } from './word-form/word-form.component';
 
 interface WordDialogData {
     wordTypeId?: number;

@@ -5,7 +5,7 @@ import { MatDialogActions, MatDialogContent, MatDialogRef } from '@angular/mater
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { WordStore } from '../word-store';
-import { WordFormComponent } from './word-form.component';
+import { WordFormComponent } from './word-form/word-form.component';
 
 @Component({
     selector: 'word-new-dialog',

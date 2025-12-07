@@ -2,7 +2,6 @@ import { Component, Output, EventEmitter, Input, ViewEncapsulation, inject, effe
 import { CoreService } from 'src/app/services/core.service';
 import { MatDialog } from '@angular/material/dialog';
 import { navItems } from '../sidebar/sidebar-data';
-import { TranslateService } from '@ngx-translate/core';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { MaterialModule } from 'src/app/material.module';
 import { RouterModule } from '@angular/router';
@@ -14,6 +13,7 @@ import { SecurityStore } from '../../../../shared/security/security-store';
 import { environment } from '@root/environments/environment';
 import { DataStore } from '@shared/data/data-store';
 import { Langue } from '@shared/data/models/langue.model';
+import { TranslateService as NgTranslateService, TranslateModule as NgTranslateModule } from '@ngx-translate/core';
 
 interface notifications {
     id: number;
@@ -46,7 +46,7 @@ interface quicklinks {
 
 @Component({
     selector: 'app-header',
-    imports: [RouterModule, CommonModule, NgScrollbarModule, TablerIconsModule, MaterialModule],
+    imports: [RouterModule, CommonModule, NgScrollbarModule, TablerIconsModule, MaterialModule, NgTranslateModule],
     templateUrl: './header.component.html',
     encapsulation: ViewEncapsulation.None
 })
@@ -108,7 +108,7 @@ export class HeaderComponent {
         private settings: CoreService,
         private vsidenav: CoreService,
         public dialog: MatDialog,
-        private translate: TranslateService
+        private translate: NgTranslateService
     ) {
         translate.setDefaultLang('en');
 
@@ -123,6 +123,27 @@ export class HeaderComponent {
             this.languagesFiltered = allLangues.filter(langue => langueIds.has(langue.id) && langue.id !== selectedId);
             this.languageSelected = allLangues.find(langue => langue.id === selectedId);
         });
+    }
+
+    langLabel(langue?: Langue): string {
+        if (!langue) {
+            return '';
+        }
+        const iso = langue.iso?.trim().toLowerCase();
+        if (iso) {
+            const key = `lang.${iso}`;
+            const translated = this.translate.instant(key);
+            if (translated && translated !== key) {
+                return translated;
+            }
+        }
+        return langue.name;
+    }
+
+    langCodeLabel(code: string): string {
+        const key = `lang.${code?.trim().toLowerCase()}`;
+        const translated = this.translate.instant(key);
+        return translated && translated !== key ? translated : code;
     }
 
     updateLangueSelected(langue: Langue) {

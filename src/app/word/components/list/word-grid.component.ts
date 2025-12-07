@@ -1,4 +1,4 @@
-import { Component, effect, inject, ViewChild } from '@angular/core';
+import { Component, computed, effect, inject, ViewChild, OnDestroy } from '@angular/core';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { DataStore } from '@shared/data/data-store';
@@ -12,11 +12,13 @@ import { IconModule } from '@root/app/icon/icon.module';
 import { MaterialModule } from '@root/app/material.module';
 import { CommonModule } from '@angular/common';
 import { SelectionModel } from '@angular/cdk/collections';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { WordDeleteSelectedDialogComponent } from '../word-delete-selected-dialog.component';
 import { Gender, Langue } from '@shared/data/models/langue.model';
 import { SecurityStore } from '@shared/security/security-store';
-import { WordTranslationEditDialogComponent } from '../word-translation-view-dialog.component';
+import { WordTranslationEditDialogComponent } from '../word-translation-view-dialog/word-translation-view-dialog.component';
+import { MatPaginatorIntl } from '@angular/material/paginator';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-word-list',
@@ -24,7 +26,7 @@ import { WordTranslationEditDialogComponent } from '../word-translation-view-dia
     styleUrls: ['./word-grid.component.scss'],
     imports: [MaterialModule, CommonModule, IconModule, TranslateModule]
 })
-export class WordGridComponent {
+export class WordGridComponent implements OnDestroy {
     readonly #dataStore = inject(DataStore);
     protected readonly types = this.#dataStore.types;
     protected readonly langues = this.#dataStore.langues;
@@ -39,9 +41,22 @@ export class WordGridComponent {
     readonly #securityStore = inject(SecurityStore);
     protected readonly profil = this.#securityStore.loadedProfil;
     protected readonly langueSelectedId = this.#securityStore.langueSelected;
+    protected readonly selectedLangueName = computed(() => {
+        const selectedId = this.langueSelectedId();
+        const langues = this.langues() ?? [];
+        return langues.find(langue => langue.id === selectedId)?.name ?? '';
+    });
+    protected readonly selectedLangueIso = computed(() => {
+        const selectedId = this.langueSelectedId();
+        const langues = this.langues() ?? [];
+        return langues.find(langue => langue.id === selectedId)?.iso ?? '';
+    });
     translationLanguages: Langue[] = [];
 
     readonly dialog = inject(MatDialog);
+    readonly #translate = inject(TranslateService);
+    readonly #paginatorIntl = inject(MatPaginatorIntl);
+    #langChangeSub?: Subscription;
 
     displayedColumns: string[] = ['select', 'name', 'actions'];
 
@@ -79,7 +94,10 @@ export class WordGridComponent {
             }
             dynamicColumns.push(...this.translationLanguages.map(lang => this.translationColumnId(lang.id)));
             this.displayedColumns = ['select', 'name', ...dynamicColumns, 'actions'];
+            this.updatePaginatorLabels();
         });
+
+        this.#langChangeSub = this.#translate.onLangChange.subscribe(() => this.updatePaginatorLabels());
     }
 
     private collectTranslationLangues(translations: Word['translations'], pushLangue: (langueId?: number | null) => void): void {
@@ -111,6 +129,29 @@ export class WordGridComponent {
         }
     }
 
+    private updatePaginatorLabels() {
+        this.#translate
+            .get([
+                'common.paginator.itemsPerPage',
+                'common.paginator.firstPage',
+                'common.paginator.lastPage',
+                'common.paginator.nextPage',
+                'common.paginator.previousPage'
+            ])
+            .subscribe(labels => {
+                this.#paginatorIntl.itemsPerPageLabel = labels['common.paginator.itemsPerPage'];
+                this.#paginatorIntl.firstPageLabel = labels['common.paginator.firstPage'];
+                this.#paginatorIntl.lastPageLabel = labels['common.paginator.lastPage'];
+                this.#paginatorIntl.nextPageLabel = labels['common.paginator.nextPage'];
+                this.#paginatorIntl.previousPageLabel = labels['common.paginator.previousPage'];
+                this.#paginatorIntl.changes.next();
+            });
+    }
+
+    ngOnDestroy(): void {
+        this.#langChangeSub?.unsubscribe();
+    }
+
     ngAfterViewInit(): void {
         this.sort.sortChange.subscribe(sort => {
             this.#wordGridStore.setSort(sort.active, sort.direction as 'asc' | 'desc');
@@ -133,6 +174,18 @@ export class WordGridComponent {
 
     translationColumnId(langueId: number): string {
         return `translation-${langueId}`;
+    }
+
+    langHeaderLabel(lang: Langue): string {
+        const iso = lang.iso?.trim().toLowerCase();
+        if (iso) {
+            const key = `lang.${iso}`;
+            const translated = this.#translate.instant(key);
+            if (translated && translated !== key) {
+                return translated;
+            }
+        }
+        return lang.name;
     }
 
     formatDisplayName(row: Word): string {
@@ -261,6 +314,14 @@ export class WordGridComponent {
         return langues ? langues.find(langue => langue.id === id) : undefined;
     }
 
+    formatTranslationMenuLabel(langue: Langue): string {
+        const selected = this.selectedLangueName();
+        if (selected) {
+            return `${selected} -> ${langue.name}`;
+        }
+        return `Traduction ${langue.name}`;
+    }
+
     openTranslationDialog(row: Word, langue: Langue): void {
         const translationValues = this.extractTranslationValues(row, langue.id);
         this.dialog
@@ -271,7 +332,9 @@ export class WordGridComponent {
                     parentWord: row,
                     langue,
                     translations: translationValues,
-                    typeId: row.type?.id ?? null
+                    typeId: row.type?.id ?? null,
+                    sourceLangueName: this.selectedLangueName(),
+                    sourceLangueIso: this.selectedLangueIso()
                 }
             })
             .afterClosed()

@@ -5,7 +5,6 @@ import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from 
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideClientHydration } from '@angular/platform-browser';
 import { TranslateLoader, TranslateModule } from '@ngx-translate/core';
-import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 
 import { ToastrModule } from 'ngx-toastr';
 import { provideToastr } from 'ngx-toastr';
@@ -22,6 +21,7 @@ import { MaterialModule } from './material.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { CalendarModule, DateAdapter } from 'angular-calendar';
 import { adapterFactory } from 'angular-calendar/date-adapters/date-fns';
+import { catchError, forkJoin, map, of } from 'rxjs';
 
 // code view
 import { provideHighlightOptions } from 'ngx-highlightjs';
@@ -36,8 +36,23 @@ import { environment } from '@root/environments/environment';
 import { KeycloakService } from '@shared/security/internal/keycloak-service';
 import { SecurityStore } from '@shared/security/security-store';
 
-export function HttpLoaderFactory(http: HttpClient): any {
-    return new TranslateHttpLoader(http, './assets/i18n/', '.json');
+type TranslationMap = Record<string, unknown>;
+
+class DomainTranslateLoader implements TranslateLoader {
+    constructor(private readonly http: HttpClient) {}
+
+    getTranslation(lang: string) {
+        const common$ = this.http.get<TranslationMap>(`./assets/i18n/${lang}.json`);
+        const wordDomain$ = this.http
+            .get<TranslationMap>(`./assets/i18n/word/${lang}.json`)
+            .pipe(catchError(() => of({} as TranslationMap)));
+
+        return forkJoin([common$, wordDomain$]).pipe(map(([common, word]) => ({ ...common, ...word })));
+    }
+}
+
+export function HttpLoaderFactory(http: HttpClient): TranslateLoader {
+    return new DomainTranslateLoader(http);
 }
 
 export function appInitFactory(security: { loaded: () => boolean }) {

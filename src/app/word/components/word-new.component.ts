@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, effect, inject, ViewEncapsulation } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { WordFormComponent } from '@root/app/word/components/word-form.component';
+import { WordFormComponent } from '@root/app/word/components/word-form/word-form.component';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -41,22 +41,22 @@ import { Subscription } from 'rxjs';
                                 <button mat-stroked-button type="button" (click)="addTranslation(block)">Ajouter une traduction</button>
                             </div>
                             <ng-container *ngFor="let formGroup of block.forms; let idx = index">
-                                <div class="word-new__translation-form" [formGroup]="formGroup">
-                                    <div class="word-new__translation-form-header" *ngIf="block.forms.length > 1">
-                                        Traduction {{ idx + 1 }}
-                                    </div>
-                                    <mat-form-field appearance="outline" class="w-100 p-0 m-t-20" color="primary">
-                                        <mat-label>Mot</mat-label>
-                                        <input type="text" matInput formControlName="name" />
-                                    </mat-form-field>
-                                    <ng-container *ngIf="showTranslationDetails()">
+                                    <div class="word-new__translation-form" [formGroup]="formGroup">
+                                        <div class="word-new__translation-form-header" *ngIf="block.forms.length > 1">
+                                            Traduction {{ idx + 1 }}
+                                        </div>
                                         <mat-form-field appearance="outline" class="w-100 p-0 m-t-20" color="primary">
-                                            <mat-label>Pluriel</mat-label>
-                                            <input type="text" matInput formControlName="plural" />
+                                            <mat-label>{{ 'word.form.name.label' | translate }}</mat-label>
+                                            <input type="text" matInput formControlName="name" />
                                         </mat-form-field>
-                                        <div *ngIf="block.genders.length" class="word-new__translation-genders">
-                                            <mat-radio-group
-                                                formControlName="genderId"
+                                        <ng-container *ngIf="showTranslationDetails()">
+                                            <mat-form-field appearance="outline" class="w-100 p-0 m-t-20" color="primary">
+                                                <mat-label>{{ 'word.form.plural.label' | translate }}</mat-label>
+                                                <input type="text" matInput formControlName="plural" />
+                                            </mat-form-field>
+                                            <div *ngIf="block.genders.length" class="word-new__translation-genders">
+                                                <mat-radio-group
+                                                    formControlName="genderId"
                                                 class="d-flex flex-wrap gap-24 justify-content-start mt-2">
                                                 <mat-card
                                                     *ngFor="let gender of block.genders"

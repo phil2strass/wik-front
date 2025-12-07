@@ -1,6 +1,4 @@
 {
-  "word.create": "Wort erstellen",
-  "word.edit": "Wort bearbeiten",
   "Analytical": "Analytisch",
   "eCommerce": "E-Commerce",
   "Chat": "Plaudern",
@@ -57,9 +55,19 @@
   "Material Table": "Materialtabelle",
   "Table Editing": "Tabellenbearbeitung",
   "Filter Table": "Filtertabelle",
+  "header.languages.title": "Sprachauswahl",
   "Line": "Linie",
   "Gredient": "Zutat",
   "Area": "Bereich",
+  "common": {
+    "paginator": {
+      "itemsPerPage": "Elemente pro Seite",
+      "nextPage": "Nächste Seite",
+      "previousPage": "Vorherige Seite",
+      "firstPage": "Erste Seite",
+      "lastPage": "Letzte Seite"
+    }
+  },
   "Candlestick": "Leuchter",
   "Column": "Spalte",
   "Doughnut & Pie": "Donut und Kuchen",
