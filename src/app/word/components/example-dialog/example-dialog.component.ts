@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Inject, ViewEncapsulation, inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -9,8 +9,10 @@ import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } fr
 import { ExampleService } from '../../services/example.service';
 import { WordExample } from '../../models/example.model';
 import { MessageService } from '@shared/ui-messaging/message/message.service';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { finalize } from 'rxjs/operators';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { ExampleDeleteDialogComponent } from './example-delete-dialog.component';
 
 export type ExampleDialogData = {
     wordTypeId: number;
@@ -32,14 +34,18 @@ export type ExampleDialogData = {
         MatFormFieldModule,
         MatInputModule,
         MatIconModule,
+        MatTooltipModule,
         ReactiveFormsModule,
-        TranslateModule
+        TranslateModule,
+        ExampleDeleteDialogComponent
     ]
 })
 export class ExampleDialogComponent {
     #fb = inject(FormBuilder);
     #exampleService = inject(ExampleService);
     #messageService = inject(MessageService);
+    #translate = inject(TranslateService);
+    #dialog = inject(MatDialog);
 
     examplesForm: FormArray<FormGroup> = this.#fb.array<FormGroup>([]);
     loading = false;
@@ -75,22 +81,19 @@ export class ExampleDialogComponent {
             .subscribe({
                 next: (examples: WordExample[]) => {
                     this.editingIndex = null;
-                    if (!examples.length) {
-                        this.addExample();
-                        return;
+                    if (examples.length) {
+                        examples.forEach(example =>
+                            this.forms.push(
+                                this.#fb.group({
+                                    id: [example.id],
+                                    content: [example.content, [Validators.required, Validators.maxLength(500)]]
+                                })
+                            )
+                        );
                     }
-                    examples.forEach(example =>
-                        this.forms.push(
-                            this.#fb.group({
-                                id: [example.id],
-                                content: [example.content, [Validators.required, Validators.maxLength(500)]]
-                            })
-                        )
-                    );
                 },
                 error: err => {
                     this.#messageService.error(err?.error ?? 'Erreur lors du chargement des exemples');
-                    this.addExample();
                 }
             });
     }
@@ -143,6 +146,45 @@ export class ExampleDialogComponent {
                     this.#messageService.error(err?.error ?? 'Erreur lors de la sauvegarde');
                 }
             });
+    }
+
+    deleteExample(index: number): void {
+        const group = this.forms.at(index);
+        if (!group || this.loading) {
+            return;
+        }
+        const id = group.get('id')?.value;
+        const dialogRef = this.#dialog.open(ExampleDeleteDialogComponent, {
+            width: '420px',
+            data: { content: group.get('content')?.value ?? '' }
+        });
+
+        dialogRef.afterClosed().subscribe(confirm => {
+            if (!confirm) {
+                return;
+            }
+            if (!id) {
+                this.forms.removeAt(index);
+                if (this.editingIndex === index) {
+                    this.editingIndex = null;
+                }
+                return;
+            }
+            this.loading = true;
+            this.#exampleService
+                .deleteExample(id)
+                .pipe(finalize(() => (this.loading = false)))
+                .subscribe({
+                    next: () => {
+                        this.forms.removeAt(index);
+                        this.editingIndex = null;
+                        this.#messageService.info('Exemple supprimé');
+                    },
+                    error: err => {
+                        this.#messageService.error(err?.error ?? 'Erreur lors de la suppression');
+                    }
+                });
+        });
     }
 
     close(): void {

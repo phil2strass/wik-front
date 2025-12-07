@@ -32,9 +32,20 @@
                         <div class="example-dialog__text">
                             {{ group.get('content')?.value }}
                         </div>
-                        <button mat-icon-button type="button" (click)="startEdit(idx)">
-                            <mat-icon>edit</mat-icon>
-                        </button>
+                        <div class="example-dialog__view-actions">
+                            <button mat-icon-button type="button" (click)="startEdit(idx)">
+                                <mat-icon>edit</mat-icon>
+                            </button>
+                            <button
+                                mat-icon-button
+                                type="button"
+                                color="warn"
+                                (click)="deleteExample(idx)"
+                                [disabled]="loading"
+                                matTooltip="{{ 'word.examples.delete' | translate }}">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
                     </div>
                 </ng-template>
             </div>

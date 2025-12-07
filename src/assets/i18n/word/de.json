@@ -31,6 +31,8 @@
         "close": "Schließen",
         "cancel": "Abbrechen",
         "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "confirmDelete": "Dieses Beispiel löschen?",
         "errors": {
             "required": "Beispieltext ist erforderlich",
             "maxlength": "Maximal {{max}} Zeichen"

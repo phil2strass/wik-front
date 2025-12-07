@@ -20,4 +20,8 @@ export class ExampleService {
     updateExample(exampleId: number, content: string): Observable<WordExample> {
         return this.#http.put<WordExample>(`${this.#baseUrl}examples/${exampleId}`, { content });
     }
+
+    deleteExample(exampleId: number): Observable<void> {
+        return this.#http.delete<void>(`${this.#baseUrl}examples/${exampleId}`);
+    }
 }
