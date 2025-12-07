@@ -138,7 +138,7 @@ export class WordGridComponent {
     formatDisplayName(row: Word): string {
         const langue = this.getLangueById(row.langue);
         const baseName = row.name ?? row.displayName ?? '';
-        return this.formatLocalizedValue(baseName, langue, row.gender);
+        return this.formatLocalizedValue(baseName, langue, row.gender, row.type?.id);
     }
 
     formatTranslationValue(row: Word, langue: Langue): string | undefined {
@@ -149,7 +149,7 @@ export class WordGridComponent {
         const formatted = values
             .map(value => {
                 const gender = value.genderId != null ? ({ id: value.genderId, name: '' } as Gender) : undefined;
-                return this.formatLocalizedValue(value.name, langue, gender);
+                return this.formatLocalizedValue(value.name, langue, gender, value.typeId ?? undefined);
             })
             .filter(value => !!value);
         return formatted.length ? formatted.join(', ') : undefined;
@@ -217,7 +217,7 @@ export class WordGridComponent {
         };
     }
 
-    private formatLocalizedValue(value: string, langue?: Langue, gender?: Gender): string {
+    private formatLocalizedValue(value: string, langue?: Langue, gender?: Gender, typeId?: number): string {
         let result = this.cleanGenderCode(value ?? '');
         if (!langue?.iso) {
             return result;
@@ -228,7 +228,7 @@ export class WordGridComponent {
             result = `${article} ${result}`.trim();
         }
 
-        if (langue.iso.trim().toUpperCase() === 'DE') {
+        if (langue.iso.trim().toUpperCase() === 'DE' && typeId === 1) {
             result = this.capitalizeLastWord(result);
         }
         return result;
@@ -259,24 +259,17 @@ export class WordGridComponent {
         return langues ? langues.find(langue => langue.id === id) : undefined;
     }
 
-    hasTranslation(row: Word, langue: Langue): boolean {
-        return this.extractTranslationValues(row, langue.id).length > 0;
-    }
-
     openTranslationDialog(row: Word, langue: Langue): void {
         const translationValues = this.extractTranslationValues(row, langue.id);
-        if (translationValues.length === 0) {
-            return;
-        }
-        const translationValue = translationValues[0];
         this.dialog
             .open(WordTranslationEditDialogComponent, {
-                width: '520px',
+                width: '75vw',
+                minWidth: '800px',
                 data: {
                     parentWord: row,
                     langue,
-                    translation: translationValue,
-                    typeId: translationValue?.typeId ?? row.type?.id ?? null
+                    translations: translationValues,
+                    typeId: row.type?.id ?? null
                 }
             })
             .afterClosed()

@@ -1,4 +1,4 @@
-import { CommonModule, NgTemplateOutlet } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, OnChanges, OnDestroy, SimpleChanges, effect, ElementRef, inject, Input, ViewChild, ViewEncapsulation } from '@angular/core';
 import { FormControl, FormGroup, FormGroupDirective, NgForm, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -36,7 +36,7 @@ class WordFormErrorStateMatcher implements ErrorStateMatcher {
                     <div class="row">
                         <div class="col-lg-8">
                             <mat-card class="cardWithShadow b-1 rounded p-30">
-                                <h4 Ctitle>{{ titleTranslationKey | translate }}</h4>
+                                <h4 *ngIf="showTitle" Ctitle>{{ titleTranslationKey | translate }}</h4>
                                 <mat-form-field appearance="outline" class="w-100 p-0 m-t-20" color="primary">
                                     <mat-label>Mot</mat-label>
                                     <input
@@ -101,7 +101,7 @@ class WordFormErrorStateMatcher implements ErrorStateMatcher {
                     </div>
                 } @else {
                     <div class="word-form__content w-100">
-                        <h4 Ctitle>{{ titleTranslationKey | translate }}</h4>
+                        <h4 *ngIf="showTitle" Ctitle>{{ titleTranslationKey | translate }}</h4>
                         <mat-form-field appearance="outline" class="w-100 p-0 m-t-20" color="primary">
                             <mat-label>Mot</mat-label>
                             <input
@@ -170,7 +170,6 @@ class WordFormErrorStateMatcher implements ErrorStateMatcher {
     imports: [
         CommonModule,
         ReactiveFormsModule,
-        NgTemplateOutlet,
         MatFormFieldModule,
         MatInputModule,
         MatRadioButton,
@@ -216,6 +215,7 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
     @Input() showTypeField = true;
     @Input() showPlural = true;
     @Input() genderOptional = false;
+    @Input() showTitle = true;
     @Input() handleSubmit = true;
     private _gendersOverride: Gender[] | null = null;
     @Input()

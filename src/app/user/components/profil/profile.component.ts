@@ -10,7 +10,6 @@ import { MessageService } from '@shared/ui-messaging/message/message.service';
 import { ProfilPhotoComponent } from './photo/profil-photo.component';
 import { MatCard, MatCardContent } from '@angular/material/card';
 import { mockPosts, topcards } from '@root/app/pages/apps/profile-content/profileData';
-import { TablerIconComponent } from 'angular-tabler-icons';
 import { MatDialog } from '@angular/material/dialog';
 import { Profil, ProfilPhoto } from '@shared/models/user.model';
 import { EditProfilDialogComponent } from '@root/app/user/components/profil/edit/profil-edit-dialog.component';
@@ -26,7 +25,6 @@ import { EditProfilDialogComponent } from '@root/app/user/components/profil/edit
         ProfilPhotoComponent,
         MatCard,
         MatCardContent,
-        TablerIconComponent,
         MatLabel,
         MatSelect,
         MatOption,

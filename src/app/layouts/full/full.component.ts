@@ -16,7 +16,6 @@ import { SidebarComponent } from './vertical/sidebar/sidebar.component';
 import { NgScrollbarModule } from 'ngx-scrollbar';
 import { TablerIconsModule } from 'angular-tabler-icons';
 import { HeaderComponent } from './vertical/header/header.component';
-import { AppBreadcrumbComponent } from './shared/breadcrumb/breadcrumb.component';
 import { CustomizerComponent } from './shared/customizer/customizer.component';
 
 const MOBILE_VIEW = 'screen and (max-width: 768px)';
@@ -50,7 +49,6 @@ interface quicklinks {
         NgScrollbarModule,
         TablerIconsModule,
         HeaderComponent,
-        AppBreadcrumbComponent,
         CustomizerComponent
     ],
     templateUrl: './full.component.html',
