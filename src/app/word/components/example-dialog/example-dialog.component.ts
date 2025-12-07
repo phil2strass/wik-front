@@ -100,6 +100,19 @@ export class ExampleDialogComponent {
     }
 
     cancelEdit(): void {
+        if (this.editingIndex !== null) {
+            const idx = this.editingIndex;
+            const group = this.forms.at(idx);
+            const id = group?.get('id')?.value;
+            const content = (group?.get('content')?.value ?? '').toString().trim();
+            if (group && !id) {
+                if (!content) {
+                    this.forms.removeAt(idx);
+                } else {
+                    group.get('content')?.setValue(content);
+                }
+            }
+        }
         this.editingIndex = null;
     }
 

@@ -1,8 +1,12 @@
-<h2 mat-dialog-title>{{ title }}</h2>
+<h2 mat-dialog-title class="word-translation-dialog__title" *ngIf="targetWordLabel">
+    {{ targetWordLabel }}
+</h2>
 <mat-dialog-content class="word-translation-dialog__content">
     <div class="word-translation-dialog__sidebar">
         <div class="word-translation-dialog__sidebar-header">
-            <button mat-stroked-button type="button" (click)="addTranslation()">Ajouter</button>
+            <button mat-stroked-button type="button" (click)="addTranslation()">
+                {{ 'word.translation.add' | translate }}
+            </button>
         </div>
         <mat-nav-list>
             <a
@@ -11,7 +15,7 @@
                 (click)="selectTranslation(index)"
                 [class.word-translation-dialog__item--active]="index === selectedIndex">
                 <div class="word-translation-dialog__item-title">
-                    {{ formGroup.value.name?.trim() || 'Nouvelle traduction' }}
+                    {{ formGroup.value.name?.trim() || ('word.translation.new' | translate) }}
                 </div>
             </a>
         </mat-nav-list>
@@ -29,6 +33,7 @@
             [showComment]="true"
             [handleSubmit]="false"
             [gendersOverride]="data.langue.genders"
+            [autoFocusName]="false"
             [commentPlaceholder]="commentPlaceholder"
             [commentPlaceholderParams]="commentPlaceholderParams"></app-word-form>
         <div class="word-translation-dialog__form-footer" *ngIf="translationForms.length > 1">
@@ -39,14 +44,16 @@
                 class="word-translation-dialog__delete-btn"
                 (click)="deleteTranslation(selectedIndex, $event)"
                 [disabled]="loading">
-                Supprimer
+                {{ 'word.translation.delete' | translate }}
             </button>
         </div>
     </div>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-    <button mat-button type="button" (click)="onCancel()" [disabled]="loading">Annuler</button>
+    <button mat-button type="button" (click)="onCancel()" [disabled]="loading">
+        {{ 'common.actions.cancel' | translate }}
+    </button>
     <button mat-flat-button color="primary" (click)="save()" [disabled]="loading || !selectedForm || selectedForm.invalid">
-        Enregistrer
+        {{ 'common.actions.save' | translate }}
     </button>
 </mat-dialog-actions>

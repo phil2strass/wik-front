@@ -25,6 +25,8 @@
         "title": "Examples for {{word}}",
         "add": "Add example",
         "label": "Example {{index}}",
+        "placeholder": "Enter your example",
+        "newLabel": "New example",
         "save": "Save",
         "close": "Close",
         "cancel": "Cancel",
@@ -33,6 +35,16 @@
             "required": "Example text is required",
             "maxlength": "Maximum {{max}} characters"
         }
+    },
+    "word.translation": {
+        "add": "Add",
+        "new": "New translation",
+        "delete": "Delete"
+    },
+    "gender": {
+        "1": "masculine",
+        "2": "feminine",
+        "3": "neuter"
     },
     "word.table": {
         "column": {

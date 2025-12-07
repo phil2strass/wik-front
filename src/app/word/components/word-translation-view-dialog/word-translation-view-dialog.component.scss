@@ -5,6 +5,11 @@
     gap: 24px;
 }
 
+.word-translation-dialog__title {
+    margin-top: -4px;
+    margin-bottom: 4px;
+}
+
 .word-translation-dialog__sidebar {
     width: 240px;
     border-right: 1px solid rgba(0, 0, 0, 0.08);
@@ -44,4 +49,9 @@ mat-nav-list a[mat-list-item] {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+.word-translation-dialog__title {
+    font-size: 18px;
+    font-weight: 600;
 }

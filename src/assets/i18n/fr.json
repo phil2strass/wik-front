@@ -65,6 +65,10 @@
       "previousPage": "Page précédente",
       "firstPage": "Première page",
       "lastPage": "Dernière page"
+    },
+    "actions": {
+      "save": "Enregistrer",
+      "cancel": "Annuler"
     }
   },
   "Area": "Zone",

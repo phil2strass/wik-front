@@ -191,6 +191,10 @@ export class WordGridComponent implements OnDestroy {
 
     openExamples(row: Word): void {
         const dialogRef = this.dialog.open(ExampleDialogComponent, {
+            width: '1000px',
+            maxWidth: '1000px',
+            autoFocus: false,
+            restoreFocus: false,
             data: { wordTypeId: row.wordTypeId, wordLabel: this.formatDisplayName(row) }
         });
         dialogRef.afterClosed().subscribe();
@@ -336,6 +340,8 @@ export class WordGridComponent implements OnDestroy {
             .open(WordTranslationEditDialogComponent, {
                 width: '75vw',
                 minWidth: '800px',
+                autoFocus: false,
+                restoreFocus: false,
                 data: {
                     parentWord: row,
                     langue,

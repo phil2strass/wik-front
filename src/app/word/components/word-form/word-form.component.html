@@ -5,7 +5,7 @@
                 <div class="col-lg-8">
                     <mat-card class="cardWithShadow b-1 rounded p-30">
                         <h4 *ngIf="showTitle" Ctitle>{{ titleTranslationKey | translate }}</h4>
-                        <mat-form-field appearance="outline" class="w-100 p-0 m-t-20" color="primary">
+                        <mat-form-field appearance="outline" class="w-100 p-0 m-t-20" color="primary" hideRequiredMarker="true">
                             <mat-label>{{ 'word.form.name.label' | translate }}</mat-label>
                             <input #nameInput type="text" matInput [errorStateMatcher]="errorMatcher" formControlName="name" />
                             <mat-error *ngIf="showError('name', 'required')">Veuillez saisir un mot.</mat-error>
@@ -46,7 +46,7 @@
                                 @for (gender of genders(); track gender) {
                                     <mat-card class="cardWithShadow b-1 rounded d-flex gap-30 align-items-center flex-row">
                                         <mat-radio-button class="p-r-16 p-l-6 p-y-2" color="primary" [value]="gender.id">
-                                            {{ gender.name }}
+                                            {{ genderLabel(gender) }}
                                         </mat-radio-button>
                                     </mat-card>
                                 }
@@ -61,7 +61,7 @@
         } @else {
             <div class="word-form__content w-100">
                 <h4 *ngIf="showTitle" Ctitle>{{ titleTranslationKey | translate }}</h4>
-                <mat-form-field appearance="outline" class="w-100 p-0 m-t-20" color="primary">
+                <mat-form-field appearance="outline" class="w-100 p-0 m-t-20" color="primary" hideRequiredMarker="true">
                     <mat-label>{{ 'word.form.name.label' | translate }}</mat-label>
                     <input #nameInput type="text" matInput [errorStateMatcher]="errorMatcher" formControlName="name" />
                     <mat-error *ngIf="showError('name', 'required')">Veuillez saisir un mot.</mat-error>
@@ -102,7 +102,7 @@
                         @for (gender of genders(); track gender) {
                             <mat-card class="cardWithShadow b-1 rounded d-flex gap-30 align-items-center flex-row">
                                 <mat-radio-button class="p-r-16 p-l-6 p-y-2" color="primary" [value]="gender.id">
-                                    {{ gender.name }}
+                                    {{ genderLabel(gender) }}
                                 </mat-radio-button>
                             </mat-card>
                         }

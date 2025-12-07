@@ -65,6 +65,10 @@
             "previousPage": "Previous page",
             "firstPage": "First page",
             "lastPage": "Last page"
+        },
+        "actions": {
+            "save": "Save",
+            "cancel": "Cancel"
         }
     },
     "Area": "Area",

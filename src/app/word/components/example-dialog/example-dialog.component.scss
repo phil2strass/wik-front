@@ -1,5 +1,5 @@
 .example-dialog__content {
-    min-width: 600px;
+    min-width: 1000px;
     max-width: 1100px;
     display: flex;
     flex-direction: column;
@@ -65,4 +65,33 @@
     align-items: flex-start;
     gap: 8px;
     justify-content: space-between;
+}
+
+.example-dialog__footer {
+    display: flex;
+    justify-content: flex-start;
+    padding-top: 8px;
+}
+
+.example-dialog__edit-container {
+    position: relative;
+}
+
+.example-dialog__action-icons {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    display: flex;
+    gap: 6px;
+}
+
+.example-dialog__actions-bar {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.example-dialog__close-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }

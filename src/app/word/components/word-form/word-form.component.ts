@@ -10,7 +10,7 @@ import { DataStore } from '@shared/data/data-store';
 import { Gender } from '@shared/data/models/langue.model';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { MessageService } from '@shared/ui-messaging/message/message.service';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { SecurityStore } from '@shared/security/security-store';
 import { MatCard } from '@angular/material/card';
 import { NgxDropzoneModule } from 'ngx-dropzone';
@@ -58,6 +58,7 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
     #langueChangesSub?: Subscription;
     @Input() commentPlaceholder = 'word.comment.label';
     @Input() commentPlaceholderParams: Record<string, unknown> = {};
+    @Input() autoFocusName = true;
     @Input({ required: true })
     set form(value: FormGroup) {
         if (!value) {
@@ -105,6 +106,8 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
     protected readonly action = this.#wordStore.action;
     protected readonly storeError = this.#wordStore.error;
 
+    #translate = inject(TranslateService);
+
     messageService = inject(MessageService);
 
     protected genders(): Gender[] {
@@ -113,6 +116,25 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
         }
         const storeGenders = this.#wordStore.genders();
         return Array.isArray(storeGenders) ? storeGenders : [];
+    }
+
+    protected genderLabel(gender: Gender): string {
+        const raw = gender?.name ?? '';
+        const idKey = gender?.id != null ? `gender.${gender.id}` : undefined;
+        if (idKey) {
+            const translatedById = this.#translate.instant(idKey);
+            if (translatedById && translatedById !== idKey) {
+                return translatedById;
+            }
+        }
+        const normalized = raw
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .trim()
+            .toLowerCase();
+        const key = `gender.${normalized}`;
+        const translated = this.#translate.instant(key);
+        return translated && translated !== key ? translated : raw;
     }
 
     constructor() {
@@ -159,7 +181,9 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
     }
 
     ngAfterViewInit() {
-        setTimeout(() => this.focusOnName());
+        if (this.autoFocusName) {
+            setTimeout(() => this.focusOnName());
+        }
     }
 
     ngOnChanges(changes: SimpleChanges) {
@@ -244,7 +268,9 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
             );
         });
         this.submitted = false;
-        setTimeout(() => this.focusOnName());
+        if (this.autoFocusName) {
+            setTimeout(() => this.focusOnName());
+        }
     }
 
     showError(controlName: string, error: string) {

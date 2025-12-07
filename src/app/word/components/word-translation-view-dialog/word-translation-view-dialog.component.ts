@@ -11,7 +11,7 @@ import { Word, WordTranslationValue } from '../../models/word.model';
 import { Langue } from '@shared/data/models/langue.model';
 import { WordFormComponent } from '../word-form/word-form.component';
 import { forkJoin, Observable } from 'rxjs';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SecurityStore } from '@shared/security/security-store';
 import { DataStore } from '@shared/data/data-store';
 
@@ -29,12 +29,13 @@ type WordTranslationEditDialogData = {
     templateUrl: './word-translation-view-dialog.component.html',
     styleUrls: ['./word-translation-view-dialog.component.scss'],
     standalone: true,
-    imports: [CommonModule, MatDialogTitle, MatDialogContent, MatDialogActions, MatButtonModule, MatListModule, WordFormComponent]
+    imports: [CommonModule, MatDialogTitle, MatDialogContent, MatDialogActions, MatButtonModule, MatListModule, WordFormComponent, TranslateModule]
 })
 export class WordTranslationEditDialogComponent {
     title: string;
     commentPlaceholder = 'word.comment.label';
     commentPlaceholderParams: Record<string, unknown> = {};
+    targetWordLabel = '';
     translationForms: FormGroup[] = [];
     selectedIndex = 0;
     loading = false;
@@ -53,6 +54,7 @@ export class WordTranslationEditDialogComponent {
         private translate: TranslateService
     ) {
         this.title = this.computeTitle(data);
+        this.targetWordLabel = this.buildTargetWordLabel(data);
         const baseTypeId = data.typeId;
         this.requiresGenderField = this.shouldRequireGender(data.langue, baseTypeId);
         const translations = Array.isArray(data.translations) && data.translations.length ? data.translations : [undefined];
@@ -202,6 +204,24 @@ export class WordTranslationEditDialogComponent {
         return '';
     }
 
+    private buildTargetWordLabel(data: WordTranslationEditDialogData): string {
+        const sourceIso = data.sourceLangueIso ?? this.data.langue.iso;
+        const base = this.formatLocalizedWord(data.parentWord, sourceIso);
+        const targetLang = this.computeLangLabel(data.langue);
+        return targetLang ? `${base} -> ${targetLang}` : base;
+    }
+
+    private formatLocalizedWord(word: Word, iso?: string | null): string {
+        const value = word.name || '';
+        const cleaned = this.cleanGenderCode(value.trim());
+        const article = this.computeArticle(iso, word.gender?.id);
+        const withArticle = article ? `${article} ${cleaned}`.trim() : cleaned;
+        if (iso?.trim().toUpperCase() === 'DE' && word.type?.id === 1) {
+            return this.capitalizeLastWord(withArticle);
+        }
+        return withArticle;
+    }
+
     private updateCommentPlaceholder(selectedId: number | undefined, langues: Langue[]) {
         const selectedLang = langues.find(lang => lang.id === selectedId);
         const langLabel = selectedLang ? this.computeLangLabel(selectedLang) : undefined;
@@ -219,5 +239,55 @@ export class WordTranslationEditDialogComponent {
             }
         }
         return langue?.name;
+    }
+
+    private cleanGenderCode(value: string): string {
+        return value
+            .replace(/\s*\(\d+\)/g, '')
+            .replace(/\s*\([^)]+\)/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    private capitalizeLastWord(value: string): string {
+        if (!value) return '';
+        const parts = value.split(' ');
+        const lastIndex = parts.length - 1;
+        const word = parts[lastIndex];
+        if (!word) return value;
+        parts[lastIndex] = word.substring(0, 1).toUpperCase() + word.substring(1);
+        return parts.join(' ');
+    }
+
+    private computeArticle(iso?: string | null, genderId?: number | null): string | null {
+        if (!iso || !genderId) {
+            return null;
+        }
+        const normalizedIso = iso.trim().toUpperCase();
+        if (normalizedIso === 'FR') {
+            switch (genderId) {
+                case 1:
+                    return 'le';
+                case 2:
+                    return 'la';
+                case 3:
+                    return 'les';
+                default:
+                    return null;
+            }
+        }
+        if (normalizedIso === 'DE') {
+            switch (genderId) {
+                case 1:
+                    return 'der';
+                case 2:
+                    return 'die';
+                case 3:
+                    return 'das';
+                default:
+                    return null;
+            }
+        }
+        return null;
     }
 }

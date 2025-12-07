@@ -25,6 +25,8 @@
         "title": "Exemples pour {{word}}",
         "add": "Ajouter un exemple",
         "label": "Exemple {{index}}",
+        "placeholder": "Saisir votre exemple",
+        "newLabel": "Nouvel exemple",
         "save": "Enregistrer",
         "close": "Fermer",
         "cancel": "Annuler",
@@ -33,6 +35,16 @@
             "required": "Le texte de l'exemple est requis",
             "maxlength": "Maximum {{max}} caractères"
         }
+    },
+    "word.translation": {
+        "add": "Ajouter",
+        "new": "Nouvelle traduction",
+        "delete": "Supprimer"
+    },
+    "gender": {
+        "1": "masculin",
+        "2": "féminin",
+        "3": "neutre"
     },
     "word.table": {
         "column": {

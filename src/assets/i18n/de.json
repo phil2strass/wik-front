@@ -66,6 +66,10 @@
       "previousPage": "Vorherige Seite",
       "firstPage": "Erste Seite",
       "lastPage": "Letzte Seite"
+    },
+    "actions": {
+      "save": "Speichern",
+      "cancel": "Abbrechen"
     }
   },
   "Candlestick": "Leuchter",
