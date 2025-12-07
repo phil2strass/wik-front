@@ -204,7 +204,8 @@ export class WordGridComponent {
                 wordTypeId: typeof maybe.wordTypeId === 'number' ? maybe.wordTypeId : null,
                 langueId: typeof maybe.langueId === 'number' ? maybe.langueId : null,
                 typeId: typeof maybe.typeId === 'number' ? maybe.typeId : null,
-                plural: typeof maybe.plural === 'string' ? maybe.plural : ''
+                plural: typeof maybe.plural === 'string' ? maybe.plural : '',
+                commentaire: typeof maybe.commentaire === 'string' ? maybe.commentaire : ''
             };
         }
         return {
@@ -213,7 +214,8 @@ export class WordGridComponent {
             wordTypeId: null,
             langueId: null,
             typeId: null,
-            plural: ''
+            plural: '',
+            commentaire: ''
         };
     }
 

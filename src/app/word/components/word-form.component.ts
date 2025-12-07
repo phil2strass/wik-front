@@ -56,8 +56,14 @@ class WordFormErrorStateMatcher implements ErrorStateMatcher {
                                         <input
                                             type="text"
                                             matInput
-                                    [errorStateMatcher]="errorMatcher"
-                                formControlName="plural" />
+                                            [errorStateMatcher]="errorMatcher"
+                                            formControlName="plural" />
+                                    </mat-form-field>
+                                }
+                                @if (showComment) {
+                                    <mat-form-field appearance="outline" class="w-100 p-0 m-t-20" color="primary">
+                                        <mat-label>Commentaire</mat-label>
+                                        <textarea matInput formControlName="commentaire" rows="3"></textarea>
                                     </mat-form-field>
                                 }
                                 @if (showTypeField) {
@@ -123,6 +129,12 @@ class WordFormErrorStateMatcher implements ErrorStateMatcher {
                                     matInput
                                     [errorStateMatcher]="errorMatcher"
                                     formControlName="plural" />
+                            </mat-form-field>
+                        }
+                        @if (showComment) {
+                            <mat-form-field appearance="outline" class="w-100 p-0 m-t-20" color="primary">
+                                <mat-label>Commentaire</mat-label>
+                                <textarea matInput formControlName="commentaire" rows="3"></textarea>
                             </mat-form-field>
                         }
                         @if (showTypeField) {
@@ -216,6 +228,7 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
     @Input() showPlural = true;
     @Input() genderOptional = false;
     @Input() showTitle = true;
+    @Input() showComment = false;
     @Input() handleSubmit = true;
     private _gendersOverride: Gender[] | null = null;
     @Input()

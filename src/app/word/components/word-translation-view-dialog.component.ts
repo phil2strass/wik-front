@@ -50,6 +50,7 @@ type WordTranslationEditDialogData = {
                     [showPlural]="true"
                     [genderOptional]="!requiresGenderField"
                     [showTitle]="false"
+                    [showComment]="true"
                     [handleSubmit]="false"
                     [gendersOverride]="data.langue.genders"></app-word-form>
                 <div class="word-translation-dialog__form-footer" *ngIf="translationForms.length > 1">
@@ -252,7 +253,9 @@ export class WordTranslationEditDialogComponent {
             plural: [translation?.plural ?? ''],
             langueId: [translation?.langueId ?? this.data.langue.id, Validators.required],
             typeId: [translation?.typeId ?? this.data.typeId ?? null, Validators.required],
-            genderId: [translation?.genderId ?? null]
+            genderId: [translation?.genderId ?? null],
+            commentaire: [translation?.commentaire ?? ''],
+            baseWordTypeId: [this.data.parentWord.wordTypeId]
         });
     }
 
