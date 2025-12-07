@@ -1,0 +1,30 @@
+{
+    "lang": {
+        "fr": "français",
+        "en": "anglais",
+        "de": "allemand"
+    },
+    "word.create": "Créer un mot",
+    "word.edit": "Modifier le mot",
+    "word.comment": {
+        "label": "commentaire en {{lang}}"
+    },
+    "word.form": {
+        "name": {
+            "label": "Mot"
+        },
+        "plural": {
+            "label": "Pluriel"
+        },
+        "type": {
+            "label": "Type"
+        }
+    },
+    "word.table": {
+        "column": {
+            "name": "Nom",
+            "type": "Type",
+            "actions": "Actions"
+        }
+    }
+}

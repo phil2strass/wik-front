@@ -1,0 +1,52 @@
+<h2 mat-dialog-title>{{ title }}</h2>
+<mat-dialog-content class="word-translation-dialog__content">
+    <div class="word-translation-dialog__sidebar">
+        <div class="word-translation-dialog__sidebar-header">
+            <button mat-stroked-button type="button" (click)="addTranslation()">Ajouter</button>
+        </div>
+        <mat-nav-list>
+            <a
+                mat-list-item
+                *ngFor="let formGroup of translationForms; let index = index"
+                (click)="selectTranslation(index)"
+                [class.word-translation-dialog__item--active]="index === selectedIndex">
+                <div class="word-translation-dialog__item-title">
+                    {{ formGroup.value.name?.trim() || 'Nouvelle traduction' }}
+                </div>
+            </a>
+        </mat-nav-list>
+    </div>
+    <div class="word-translation-dialog__form" *ngIf="selectedForm as activeForm">
+        <app-word-form
+            [form]="activeForm"
+            mode="update"
+            [useCard]="false"
+            [disableTypeSelection]="true"
+            [showTypeField]="false"
+            [showPlural]="true"
+            [genderOptional]="!requiresGenderField"
+            [showTitle]="false"
+            [showComment]="true"
+            [handleSubmit]="false"
+            [gendersOverride]="data.langue.genders"
+            [commentPlaceholder]="commentPlaceholder"
+            [commentPlaceholderParams]="commentPlaceholderParams"></app-word-form>
+        <div class="word-translation-dialog__form-footer" *ngIf="translationForms.length > 1">
+            <button
+                mat-button
+                color="warn"
+                type="button"
+                class="word-translation-dialog__delete-btn"
+                (click)="deleteTranslation(selectedIndex, $event)"
+                [disabled]="loading">
+                Supprimer
+            </button>
+        </div>
+    </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="onCancel()" [disabled]="loading">Annuler</button>
+    <button mat-flat-button color="primary" (click)="save()" [disabled]="loading || !selectedForm || selectedForm.invalid">
+        Enregistrer
+    </button>
+</mat-dialog-actions>

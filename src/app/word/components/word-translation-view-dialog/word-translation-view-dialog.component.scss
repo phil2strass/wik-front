@@ -1,0 +1,47 @@
+.word-translation-dialog__content {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    gap: 24px;
+}
+
+.word-translation-dialog__sidebar {
+    width: 240px;
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    padding-right: 12px;
+}
+
+.word-translation-dialog__sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.word-translation-dialog__form {
+    flex: 1;
+}
+
+.word-translation-dialog__form-footer {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 12px;
+}
+
+.word-translation-dialog__delete-btn {
+    font-size: 0.85rem;
+}
+
+.word-translation-dialog__item-title {
+    font-weight: 600;
+}
+
+.word-translation-dialog__item--active {
+    background-color: rgba(25, 118, 210, 0.12);
+}
+
+mat-nav-list a[mat-list-item] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
