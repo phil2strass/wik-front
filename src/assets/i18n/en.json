@@ -107,9 +107,12 @@
     "Side Two Steps": "Side Two Steps",
     "Boxed Two Steps": "Boxed Two Steps",
     "Error": "Error",
-    "Maintenance": "Maintenance",
-    "Menu Level": "Menu Level",
-    "Menu 1": "Menu 1",
-    "Menu 2": "Menu 2",
-    "Disabled": "Disabled"
+  "Maintenance": "Maintenance",
+  "Menu Level": "Menu Level",
+  "Menu 1": "Menu 1",
+  "Menu 2": "Menu 2",
+  "Disabled": "Disabled",
+  "welcome": {
+    "message": "Coming soon: a site to learn vocabulary and save your knowledge."
+  }
 }

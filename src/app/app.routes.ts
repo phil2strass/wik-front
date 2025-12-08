@@ -9,12 +9,16 @@ export const routes: Routes = [
         children: [
             {
                 path: '',
-                redirectTo: '/dashboards/dashboard1',
+                redirectTo: '/welcome',
                 pathMatch: 'full'
             },
             {
                 path: 'user',
                 loadChildren: () => import('./user/user.routes')
+            },
+            {
+                path: 'welcome',
+                loadComponent: () => import('./pages/welcome/welcome.component').then(m => m.WelcomeComponent)
             },
             {
                 path: 'word',

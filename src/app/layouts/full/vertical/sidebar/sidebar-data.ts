@@ -7,12 +7,14 @@ export const navItems: NavItem[] = [
     {
         displayName: 'sidebar.new',
         iconName: 'aperture',
-        route: '/word/new'
+        route: '/word/new',
+        adminOnly: true
     },
     {
         displayName: 'sidebar.list',
         iconName: 'shopping-cart',
-        route: '/word/list'
+        route: '/word/list',
+        adminOnly: true
     }
     /*
   {

@@ -24,7 +24,9 @@ export const ANONYMOUS_USER: User = {
     email: 'nomail',
     profil: undefined,
     anonymous: true,
-    bearer: ''
+    bearer: '',
+    roles: [],
+    groups: []
 };
 
 export const SecurityStore = signalStore(
@@ -37,6 +39,15 @@ export const SecurityStore = signalStore(
             return state.loaded() && user ? user.profil : undefined;
         }),
         signedIn: computed(() => state.loaded() && !state.user()?.anonymous),
+        isAdmin: computed(() => {
+            const user = state.user();
+            const roles = user?.roles ?? [];
+            const groups = user?.groups ?? [];
+            return (
+                roles.some(role => role.toUpperCase() === 'ADMIN') ||
+                groups.some(group => group.toLowerCase() === 'admin')
+            );
+        }),
         langues: computed(() => {
             const user = state.user();
             return user && user.profil ? user.profil.langues : [];
@@ -119,7 +130,9 @@ export const SecurityStore = signalStore(
                         email,
                         profil: undefined,
                         anonymous: false,
-                        bearer: token
+                        bearer: token,
+                        roles: keycloakService.profile.roles ?? [],
+                        groups: keycloakService.profile.groups ?? []
                     };
                     // Allow navigation immediately; profile details can load afterward
                     patchState(store, { user, loaded: true });

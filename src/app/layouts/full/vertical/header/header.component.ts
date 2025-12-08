@@ -335,9 +335,10 @@ export class HeaderComponent {
 })
 export class AppSearchDialogComponent {
     searchText: string = '';
+    readonly #securityStore = inject(SecurityStore);
     navItems = navItems;
 
-    navItemsData = navItems.filter(navitem => navitem.displayName);
+    navItemsData = navItems.filter(navitem => navitem.displayName && (!navitem.adminOnly || this.#securityStore.isAdmin()));
 
     // filtered = this.navItemsData.find((obj) => {
     //   return obj.displayName == this.searchinput;

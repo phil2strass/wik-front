@@ -25,4 +25,6 @@ export interface User {
     profil: ProfilStorage | undefined;
     anonymous: boolean;
     bearer: string;
+    roles: string[];
+    groups: string[];
 }

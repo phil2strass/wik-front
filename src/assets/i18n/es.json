@@ -99,5 +99,8 @@
   "Menu Level": "Nível do menu",
   "Menu 1": "Menu 1",
   "Menu 2": "Menu 2",
-  "Disabled": "Desabilitada"
+  "Disabled": "Desabilitada",
+  "welcome": {
+    "message": "Pronto, un sitio para aprender vocabulario y guardar tu conocimiento."
+  }
 }

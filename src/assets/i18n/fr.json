@@ -111,5 +111,8 @@
   "Menu Level": "Niveau menu",
   "Menu 1": "Menu 1",
   "Menu 2": "Menu 2",
-  "Disabled": "Désactivé"
+  "Disabled": "Désactivé",
+  "welcome": {
+    "message": "Bientôt un site pour apprendre du vocabulaire et sauvegarder votre savoir."
+  }
 }
