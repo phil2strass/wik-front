@@ -1,7 +1,7 @@
 export const environment = {
     production: true,
-    apiUrl: 'https://wordsiknow.com/api/',
-    basePhotoUrl: 'https://wordsiknow.com/images/',
+    apiUrl: 'https://www.wordsiknow.com/api/',
+    basePhotoUrl: 'https://www.wordsiknow.com/images/',
     // Keep silent SSO in prod by default
     enableSilentSSO: true,
     keycloak: {
