@@ -1,5 +1,5 @@
 export const environment = {
-    production: false,
+    production: true,
     apiUrl: 'https://wordsiknow.com/api/',
     basePhotoUrl: 'https://wordsiknow.com/images/',
     // Keep silent SSO in prod by default
