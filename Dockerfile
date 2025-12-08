@@ -7,5 +7,5 @@ RUN npm run build -- --configuration production
 
 # Étape 2 : Serve via Nginx
 FROM nginx:alpine
-COPY --from=build /app/dist/wik-front/browser /usr/share/nginx/html
+COPY --from=build /app/dist/Modernize/browser /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf

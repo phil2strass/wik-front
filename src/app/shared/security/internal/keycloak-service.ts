@@ -26,11 +26,8 @@ export class KeycloakService {
 
     get keycloak() {
         if (!this.#keycloak) {
-            this.#keycloak = new Keycloak({
-                url: 'https://almadev.htpweb.fr/',
-                realm: 'wik',
-                clientId: 'myclient'
-            });
+            const { url, realm, clientId } = environment.keycloak;
+            this.#keycloak = new Keycloak({ url, realm, clientId });
         }
         return this.#keycloak;
     }
