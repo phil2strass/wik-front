@@ -55,6 +55,32 @@
         "delete": "Löschen",
         "section": "Übersetzungen"
     },
+    "word.expressions": {
+        "menu": "Ausdrücke",
+        "section": "Ausdrücke",
+        "title": "Ausdrücke für {{word}}",
+        "titleByLangShort": "ausdrücke auf {{lang}}",
+        "add": "Ausdruck hinzufügen",
+        "newLabel": "Neuer Ausdruck",
+        "save": "Speichern",
+        "close": "Schließen",
+        "cancel": "Abbrechen",
+        "edit": "Bearbeiten",
+        "delete": "Löschen",
+        "confirmDelete": "Diesen Ausdruck löschen?",
+        "empty": "Keine Ausdrücke verfügbar",
+        "translation": {
+            "label": "Übersetzung auf {{lang}}",
+            "required": "Übersetzungstext ist erforderlich",
+            "add": "Übersetzung hinzufügen",
+            "saved": "Übersetzungen gespeichert",
+            "deleted": "Übersetzung gelöscht"
+        },
+        "errors": {
+            "required": "Ausdruckstext ist erforderlich",
+            "maxlength": "Maximal {{max}} Zeichen"
+        }
+    },
     "gender": {
         "1": "Maskulinum",
         "2": "Femininum",
@@ -66,5 +92,10 @@
             "type": "Typ",
             "actions": "Aktionen"
         }
+    },
+    "sidebar": {
+        "vocabulary": "Wortschatz",
+        "new": "Neu",
+        "list": "Liste"
     }
 }

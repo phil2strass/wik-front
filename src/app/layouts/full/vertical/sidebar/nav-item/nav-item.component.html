@@ -1,6 +1,6 @@
 @if(item.navCap){
 <div mat-subheader class="nav-caption">
-  {{ item.navCap }}
+  {{ item.navCap | translate }}
 </div>
 } @if(!item.navCap && !item.external && !item.twoLines) {
 <a mat-list-item (click)="onItemSelected(item)" [ngClass]="{

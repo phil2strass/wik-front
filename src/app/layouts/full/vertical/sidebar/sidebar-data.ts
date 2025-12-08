@@ -1,19 +1,20 @@
 import { NavItem } from './nav-item/nav-item';
 
 export const navItems: NavItem[] = [
-  {
-    navCap: 'Vocabulaire',
-  },
-  {
-    displayName: 'Nouveau',
-    iconName: 'aperture',
-    route: '/word/new',
-  },
-  {
-    displayName: 'Liste',
-    iconName: 'shopping-cart',
-    route: '/word/list',
-  },
+    {
+        navCap: 'sidebar.vocabulary'
+    },
+    {
+        displayName: 'sidebar.new',
+        iconName: 'aperture',
+        route: '/word/new'
+    },
+    {
+        displayName: 'sidebar.list',
+        iconName: 'shopping-cart',
+        route: '/word/list'
+    }
+    /*
   {
     displayName: 'Frontend pages',
     iconName: 'app-window',
@@ -702,4 +703,6 @@ export const navItems: NavItem[] = [
     route: 'https://www.google.com/',
     external: true,
   },
+
+     */
 ];

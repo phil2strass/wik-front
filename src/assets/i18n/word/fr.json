@@ -55,6 +55,32 @@
         "delete": "Supprimer",
         "section": "Traductions"
     },
+    "word.expressions": {
+        "menu": "Expressions",
+        "section": "Expressions",
+        "title": "Expressions pour {{word}}",
+        "titleByLangShort": "expressions en {{lang}}",
+        "add": "Ajouter une expression",
+        "newLabel": "Nouvelle expression",
+        "save": "Enregistrer",
+        "close": "Fermer",
+        "cancel": "Annuler",
+        "edit": "Modifier",
+        "delete": "Supprimer",
+        "confirmDelete": "Supprimer cette expression ?",
+        "empty": "Aucune expression disponible",
+        "translation": {
+            "label": "Traduction en {{lang}}",
+            "required": "Le texte de la traduction est requis",
+            "add": "Ajouter une traduction",
+            "saved": "Traductions enregistrées",
+            "deleted": "Traduction supprimée"
+        },
+        "errors": {
+            "required": "Le texte de l'expression est requis",
+            "maxlength": "Maximum {{max}} caractères"
+        }
+    },
     "gender": {
         "1": "masculin",
         "2": "féminin",
@@ -66,5 +92,10 @@
             "type": "Type",
             "actions": "Actions"
         }
+    },
+    "sidebar": {
+        "vocabulary": "Vocabulaire",
+        "new": "Nouveau",
+        "list": "Liste"
     }
 }

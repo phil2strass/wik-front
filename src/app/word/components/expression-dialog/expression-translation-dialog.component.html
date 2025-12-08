@@ -1,0 +1,85 @@
+<div class="example-dialog__title-row" mat-dialog-title>
+    <h2 class="example-dialog__title">
+        {{ data.wordLabel }}: {{ 'word.expressions.titleByLangShort' | translate:{ lang: langLabel } }}
+    </h2>
+</div>
+<mat-dialog-content class="example-dialog__content">
+    <div class="example-dialog__list" *ngIf="forms.length; else noExpressions">
+        @for (group of forms.controls; track $index; let idx = $index) {
+            <div class="example-dialog__item" [formGroup]="group">
+                <div class="example-dialog__view-row">
+                    <div class="example-dialog__text">
+                        {{ group.get('expressionContent')?.value }}
+                    </div>
+                </div>
+                <div class="example-dialog__translation-display">
+                    <div class="example-dialog__translation-text" *ngIf="!isEditing(idx) && hasTranslation(idx)">
+                        <span class="example-dialog__arrow">&#8594;</span>
+                        <span>{{ group.get('content')?.value }}</span>
+                    </div>
+                    <div class="example-dialog__action-icons">
+                        <button
+                            mat-flat-button
+                            type="button"
+                            class="example-dialog__add-btn bg-light-primary text-primary"
+                            (click)="enableEditing(idx)"
+                            *ngIf="!isEditing(idx) && !hasTranslation(idx)">
+                            <div class="d-flex align-items-center">
+                                <tabler-icon name="plus" class="m-r-5"></tabler-icon>
+                                <span>{{ 'word.expressions.translation.add' | translate }}</span>
+                            </div>
+                        </button>
+                        <button mat-icon-button type="button" (click)="enableEditing(idx)" *ngIf="!isEditing(idx) && hasTranslation(idx)">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button
+                            mat-icon-button
+                            color="warn"
+                            type="button"
+                            (click)="deleteTranslation(idx)"
+                            *ngIf="!isEditing(idx) && hasTranslation(idx)">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </div>
+                <div class="example-dialog__translation-row" *ngIf="isEditing(idx)">
+                    <mat-form-field appearance="outline" class="w-100 example-dialog__field" color="primary" hideRequiredMarker="true">
+                        <textarea matInput formControlName="content" rows="3"></textarea>
+                        <mat-error *ngIf="group.get('content')?.hasError('required')">
+                            {{ 'word.expressions.translation.required' | translate }}
+                        </mat-error>
+                        <mat-error *ngIf="group.get('content')?.hasError('maxlength')">
+                            {{ 'word.expressions.errors.maxlength' | translate:{ max: 500 } }}
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+        }
+    </div>
+    <ng-template #noExpressions>
+        <div class="example-dialog__empty">{{ 'word.expressions.empty' | translate }}</div>
+    </ng-template>
+</mat-dialog-content>
+<mat-dialog-actions align="end" class="example-dialog__actions-bar">
+    <ng-container *ngIf="hasEditing(); else closeOnly">
+        <button
+            mat-button
+            type="button"
+            class="example-dialog__close-btn b-1 border-error text-error"
+            (click)="cancel()"
+            [disabled]="loading">
+            <mat-icon>close</mat-icon>
+            <span>{{ 'word.examples.cancel' | translate }}</span>
+        </button>
+        <button mat-flat-button color="primary" type="button" class="example-dialog__close-btn" (click)="saveAll()" [disabled]="loading">
+            <mat-icon>check</mat-icon>
+            <span>{{ 'word.examples.save' | translate }}</span>
+        </button>
+    </ng-container>
+    <ng-template #closeOnly>
+        <button mat-flat-button color="primary" type="button" class="example-dialog__close-btn" (click)="cancel()" [disabled]="loading">
+            <mat-icon>close</mat-icon>
+            <span>{{ 'word.examples.close' | translate }}</span>
+        </button>
+    </ng-template>
+</mat-dialog-actions>

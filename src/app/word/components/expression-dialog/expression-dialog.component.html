@@ -1,0 +1,80 @@
+<div class="example-dialog__title-row" mat-dialog-title>
+    <h2 class="example-dialog__title">
+        {{ 'word.expressions.title' | translate:{ word: data.wordLabel } }}
+    </h2>
+</div>
+<mat-dialog-content class="example-dialog__content">
+    <div class="example-dialog__list">
+        @for (group of forms.controls; track $index; let idx = $index) {
+            <div class="example-dialog__item" [formGroup]="group">
+                <ng-container *ngIf="editingIndex === idx; else viewMode">
+                    <div class="example-dialog__edit-container">
+                        <mat-form-field appearance="outline" class="w-100 example-dialog__field" color="primary" hideRequiredMarker="true">
+                            <mat-label *ngIf="!group.get('id')?.value">{{ 'word.expressions.newLabel' | translate }}</mat-label>
+                            <textarea matInput formControlName="content" rows="3"></textarea>
+                            <mat-error *ngIf="group.get('content')?.hasError('required')">
+                                {{ 'word.expressions.errors.required' | translate }}
+                            </mat-error>
+                            <mat-error *ngIf="group.get('content')?.hasError('maxlength')">
+                                {{ 'word.expressions.errors.maxlength' | translate:{ max: 500 } }}
+                            </mat-error>
+                        </mat-form-field>
+                        <div class="example-dialog__action-icons">
+                            <button mat-icon-button color="primary" type="button" (click)="saveExpression(idx)" [disabled]="loading">
+                                <mat-icon>check</mat-icon>
+                            </button>
+                            <button mat-icon-button type="button" (click)="cancelEdit()" [disabled]="loading">
+                                <mat-icon>close</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-template #viewMode>
+                    <div class="example-dialog__view-row">
+                        <div class="example-dialog__text">
+                            {{ group.get('content')?.value }}
+                        </div>
+                        <div class="example-dialog__view-actions">
+                            <button mat-icon-button type="button" (click)="startEdit(idx)">
+                                <mat-icon>edit</mat-icon>
+                            </button>
+                            <button
+                                mat-icon-button
+                                type="button"
+                                color="warn"
+                                (click)="deleteExpression(idx)"
+                                [disabled]="loading"
+                                matTooltip="{{ 'word.expressions.delete' | translate }}">
+                                <mat-icon>delete</mat-icon>
+                            </button>
+                        </div>
+                    </div>
+                </ng-template>
+            </div>
+        }
+    </div>
+    <div class="example-dialog__footer" *ngIf="!addingNew">
+        <button
+            mat-flat-button
+            type="button"
+            class="bg-light-primary text-primary example-dialog__add-btn"
+            (click)="addExpression()">
+            <div class="d-flex align-items-center">
+                <tabler-icon name="plus" class="m-r-5"></tabler-icon>
+                <span>{{ 'word.expressions.add' | translate }}</span>
+            </div>
+        </button>
+    </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end" class="example-dialog__actions-bar">
+    <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        class="example-dialog__close-btn"
+        (click)="close()"
+        [disabled]="loading">
+        <mat-icon>close</mat-icon>
+        <span>{{ 'word.expressions.close' | translate }}</span>
+    </button>
+</mat-dialog-actions>

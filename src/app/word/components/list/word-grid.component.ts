@@ -21,6 +21,8 @@ import { MatPaginatorIntl } from '@angular/material/paginator';
 import { Subscription } from 'rxjs';
 import { ExampleDialogComponent } from '../example-dialog/example-dialog.component';
 import { ExampleTranslationDialogComponent } from '../example-dialog/example-translation-dialog.component';
+import { ExpressionDialogComponent } from '../expression-dialog/expression-dialog.component';
+import { ExpressionTranslationDialogComponent } from '../expression-dialog/expression-translation-dialog.component';
 
 @Component({
     selector: 'app-word-list',
@@ -207,6 +209,32 @@ export class WordGridComponent implements OnDestroy {
                   data: { wordTypeId: row.wordTypeId, wordLabel: this.formatDisplayName(row) }
               });
         dialogRef.afterClosed().subscribe();
+    }
+
+    openExpressions(row: Word): void {
+        const baseConfig = {
+            width: '1000px',
+            maxWidth: '1000px',
+            autoFocus: false,
+            restoreFocus: false
+        } as const;
+        this.dialog.open(ExpressionDialogComponent, {
+            ...baseConfig,
+            data: { wordTypeId: row.wordTypeId, wordLabel: this.formatDisplayName(row) }
+        });
+    }
+
+    openExpressionTranslationDialog(row: Word, langue: Langue): void {
+        const baseConfig = {
+            width: '1000px',
+            maxWidth: '1000px',
+            autoFocus: false,
+            restoreFocus: false
+        } as const;
+        this.dialog.open(ExpressionTranslationDialogComponent, {
+            ...baseConfig,
+            data: { wordTypeId: row.wordTypeId, wordLabel: this.formatDisplayName(row), langue }
+        });
     }
 
     formatDisplayName(row: Word): string {

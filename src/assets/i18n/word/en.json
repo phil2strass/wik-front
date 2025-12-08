@@ -55,6 +55,32 @@
         "delete": "Delete",
         "section": "Translations"
     },
+    "word.expressions": {
+        "menu": "Expressions",
+        "section": "Expressions",
+        "title": "Expressions for {{word}}",
+        "titleByLangShort": "expressions in {{lang}}",
+        "add": "Add expression",
+        "newLabel": "New expression",
+        "save": "Save",
+        "close": "Close",
+        "cancel": "Cancel",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDelete": "Delete this expression?",
+        "empty": "No expressions available",
+        "translation": {
+            "label": "Translation in {{lang}}",
+            "required": "Translation text is required",
+            "add": "Add translation",
+            "saved": "Translations saved",
+            "deleted": "Translation deleted"
+        },
+        "errors": {
+            "required": "Expression text is required",
+            "maxlength": "Maximum {{max}} characters"
+        }
+    },
     "gender": {
         "1": "masculine",
         "2": "feminine",
@@ -66,5 +92,10 @@
             "type": "Type",
             "actions": "Actions"
         }
+    },
+    "sidebar": {
+        "vocabulary": "Vocabulary",
+        "new": "New",
+        "list": "List"
     }
 }
