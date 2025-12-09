@@ -7,6 +7,6 @@ export const environment = {
     keycloak: {
         url: 'https://almadev.htpweb.fr/',
         realm: 'wik',
-        clientId: 'wik-admin'
+        clientId: 'myclient'
     }
 };

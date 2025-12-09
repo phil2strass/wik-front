@@ -13,8 +13,8 @@ import { MessageService } from '@shared/ui-messaging/message/message.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { finalize } from 'rxjs/operators';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ExampleDeleteDialogComponent } from './example-delete-dialog.component';
 import { Langue } from '@shared/data/models/langue.model';
+import { ExampleDeleteDialogComponent } from './example-delete-dialog.component';
 
 export type ExampleDialogData = {
     wordTypeId: number;
@@ -40,7 +40,6 @@ export type ExampleDialogData = {
         MatTooltipModule,
         ReactiveFormsModule,
         TranslateModule,
-        ExampleDeleteDialogComponent,
         IconModule
     ]
 })

@@ -38,8 +38,7 @@ export type ExpressionDialogData = {
         MatTooltipModule,
         ReactiveFormsModule,
         TranslateModule,
-        IconModule,
-        ExpressionDeleteDialogComponent
+        IconModule
     ]
 })
 export class ExpressionDialogComponent {

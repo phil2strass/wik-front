@@ -97,12 +97,12 @@
                         </mat-icon>
                     </button>
                     <mat-menu #menu="matMenu" class="cardWithShadow">
-                        <button mat-menu-item>
-                    <div class="d-flex align-items-center" (click)="openEdit(row)">
-                        <tabler-icon name="pencil" class="m-x-6"></tabler-icon>
-                        <span>Edit</span>
-                    </div>
-                </button>
+                        <button mat-menu-item (click)="openEdit(row)">
+                            <div class="d-flex align-items-center">
+                                <tabler-icon name="pencil" class="m-x-6"></tabler-icon>
+                                <span>Edit</span>
+                            </div>
+                        </button>
                 <button mat-menu-item (click)="openExpressions(row)">
                     <div class="d-flex align-items-center">
                         <tabler-icon name="message-circle" class="m-x-6"></tabler-icon>
@@ -115,8 +115,8 @@
                         <span>{{ 'word.examples.menu' | translate }}</span>
                     </div>
                 </button>
-                <button mat-menu-item>
-                    <div class="d-flex align-items-center text-error" (click)="openDelete(row)">
+                <button mat-menu-item (click)="openDelete(row)">
+                    <div class="d-flex align-items-center text-error">
                         <tabler-icon name="trash" class="m-x-6"></tabler-icon>
                         <span>Delete</span>
                     </div>
