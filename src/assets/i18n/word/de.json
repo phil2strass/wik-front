@@ -6,6 +6,9 @@
     },
     "word.create": "Wort erstellen",
     "word.edit": "Wort bearbeiten",
+    "word.lang.fr": "Französisch",
+    "word.lang.en": "Englisch",
+    "word.lang.de": "Deutsch",
     "word.comment": {
         "label": "Kommentar auf {{lang}}"
     },
@@ -18,7 +21,11 @@
         },
         "type": {
             "label": "Typ"
-        }
+        },
+        "gender": {
+            "label": "Genus"
+        },
+        "translationFor": "Wort auf {{lang}}"
     },
     "word.examples": {
         "menu": "Beispiele",
@@ -53,7 +60,8 @@
         "add": "Hinzufügen",
         "new": "Neue Übersetzung",
         "delete": "Löschen",
-        "section": "Übersetzungen"
+        "section": "Übersetzungen",
+        "motherTongue": "Muttersprache"
     },
     "word.expressions": {
         "menu": "Ausdrücke",

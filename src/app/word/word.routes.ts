@@ -24,6 +24,10 @@ export default [
             {
                 path: 'list',
                 component: WordGridComponent
+            },
+            {
+                path: 'categories',
+                loadComponent: () => import('./components/category-list.component').then(m => m.CategoryListComponent)
             }
         ]
     }

@@ -25,6 +25,22 @@
 
 .word-translation-dialog__form {
     flex: 1;
+    padding-top: 8px;
+}
+
+.word-translation-dialog__form .mdc-floating-label {
+    white-space: normal;
+    line-height: 1.2;
+}
+
+.word-translation-dialog__form form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.word-translation-dialog__form mat-form-field {
+    width: 100%;
 }
 
 .word-translation-dialog__form-footer {

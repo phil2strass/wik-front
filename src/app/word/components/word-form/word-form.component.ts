@@ -78,6 +78,7 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
     }
     @Input() mode: 'create' | 'update' = 'update';
     @Input() useCard = true;
+    @Input() inlineLayout = false;
     @Input() translationForms: FormGroup[] | undefined;
     @Input() disableTypeSelection = false;
     @Input() showTypeField = true;
@@ -225,6 +226,8 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
                         langueId: value.langueId,
                         plural: value.plural ?? '',
                         genderId: value.genderId ?? null,
+                        commentaire: value.commentaire?.trim?.() ?? '',
+                        categorieIds: data.categorieIds ?? [],
                         typeId
                     }));
                 if (translations.length > 0) {
@@ -251,7 +254,8 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
             name: '',
             typeId: null,
             genderId: null,
-            plural: ''
+            plural: '',
+            categorieIds: [1]
         };
         this.formGroup?.reset(defaultValue);
         this.formDirective?.resetForm(defaultValue);
@@ -262,7 +266,8 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
                     langueId,
                     name: '',
                     plural: '',
-                    genderId: null
+                    genderId: null,
+                    commentaire: ''
                 },
                 { emitEvent: false }
             );

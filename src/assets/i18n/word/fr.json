@@ -1,11 +1,14 @@
 {
     "lang": {
-        "fr": "français",
-        "en": "anglais",
-        "de": "allemand"
+        "fr": "Français",
+        "en": "Anglais",
+        "de": "Allemand"
     },
     "word.create": "Créer un mot",
     "word.edit": "Modifier le mot",
+    "word.lang.fr": "Français",
+    "word.lang.en": "Anglais",
+    "word.lang.de": "Allemand",
     "word.comment": {
         "label": "commentaire en {{lang}}"
     },
@@ -18,7 +21,11 @@
         },
         "type": {
             "label": "Type"
-        }
+        },
+        "gender": {
+            "label": "Genre"
+        },
+        "translationFor": "Mot en {{lang}}"
     },
     "word.examples": {
         "menu": "Exemples",
@@ -53,7 +60,8 @@
         "add": "Ajouter",
         "new": "Nouvelle traduction",
         "delete": "Supprimer",
-        "section": "Traductions"
+        "section": "Traductions",
+        "motherTongue": "Langue maternelle"
     },
     "word.expressions": {
         "menu": "Expressions",

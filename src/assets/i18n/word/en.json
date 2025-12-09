@@ -6,6 +6,9 @@
     },
     "word.create": "Create word",
     "word.edit": "Edit word",
+    "word.lang.fr": "French",
+    "word.lang.en": "English",
+    "word.lang.de": "German",
     "word.comment": {
         "label": "comment in {{lang}}"
     },
@@ -18,7 +21,11 @@
         },
         "type": {
             "label": "Type"
-        }
+        },
+        "gender": {
+            "label": "Gender"
+        },
+        "translationFor": "Word in {{lang}}"
     },
     "word.examples": {
         "menu": "Examples",
@@ -53,7 +60,8 @@
         "add": "Add",
         "new": "New translation",
         "delete": "Delete",
-        "section": "Translations"
+        "section": "Translations",
+        "motherTongue": "Mother tongue"
     },
     "word.expressions": {
         "menu": "Expressions",

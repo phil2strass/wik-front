@@ -19,6 +19,7 @@ export interface WordTranslation {
     typeId: number | undefined;
     genderId: number | undefined;
     plural: string;
+    categorieIds?: number[];
 }
 
 export interface Word {
@@ -28,6 +29,7 @@ export interface Word {
     genderId: number | undefined;
     plural: string;
     genders: Gender[];
+    categorieIds?: number[];
     trads?: WordTranslation[];
 }
 
@@ -37,7 +39,8 @@ const initialWordState: Word = {
     typeId: undefined,
     genderId: undefined,
     plural: '',
-    genders: []
+    genders: [],
+    categorieIds: []
 };
 
 export const WordStore = signalStore(

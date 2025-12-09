@@ -15,6 +15,12 @@ export const navItems: NavItem[] = [
         iconName: 'shopping-cart',
         route: '/word/list',
         adminOnly: true
+    },
+    {
+        displayName: 'Catégories',
+        iconName: 'category',
+        route: '/word/categories',
+        adminOnly: true
     }
     /*
   {

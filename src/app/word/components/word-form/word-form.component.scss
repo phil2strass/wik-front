@@ -1,3 +1,52 @@
 .word-form__gender-error {
+    margin-top: 4px;
+}
+
+.word-form__content-inline .word-form__inline-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: flex-start;
+    margin-top: 8px;
+}
+
+.word-form__content-inline h4 {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.word-form__inline-field {
+    flex: 0 0 240px;
+    min-width: 240px;
+}
+
+.word-form__inline-plural {
+    flex: 0 0 240px;
+    min-width: 240px;
+    margin-top: 0;
+}
+
+.word-form__inline-comment {
+    flex: 0 0 240px;
+    min-width: 240px;
+}
+
+.word-form__comment-full {
+    width: 100%;
+    margin-top: 6px;
+}
+
+.word-form__inline-gender {
+    flex: 0 0 240px;
+    min-width: 240px;
+    margin-left: auto;
+}
+
+.word-form__inline-plural {
+    display: block;
+    margin-top: 4px;
+}
+
+.word-form__gender-inline {
     margin-top: 8px;
 }
