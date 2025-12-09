@@ -12,12 +12,14 @@ import { Langue } from '@shared/data/models/langue.model';
 import { WordFormComponent } from '../word-form/word-form.component';
 import { forkJoin, Observable } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { MatIconModule } from '@angular/material/icon';
 import { SecurityStore } from '@shared/security/security-store';
 import { DataStore } from '@shared/data/data-store';
 
 type WordTranslationEditDialogData = {
     parentWord: Word;
     langue: Langue;
+    languages?: Langue[];
     translations?: WordTranslationValue[];
     typeId: number | null;
     sourceLangueName?: string;
@@ -29,7 +31,7 @@ type WordTranslationEditDialogData = {
     templateUrl: './word-translation-view-dialog.component.html',
     styleUrls: ['./word-translation-view-dialog.component.scss'],
     standalone: true,
-    imports: [CommonModule, MatDialogTitle, MatDialogContent, MatDialogActions, MatButtonModule, MatListModule, WordFormComponent, TranslateModule]
+    imports: [CommonModule, MatDialogTitle, MatDialogContent, MatDialogActions, MatButtonModule, MatListModule, MatIconModule, WordFormComponent, TranslateModule]
 })
 export class WordTranslationEditDialogComponent {
     title: string;
@@ -40,6 +42,8 @@ export class WordTranslationEditDialogComponent {
     selectedIndex = 0;
     loading = false;
     requiresGenderField: boolean;
+    languages: Langue[] = [];
+    activeLang: Langue;
     private pendingDeleteWordTypeIds: number[] = [];
     readonly #securityStore = inject(SecurityStore);
     readonly #dataStore = inject(DataStore);
@@ -53,12 +57,15 @@ export class WordTranslationEditDialogComponent {
         private messageService: MessageService,
         private translate: TranslateService
     ) {
-        this.title = this.computeTitle(data);
-        this.targetWordLabel = this.buildTargetWordLabel(data);
-        const baseTypeId = data.typeId;
-        this.requiresGenderField = this.shouldRequireGender(data.langue, baseTypeId);
-        const translations = Array.isArray(data.translations) && data.translations.length ? data.translations : [undefined];
-        this.translationForms = translations.map(translation => this.createTranslationForm(translation));
+        this.languages = data.languages ?? [data.langue];
+        this.activeLang = data.langue;
+        this.targetWordLabel = this.formatLocalizedWord(
+            data.parentWord,
+            data.sourceLangueIso ?? data.langue.iso
+        );
+        this.title = `${this.targetWordLabel} ->`;
+        this.requiresGenderField = this.shouldRequireGender(this.activeLang, data.typeId);
+        this.translationForms = this.buildFormsForLang(this.activeLang);
 
         effect(() => {
             const selectedId = this.#securityStore.langueSelected();
@@ -75,7 +82,7 @@ export class WordTranslationEditDialogComponent {
     }
 
     addTranslation(): void {
-        const form = this.createTranslationForm(undefined);
+        const form = this.createTranslationForm(undefined, this.activeLang, this.data);
         this.translationForms.push(form);
         this.selectedIndex = this.translationForms.length - 1;
     }
@@ -101,7 +108,7 @@ export class WordTranslationEditDialogComponent {
         }
         this.translationForms.splice(index, 1);
         if (this.translationForms.length === 0) {
-            this.translationForms.push(this.createTranslationForm(undefined));
+        this.translationForms.push(this.createTranslationForm(undefined, this.activeLang, this.data));
         }
         if (this.selectedIndex >= this.translationForms.length) {
             this.selectedIndex = this.translationForms.length - 1;
@@ -162,17 +169,54 @@ export class WordTranslationEditDialogComponent {
         });
     }
 
-    private createTranslationForm(translation?: WordTranslationValue): FormGroup {
-        const defaultComment = this.computeDefaultComment(translation, this.data);
+    selectLanguage(lang: Langue): void {
+        if (!lang || this.activeLang?.id === lang.id) {
+            return;
+        }
+        this.activeLang = lang;
+        this.pendingDeleteWordTypeIds = [];
+        this.requiresGenderField = this.shouldRequireGender(this.activeLang, this.data.typeId);
+        this.loading = true;
+        const url = `${this.configuration.baseUrl}word/${this.data.parentWord.wordTypeId}/translations/${lang.id}`;
+        this.http.get<WordTranslationValue[]>(url).subscribe({
+            next: translations => {
+                this.translationForms = this.buildFormsForLang(this.activeLang, translations);
+                this.selectedIndex = 0;
+            },
+            error: () => {
+                this.translationForms = this.buildFormsForLang(this.activeLang);
+                this.selectedIndex = 0;
+            },
+            complete: () => {
+                this.loading = false;
+            }
+        });
+    }
+
+    private buildFormsForLang(lang: Langue, provided?: WordTranslationValue[]): FormGroup[] {
+        const translations =
+            Array.isArray(provided) && provided.length
+                ? provided
+                : this.extractTranslationValues(this.data.parentWord, lang.id);
+        const list = translations.length ? translations : [undefined];
+        return list.map(tr => this.createTranslationForm(tr, lang, this.data));
+    }
+
+    private createTranslationForm(
+        translation: WordTranslationValue | undefined,
+        lang: Langue,
+        data: WordTranslationEditDialogData
+    ): FormGroup {
+        const defaultComment = this.computeDefaultComment(translation, { ...data, langue: lang });
         return this.fb.group({
             wordTypeId: [translation?.wordTypeId ?? null],
             name: [translation?.name ?? '', Validators.required],
             plural: [translation?.plural ?? ''],
-            langueId: [translation?.langueId ?? this.data.langue.id, Validators.required],
-            typeId: [translation?.typeId ?? this.data.typeId ?? null, Validators.required],
+            langueId: [translation?.langueId ?? lang.id, Validators.required],
+            typeId: [translation?.typeId ?? data.typeId ?? null, Validators.required],
             genderId: [translation?.genderId ?? null],
             commentaire: [translation?.commentaire ?? defaultComment],
-            baseWordTypeId: [this.data.parentWord.wordTypeId]
+            baseWordTypeId: [data.parentWord.wordTypeId]
         });
     }
 
@@ -186,10 +230,71 @@ export class WordTranslationEditDialogComponent {
     }
 
     private computeTitle(data: WordTranslationEditDialogData): string {
-        if (data.sourceLangueName) {
-            return `${data.sourceLangueName} -> ${data.langue.name}`;
+        return `${this.buildTargetWordLabel(data)} ->`;
+    }
+
+    private extractTranslationValues(word: Word, langueId: number): WordTranslationValue[] {
+        const translations = word.translations;
+        if (!translations) {
+            return [];
         }
-        return `Traductions ${data.langue.name}`;
+        if (Array.isArray(translations)) {
+            for (const entry of translations) {
+                if (Array.isArray(entry) && entry.length >= 2) {
+                    const key = Number(entry[0]);
+                    if (!Number.isNaN(key) && key === langueId) {
+                        return this.normalizeTranslationBucket(entry[1]);
+                    }
+                }
+            }
+            return [];
+        }
+        const byNumber = translations as Record<number, WordTranslationValue[]>;
+        if (byNumber[langueId] !== undefined) {
+            return this.normalizeTranslationBucket(byNumber[langueId]);
+        }
+        const byString = translations as Record<string, WordTranslationValue[]>;
+        return this.normalizeTranslationBucket(byString[String(langueId)]);
+    }
+
+    private normalizeTranslationBucket(bucket: unknown): WordTranslationValue[] {
+        if (bucket == null) {
+            return [];
+        }
+        if (Array.isArray(bucket)) {
+            return bucket
+                .map(value => this.normalizeTranslationValue(value))
+                .filter((value): value is WordTranslationValue => !!value);
+        }
+        const single = this.normalizeTranslationValue(bucket);
+        return single ? [single] : [];
+    }
+
+    private normalizeTranslationValue(value: unknown): WordTranslationValue | undefined {
+        if (value == null) {
+            return undefined;
+        }
+        if (typeof value === 'object' && !Array.isArray(value)) {
+            const maybe = value as Partial<WordTranslationValue>;
+            return {
+                name: typeof maybe.name === 'string' ? maybe.name : '',
+                genderId: typeof maybe.genderId === 'number' ? maybe.genderId : null,
+                wordTypeId: typeof maybe.wordTypeId === 'number' ? maybe.wordTypeId : null,
+                langueId: typeof maybe.langueId === 'number' ? maybe.langueId : null,
+                typeId: typeof maybe.typeId === 'number' ? maybe.typeId : null,
+                plural: typeof maybe.plural === 'string' ? maybe.plural : '',
+                commentaire: typeof maybe.commentaire === 'string' ? maybe.commentaire : ''
+            };
+        }
+        return {
+            name: String(value),
+            genderId: null,
+            wordTypeId: null,
+            langueId: null,
+            typeId: null,
+            plural: '',
+            commentaire: ''
+        };
     }
 
     private computeDefaultComment(translation: WordTranslationValue | undefined, data: WordTranslationEditDialogData): string {

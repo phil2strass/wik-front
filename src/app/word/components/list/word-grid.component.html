@@ -122,17 +122,12 @@
                     </div>
                 </button>
                 <mat-divider *ngIf="translationLanguages.length"></mat-divider>
-                <div class="mat-menu-item word-grid__menu-section" *ngIf="translationLanguages.length">
-                    <span>{{ 'word.translation.section' | translate }}</span>
-                </div>
-                @for (lang of translationLanguages; track lang.id) {
-                    <button mat-menu-item (click)="openTranslationDialog(row, lang)">
-                        <div class="d-flex align-items-center">
-                            <mat-icon class="m-r-8">translate</mat-icon>
-                            <span>{{ langHeaderLabel(lang) }}</span>
-                        </div>
-                    </button>
-                }
+                <button mat-menu-item *ngIf="translationLanguages.length" (click)="openTranslationPicker(row)">
+                    <div class="d-flex align-items-center">
+                        <mat-icon class="m-r-8">translate</mat-icon>
+                        <span>{{ 'word.translation.section' | translate }}</span>
+                    </div>
+                </button>
                 <div class="mat-menu-item word-grid__menu-section" *ngIf="translationLanguages.length">
                     <span>{{ 'word.expressions.section' | translate }}</span>
                 </div>

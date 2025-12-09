@@ -1,5 +1,16 @@
 <h2 mat-dialog-title class="word-translation-dialog__title" *ngIf="targetWordLabel">
-    {{ targetWordLabel }}
+    {{ targetWordLabel }} ->
+    <span class="word-translation-dialog__lang-buttons" *ngIf="languages.length">
+        <button
+            mat-stroked-button
+            type="button"
+            class="word-translation-dialog__lang-btn"
+            *ngFor="let lang of languages"
+            [class.word-translation-dialog__lang-btn--active]="activeLang?.id === lang.id"
+            (click)="selectLanguage(lang)">
+            {{ lang.name }}
+        </button>
+    </span>
 </h2>
 <mat-dialog-content class="word-translation-dialog__content">
     <div class="word-translation-dialog__sidebar">
@@ -32,7 +43,7 @@
             [showTitle]="false"
             [showComment]="true"
             [handleSubmit]="false"
-            [gendersOverride]="data.langue.genders"
+            [gendersOverride]="activeLang?.genders ?? data.langue.genders"
             [autoFocusName]="false"
             [commentPlaceholder]="commentPlaceholder"
             [commentPlaceholderParams]="commentPlaceholderParams"></app-word-form>
@@ -49,11 +60,24 @@
         </div>
     </div>
 </mat-dialog-content>
-<mat-dialog-actions align="end">
-    <button mat-button type="button" (click)="onCancel()" [disabled]="loading">
-        {{ 'common.actions.cancel' | translate }}
+<mat-dialog-actions align="end" class="word-translation-dialog__actions-bar">
+    <button
+        mat-button
+        type="button"
+        class="word-translation-dialog__action-btn b-1 border-error text-error"
+        (click)="onCancel()"
+        [disabled]="loading">
+        <mat-icon>close</mat-icon>
+        <span>{{ 'common.actions.cancel' | translate }}</span>
     </button>
-    <button mat-flat-button color="primary" (click)="save()" [disabled]="loading || !selectedForm || selectedForm.invalid">
-        {{ 'common.actions.save' | translate }}
+    <button
+        mat-flat-button
+        color="primary"
+        type="button"
+        class="word-translation-dialog__action-btn"
+        (click)="save()"
+        [disabled]="loading || !selectedForm || selectedForm.invalid">
+        <mat-icon>check</mat-icon>
+        <span>{{ 'common.actions.save' | translate }}</span>
     </button>
 </mat-dialog-actions>

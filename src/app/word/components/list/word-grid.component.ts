@@ -2,7 +2,7 @@ import { Component, computed, effect, inject, ViewChild, OnDestroy } from '@angu
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { DataStore } from '@shared/data/data-store';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Word, WordTranslationValue } from '../../models/word.model';
 import { WordDeleteDialog } from '../word-delete.component';
 import { WordGridStore } from '../../word-grid-store';
@@ -321,6 +321,43 @@ export class WordGridComponent implements OnDestroy {
         };
     }
 
+    openTranslationPicker(word: Word): void {
+        if (!this.translationLanguages.length) {
+            return;
+        }
+        const initialLang = this.translationLanguages[0];
+        this.openTranslationDialogRef(word, initialLang, this.extractTranslationValues(word, initialLang.id), this.translationLanguages);
+    }
+
+    private openTranslationDialogRef(
+        row: Word,
+        langue: Langue,
+        translationValues: WordTranslationValue[],
+        languages?: Langue[]
+    ): MatDialogRef<WordTranslationEditDialogComponent> {
+        const ref = this.dialog.open(WordTranslationEditDialogComponent, {
+            width: '75vw',
+            minWidth: '800px',
+            autoFocus: false,
+            restoreFocus: false,
+            data: {
+                parentWord: row,
+                langue,
+                languages,
+                translations: translationValues,
+                typeId: row.type?.id ?? null,
+                sourceLangueName: this.selectedLangueName(),
+                sourceLangueIso: this.selectedLangueIso()
+            }
+        });
+        ref.afterClosed().subscribe(updated => {
+            if (updated) {
+                this.#wordGridStore.load();
+            }
+        });
+        return ref;
+    }
+
     private formatLocalizedValue(value: string, langue?: Langue, gender?: Gender, typeId?: number): string {
         let result = this.cleanGenderCode(value ?? '');
         if (!langue?.iso) {
@@ -373,27 +410,7 @@ export class WordGridComponent implements OnDestroy {
 
     openTranslationDialog(row: Word, langue: Langue): void {
         const translationValues = this.extractTranslationValues(row, langue.id);
-        this.dialog
-            .open(WordTranslationEditDialogComponent, {
-                width: '75vw',
-                minWidth: '800px',
-                autoFocus: false,
-                restoreFocus: false,
-                data: {
-                    parentWord: row,
-                    langue,
-                    translations: translationValues,
-                    typeId: row.type?.id ?? null,
-                    sourceLangueName: this.selectedLangueName(),
-                    sourceLangueIso: this.selectedLangueIso()
-                }
-            })
-            .afterClosed()
-            .subscribe(updated => {
-                if (updated) {
-                    this.#wordGridStore.load();
-                }
-            });
+        this.openTranslationDialogRef(row, langue, translationValues, this.translationLanguages);
     }
 
     private resolveArticle(iso: string, genderId?: number): string | null {
