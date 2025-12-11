@@ -8,7 +8,7 @@ export interface WordTranslationValue {
     langueId: number | null;
     typeId: number | null;
     plural: string;
-    commentaire: string;
+    commentaire?: string;
 }
 
 export type WordTranslations =

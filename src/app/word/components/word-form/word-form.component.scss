@@ -15,6 +15,10 @@
     margin-bottom: 0;
 }
 
+.word-form__content h4 {
+    margin: 0 0 20px;
+}
+
 .word-form__inline-field {
     flex: 0 0 240px;
     min-width: 240px;
@@ -49,4 +53,8 @@
 
 .word-form__gender-inline {
     margin-top: 8px;
+}
+
+.word-form__gender-stacked {
+    margin-top: 12px;
 }

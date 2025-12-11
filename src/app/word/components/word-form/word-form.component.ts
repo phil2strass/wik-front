@@ -56,8 +56,6 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
     #nameChangesSub?: Subscription;
     #typeChangesSub?: Subscription;
     #langueChangesSub?: Subscription;
-    @Input() commentPlaceholder = 'word.comment.label';
-    @Input() commentPlaceholderParams: Record<string, unknown> = {};
     @Input() autoFocusName = true;
     @Input({ required: true })
     set form(value: FormGroup) {
@@ -85,7 +83,6 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
     @Input() showPlural = true;
     @Input() genderOptional = false;
     @Input() showTitle = true;
-    @Input() showComment = false;
     @Input() handleSubmit = true;
     private _gendersOverride: Gender[] | null = null;
     @Input()
@@ -226,7 +223,6 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
                         langueId: value.langueId,
                         plural: value.plural ?? '',
                         genderId: value.genderId ?? null,
-                        commentaire: value.commentaire?.trim?.() ?? '',
                         categorieIds: data.categorieIds ?? [],
                         typeId
                     }));
@@ -266,8 +262,7 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
                     langueId,
                     name: '',
                     plural: '',
-                    genderId: null,
-                    commentaire: ''
+                    genderId: null
                 },
                 { emitEvent: false }
             );

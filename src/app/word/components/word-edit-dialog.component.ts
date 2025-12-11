@@ -5,8 +5,10 @@ import { MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef } fro
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { WordStore } from '../word-store';
 import { WordFormComponent } from './word-form/word-form.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 interface WordDialogData {
     wordTypeId?: number;
@@ -23,20 +25,26 @@ interface WordDialogData {
 @Component({
     selector: 'word-edit-dialog',
     template: `
-        <mat-dialog-content>
+        <mat-dialog-content class="word-edit-dialog__content">
             <app-word-form #wordFormRef [form]="form" mode="update" [useCard]="false" [disableTypeSelection]="true"></app-word-form>
         </mat-dialog-content>
         <div class="word-edit-dialog__loader-slot">
             <mat-progress-bar *ngIf="isLoading()" mode="indeterminate"></mat-progress-bar>
         </div>
-        <mat-dialog-actions class="d-flex gap-10 align-items-center">
-            <button mat-button (click)="onNoClick()">Annuler</button>
+        <mat-dialog-actions align="end" class="word-edit-dialog__actions-bar">
+            <button mat-button type="button" class="word-edit-dialog__action-btn b-1 border-error text-error" (click)="onNoClick()">
+                <mat-icon>close</mat-icon>
+                <span>{{ 'common.actions.cancel' | translate }}</span>
+            </button>
             <button
                 mat-flat-button
                 color="primary"
+                type="button"
+                class="word-edit-dialog__action-btn"
                 (click)="onSave()"
                 [disabled]="form.invalid || !form.dirty || isLoading()">
-                <span>Enregistrer</span>
+                <mat-icon>check</mat-icon>
+                <span>{{ 'common.actions.save' | translate }}</span>
             </button>
         </mat-dialog-actions>
     `,
@@ -45,18 +53,39 @@ interface WordDialogData {
         MatButtonModule,
         MatDialogContent,
         MatDialogActions,
+        MatIconModule,
         MatProgressSpinnerModule,
         MatProgressBarModule,
-        WordFormComponent
+        WordFormComponent,
+        TranslateModule
     ],
     styles: [
         `
+            .word-edit-dialog__content {
+                padding-top: 24px;
+                display: block;
+            }
+
             .word-edit-dialog__loader-slot {
                 height: 4px;
             }
 
             .word-edit-dialog__loader-slot mat-progress-bar {
                 height: 4px;
+            }
+
+            .word-edit-dialog__actions-bar {
+                border-top: 1px solid rgba(0, 0, 0, 0.08);
+                padding-top: 12px;
+                display: flex;
+                justify-content: flex-end;
+                gap: 8px;
+            }
+
+            .word-edit-dialog__action-btn {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
             }
         `
     ]

@@ -107,10 +107,6 @@ import { MessageService } from '@shared/ui-messaging/message/message.service';
                                             Veuillez sélectionner un genre.
                                         </div>
                                     }
-                                    <mat-form-field appearance="outline" class="word-new__translation-comment" color="primary">
-                                        <mat-label>{{ 'word.comment.label' | translate:{ lang: headerLangLabel() } }}</mat-label>
-                                        <input type="text" matInput formControlName="commentaire" />
-                                    </mat-form-field>
                                 </div>
                             </ng-container>
                         </div>
@@ -249,10 +245,6 @@ import { MessageService } from '@shared/ui-messaging/message/message.service';
                 flex: 0 0 240px;
             }
 
-            .word-new__translation-comment {
-                width: 100%;
-            }
-
             .word-new__translation-form-header {
                 font-weight: 600;
                 font-size: 0.9rem;
@@ -369,8 +361,7 @@ export class WordNewComponent implements OnDestroy {
             langueId: [langueId],
             name: [''],
             plural: [''],
-            genderId: [null],
-            commentaire: ['']
+            genderId: [null]
         });
     }
 

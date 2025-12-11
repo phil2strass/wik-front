@@ -17,12 +17,6 @@
                                 <input type="text" matInput [errorStateMatcher]="errorMatcher" formControlName="plural" />
                             </mat-form-field>
                         }
-                        @if (showComment) {
-                            <mat-form-field appearance="outline" class="w-100 p-0 m-t-20" color="primary">
-                                <mat-label>{{ (commentPlaceholder || 'word.comment.label') | translate: commentPlaceholderParams }}</mat-label>
-                                <textarea matInput formControlName="commentaire" rows="3"></textarea>
-                            </mat-form-field>
-                        }
                         @if (showTypeField) {
                             <mat-form-field appearance="outline" class="w-100 m-t-20">
                                 <mat-label>{{ 'word.form.type.label' | translate }}</mat-label>
@@ -61,10 +55,58 @@
         } @else {
             <div class="word-form__content w-100" [class.word-form__content-inline]="inlineLayout">
                 <h4 *ngIf="showTitle" Ctitle>{{ titleTranslationKey | translate }}</h4>
-                <div class="word-form__inline-row">
+
+                @if (inlineLayout) {
+                    <div class="word-form__inline-row">
+                        <mat-form-field
+                            appearance="outline"
+                            class="word-form__inline-field"
+                            color="primary"
+                            hideRequiredMarker="true">
+                            <mat-label>{{ 'word.form.name.label' | translate }}</mat-label>
+                            <input #nameInput type="text" matInput [errorStateMatcher]="errorMatcher" formControlName="name" />
+                            <mat-error *ngIf="showError('name', 'required')">Veuillez saisir un mot.</mat-error>
+                            <mat-error *ngIf="showError('name', 'duplicate')">Ce mot existe déjà pour ce type.</mat-error>
+                        </mat-form-field>
+                        @if (selectedType() && showPlural) {
+                            <mat-form-field appearance="outline" class="word-form__inline-field word-form__inline-plural" color="primary">
+                                <mat-label>{{ 'word.form.plural.label' | translate }}</mat-label>
+                                <input type="text" matInput [errorStateMatcher]="errorMatcher" formControlName="plural" />
+                            </mat-form-field>
+                        }
+                        @if (showTypeField) {
+                            <mat-form-field appearance="outline" class="word-form__inline-field" color="primary">
+                                <mat-label>{{ 'word.form.type.label' | translate }}</mat-label>
+                                <mat-select
+                                    formControlName="typeId"
+                                    [disabled]="disableTypeSelection"
+                                    disableOptionCentering
+                                    [errorStateMatcher]="errorMatcher">
+                                    @for (type of types(); track type) {
+                                        <mat-option [value]="type.id">{{ type.name }}</mat-option>
+                                    }
+                                </mat-select>
+                                <mat-error *ngIf="showError('typeId', 'required')">Veuillez saisir un type.</mat-error>
+                            </mat-form-field>
+                        }
+                        @if (selectedType() && genders().length) {
+                            <mat-form-field appearance="outline" class="word-form__inline-field word-form__inline-gender" color="primary">
+                                <mat-label>{{ 'word.form.gender.label' | translate }}</mat-label>
+                                <mat-select formControlName="genderId" [errorStateMatcher]="errorMatcher">
+                                    @for (gender of genders(); track gender) {
+                                        <mat-option [value]="gender.id">{{ genderLabel(gender) }}</mat-option>
+                                    }
+                                </mat-select>
+                                <mat-error *ngIf="showError('genderId', 'required')">
+                                    Veuillez sélectionner un genre.
+                                </mat-error>
+                            </mat-form-field>
+                        }
+                    </div>
+                } @else {
                     <mat-form-field
                         appearance="outline"
-                        class="word-form__inline-field"
+                        class="w-100"
                         color="primary"
                         hideRequiredMarker="true">
                         <mat-label>{{ 'word.form.name.label' | translate }}</mat-label>
@@ -72,14 +114,16 @@
                         <mat-error *ngIf="showError('name', 'required')">Veuillez saisir un mot.</mat-error>
                         <mat-error *ngIf="showError('name', 'duplicate')">Ce mot existe déjà pour ce type.</mat-error>
                     </mat-form-field>
+
                     @if (selectedType() && showPlural) {
-                        <mat-form-field appearance="outline" class="word-form__inline-field word-form__inline-plural" color="primary">
+                        <mat-form-field appearance="outline" class="w-100 m-t-12" color="primary">
                             <mat-label>{{ 'word.form.plural.label' | translate }}</mat-label>
                             <input type="text" matInput [errorStateMatcher]="errorMatcher" formControlName="plural" />
                         </mat-form-field>
                     }
+
                     @if (showTypeField) {
-                        <mat-form-field appearance="outline" class="word-form__inline-field" color="primary">
+                        <mat-form-field appearance="outline" class="w-100 m-t-12">
                             <mat-label>{{ 'word.form.type.label' | translate }}</mat-label>
                             <mat-select
                                 formControlName="typeId"
@@ -93,44 +137,24 @@
                             <mat-error *ngIf="showError('typeId', 'required')">Veuillez saisir un type.</mat-error>
                         </mat-form-field>
                     }
-                    @if (inlineLayout && selectedType() && genders().length) {
-                        <mat-form-field appearance="outline" class="word-form__inline-field word-form__inline-gender" color="primary">
-                            <mat-label>{{ 'word.form.gender.label' | translate }}</mat-label>
-                            <mat-select formControlName="genderId" [errorStateMatcher]="errorMatcher">
+
+                    @if (selectedType() && genders().length) {
+                        <div class="word-form__gender-wrapper word-form__gender-stacked">
+                            <mat-radio-group
+                                formControlName="genderId"
+                                aria-labelledby="example-radio-group-label"
+                                class="d-flex flex-column gap-8">
                                 @for (gender of genders(); track gender) {
-                                    <mat-option [value]="gender.id">{{ genderLabel(gender) }}</mat-option>
-                                }
-                            </mat-select>
-                            <mat-error *ngIf="showError('genderId', 'required')">
-                                Veuillez sélectionner un genre.
-                            </mat-error>
-                        </mat-form-field>
-                    }
-                </div>
-                @if (showComment) {
-                    <mat-form-field appearance="outline" class="word-form__comment-full" color="primary">
-                        <mat-label>{{ (commentPlaceholder || 'word.comment.label') | translate: commentPlaceholderParams }}</mat-label>
-                        <textarea matInput formControlName="commentaire" rows="3"></textarea>
-                    </mat-form-field>
-                }
-                @if (!inlineLayout && selectedType()) {
-                    <div class="word-form__gender-wrapper" [class.word-form__gender-inline]="inlineLayout">
-                        <mat-radio-group
-                            formControlName="genderId"
-                            aria-labelledby="example-radio-group-label"
-                            class="d-flex flex-wrap gap-24 justify-content-start 100 mt-2">
-                            @for (gender of genders(); track gender) {
-                                <mat-card class="cardWithShadow b-1 rounded d-flex gap-30 align-items-center flex-row">
-                                    <mat-radio-button class="p-r-16 p-l-6 p-y-2" color="primary" [value]="gender.id">
+                                    <mat-radio-button color="primary" [value]="gender.id">
                                         {{ genderLabel(gender) }}
                                     </mat-radio-button>
-                                </mat-card>
-                            }
-                        </mat-radio-group>
-                        <div class="mat-error word-form__gender-error" *ngIf="showError('genderId', 'required')">
-                            Veuillez sélectionner un genre.
+                                }
+                            </mat-radio-group>
+                            <div class="mat-error word-form__gender-error" *ngIf="showError('genderId', 'required')">
+                                Veuillez sélectionner un genre.
+                            </div>
                         </div>
-                    </div>
+                    }
                 }
             </div>
         }

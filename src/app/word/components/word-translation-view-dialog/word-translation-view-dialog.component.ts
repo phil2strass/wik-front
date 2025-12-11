@@ -1,4 +1,4 @@
-import { Component, Inject, effect, inject } from '@angular/core';
+import { Component, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
@@ -13,8 +13,6 @@ import { WordFormComponent } from '../word-form/word-form.component';
 import { forkJoin, Observable } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
-import { SecurityStore } from '@shared/security/security-store';
-import { DataStore } from '@shared/data/data-store';
 
 type WordTranslationEditDialogData = {
     parentWord: Word;
@@ -35,8 +33,6 @@ type WordTranslationEditDialogData = {
 })
 export class WordTranslationEditDialogComponent {
     title: string;
-    commentPlaceholder = 'word.comment.label';
-    commentPlaceholderParams: Record<string, unknown> = {};
     targetWordLabel = '';
     translationForms: FormGroup[] = [];
     selectedIndex = 0;
@@ -45,9 +41,6 @@ export class WordTranslationEditDialogComponent {
     languages: Langue[] = [];
     activeLang: Langue;
     private pendingDeleteWordTypeIds: number[] = [];
-    readonly #securityStore = inject(SecurityStore);
-    readonly #dataStore = inject(DataStore);
-
     constructor(
         @Inject(MAT_DIALOG_DATA) public data: WordTranslationEditDialogData,
         private dialogRef: MatDialogRef<WordTranslationEditDialogComponent>,
@@ -66,12 +59,6 @@ export class WordTranslationEditDialogComponent {
         this.title = `${this.targetWordLabel} ->`;
         this.requiresGenderField = this.shouldRequireGender(this.activeLang, data.typeId);
         this.translationForms = this.buildFormsForLang(this.activeLang);
-
-        effect(() => {
-            const selectedId = this.#securityStore.langueSelected();
-            const langues = this.#dataStore.langues();
-            this.updateCommentPlaceholder(selectedId, langues);
-        });
     }
 
     get selectedForm(): FormGroup | null {
@@ -207,7 +194,6 @@ export class WordTranslationEditDialogComponent {
         lang: Langue,
         data: WordTranslationEditDialogData
     ): FormGroup {
-        const defaultComment = this.computeDefaultComment(translation, { ...data, langue: lang });
         return this.fb.group({
             wordTypeId: [translation?.wordTypeId ?? null],
             name: [translation?.name ?? '', Validators.required],
@@ -215,7 +201,6 @@ export class WordTranslationEditDialogComponent {
             langueId: [translation?.langueId ?? lang.id, Validators.required],
             typeId: [translation?.typeId ?? data.typeId ?? null, Validators.required],
             genderId: [translation?.genderId ?? null],
-            commentaire: [translation?.commentaire ?? defaultComment],
             baseWordTypeId: [data.parentWord.wordTypeId]
         });
     }
@@ -282,8 +267,7 @@ export class WordTranslationEditDialogComponent {
                 wordTypeId: typeof maybe.wordTypeId === 'number' ? maybe.wordTypeId : null,
                 langueId: typeof maybe.langueId === 'number' ? maybe.langueId : null,
                 typeId: typeof maybe.typeId === 'number' ? maybe.typeId : null,
-                plural: typeof maybe.plural === 'string' ? maybe.plural : '',
-                commentaire: typeof maybe.commentaire === 'string' ? maybe.commentaire : ''
+                plural: typeof maybe.plural === 'string' ? maybe.plural : ''
             };
         }
         return {
@@ -292,21 +276,8 @@ export class WordTranslationEditDialogComponent {
             wordTypeId: null,
             langueId: null,
             typeId: null,
-            plural: '',
-            commentaire: ''
+            plural: ''
         };
-    }
-
-    private computeDefaultComment(translation: WordTranslationValue | undefined, data: WordTranslationEditDialogData): string {
-        if (translation?.commentaire) {
-            return translation.commentaire;
-        }
-        const sourceIso = data.sourceLangueIso?.trim().toUpperCase();
-        const targetIso = data.langue.iso?.trim().toUpperCase();
-        if (sourceIso === 'FR' && targetIso === 'EN') {
-            return 'commentaire en français';
-        }
-        return '';
     }
 
     private buildTargetWordLabel(data: WordTranslationEditDialogData): string {
@@ -325,13 +296,6 @@ export class WordTranslationEditDialogComponent {
             return this.capitalizeLastWord(withArticle);
         }
         return withArticle;
-    }
-
-    private updateCommentPlaceholder(selectedId: number | undefined, langues: Langue[]) {
-        const selectedLang = langues.find(lang => lang.id === selectedId);
-        const langLabel = selectedLang ? this.computeLangLabel(selectedLang) : undefined;
-        this.commentPlaceholder = 'word.comment.label';
-        this.commentPlaceholderParams = langLabel ? { lang: langLabel } : {};
     }
 
     private computeLangLabel(langue: Langue): string | undefined {

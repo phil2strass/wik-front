@@ -41,12 +41,9 @@
             [showPlural]="true"
             [genderOptional]="!requiresGenderField"
             [showTitle]="false"
-            [showComment]="true"
             [handleSubmit]="false"
             [gendersOverride]="activeLang?.genders ?? data.langue.genders"
-            [autoFocusName]="false"
-            [commentPlaceholder]="commentPlaceholder"
-            [commentPlaceholderParams]="commentPlaceholderParams"></app-word-form>
+            [autoFocusName]="false"></app-word-form>
         <div class="word-translation-dialog__form-footer" *ngIf="translationForms.length > 1">
             <button
                 mat-button
