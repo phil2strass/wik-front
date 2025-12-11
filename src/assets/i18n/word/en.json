@@ -40,6 +40,13 @@
         "10": "determiner",
         "11": "proper noun"
     },
+    "word.import": {
+        "title": "Import words from JSON",
+        "label": "Paste a JSON array of words",
+        "submit": "Import",
+        "required": "This field is required"
+    },
+    "common.actions.reset": "Reset",
     "word.examples": {
         "menu": "Examples",
         "section": "Examples",

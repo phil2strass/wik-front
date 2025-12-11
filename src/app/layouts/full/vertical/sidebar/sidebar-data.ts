@@ -21,6 +21,12 @@ export const navItems: NavItem[] = [
         iconName: 'category',
         route: '/word/categories',
         adminOnly: true
+    },
+    {
+        displayName: 'sidebar.import',
+        iconName: 'upload',
+        route: '/word/import',
+        adminOnly: true
     }
     /*
   {

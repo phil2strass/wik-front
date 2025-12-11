@@ -40,6 +40,13 @@
         "10": "Determinativ",
         "11": "Eigenname"
     },
+    "word.import": {
+        "title": "Wörter aus JSON importieren",
+        "label": "JSON-Array von Wörtern einfügen",
+        "submit": "Importieren",
+        "required": "Dieses Feld ist erforderlich"
+    },
+    "common.actions.reset": "Zurücksetzen",
     "word.examples": {
         "menu": "Beispiele",
         "section": "Beispiele",

@@ -40,6 +40,13 @@
         "10": "déterminant",
         "11": "nom propre"
     },
+    "word.import": {
+        "title": "Importer des mots en JSON",
+        "label": "Coller un tableau JSON de mots",
+        "submit": "Valider l'import",
+        "required": "Ce champ est requis"
+    },
+    "common.actions.reset": "Réinitialiser",
     "word.examples": {
         "menu": "Exemples",
         "section": "Exemples",

@@ -112,6 +112,12 @@
   "Menu 1": "Menu 1",
   "Menu 2": "Menu 2",
   "Disabled": "Désactivé",
+  "sidebar": {
+    "vocabulary": "Vocabulaire",
+    "new": "Nouveau",
+    "list": "Liste",
+    "import": "Importer (JSON)"
+  },
   "welcome": {
     "message": "Bientôt un site pour apprendre du vocabulaire et sauvegarder votre savoir."
   }
