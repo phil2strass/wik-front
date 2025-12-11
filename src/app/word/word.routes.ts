@@ -6,7 +6,6 @@ import { WordComponent } from './components/word.component';
 import { ProfilSidebarComponent } from '../user/components/profil-sidebar.component';
 import { SidebarComponent } from '../layouts/full/vertical/sidebar/sidebar.component';
 import { adminGuard } from '@shared/security/admin.guard';
-import { WordImportComponent } from './components/word-import.component';
 
 export default [
     {
@@ -28,7 +27,7 @@ export default [
             },
             {
                 path: 'import',
-                component: WordImportComponent
+                loadComponent: () => import('./components/word-import/word-import.component').then(m => m.WordImportComponent)
             },
             {
                 path: 'categories',
