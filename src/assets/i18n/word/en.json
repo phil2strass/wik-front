@@ -27,6 +27,19 @@
         },
         "translationFor": "Word in {{lang}}"
     },
+    "word.type": {
+        "1": "noun",
+        "2": "plural noun",
+        "3": "pronoun",
+        "4": "verb",
+        "5": "adjective",
+        "6": "adverb",
+        "7": "preposition",
+        "8": "conjunction",
+        "9": "interjection",
+        "10": "determiner",
+        "11": "proper noun"
+    },
     "word.examples": {
         "menu": "Examples",
         "section": "Examples",

@@ -27,6 +27,19 @@
         },
         "translationFor": "Wort auf {{lang}}"
     },
+    "word.type": {
+        "1": "Nomen",
+        "2": "Nomen (Plural)",
+        "3": "Pronomen",
+        "4": "Verb",
+        "5": "Adjektiv",
+        "6": "Adverb",
+        "7": "Präposition",
+        "8": "Konjunktion",
+        "9": "Interjektion",
+        "10": "Determinativ",
+        "11": "Eigenname"
+    },
     "word.examples": {
         "menu": "Beispiele",
         "section": "Beispiele",
