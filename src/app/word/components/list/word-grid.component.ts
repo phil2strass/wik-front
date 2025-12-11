@@ -15,6 +15,7 @@ import { SelectionModel } from '@angular/cdk/collections';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { WordDeleteSelectedDialogComponent } from '../word-delete-selected-dialog.component';
 import { Gender, Langue } from '@shared/data/models/langue.model';
+import { Type } from '@shared/data/models/type.model';
 import { SecurityStore } from '@shared/security/security-store';
 import { WordTranslationEditDialogComponent } from '../word-translation-view-dialog/word-translation-view-dialog.component';
 import { MatPaginatorIntl } from '@angular/material/paginator';
@@ -174,6 +175,15 @@ export class WordGridComponent implements OnDestroy {
 
     onTypeFilterChange(typeId: number | null) {
         this.#wordGridStore.setTypeFilter(typeId ?? null);
+    }
+
+    typeLabel(type: Type | { id?: number; name?: string } | null | undefined): string {
+        if (!type || !type.id) {
+            return type?.name ?? '';
+        }
+        const key = `word.type.${type.id}`;
+        const translated = this.#translate.instant(key);
+        return translated && translated !== key ? translated : type.name ?? '';
     }
 
     translationColumnId(langueId: number): string {
