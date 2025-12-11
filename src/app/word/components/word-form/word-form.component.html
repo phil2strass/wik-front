@@ -26,7 +26,7 @@
                                     disableOptionCentering
                                     [errorStateMatcher]="errorMatcher">
                                     @for (type of types(); track type) {
-                                        <mat-option [value]="type.id">{{ type.name }}</mat-option>
+                                        <mat-option [value]="type.id">{{ typeLabel(type) }}</mat-option>
                                     }
                                 </mat-select>
                                 <mat-error *ngIf="showError('typeId', 'required')">Veuillez saisir un type.</mat-error>
@@ -83,7 +83,7 @@
                                     disableOptionCentering
                                     [errorStateMatcher]="errorMatcher">
                                     @for (type of types(); track type) {
-                                        <mat-option [value]="type.id">{{ type.name }}</mat-option>
+                                        <mat-option [value]="type.id">{{ typeLabel(type) }}</mat-option>
                                     }
                                 </mat-select>
                                 <mat-error *ngIf="showError('typeId', 'required')">Veuillez saisir un type.</mat-error>
@@ -131,7 +131,7 @@
                                 disableOptionCentering
                                 [errorStateMatcher]="errorMatcher">
                                 @for (type of types(); track type) {
-                                    <mat-option [value]="type.id">{{ type.name }}</mat-option>
+                                    <mat-option [value]="type.id">{{ typeLabel(type) }}</mat-option>
                                 }
                             </mat-select>
                             <mat-error *ngIf="showError('typeId', 'required')">Veuillez saisir un type.</mat-error>

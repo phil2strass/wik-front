@@ -8,6 +8,7 @@ import { MatSelect } from '@angular/material/select';
 import { WordStore } from '../../word-store';
 import { DataStore } from '@shared/data/data-store';
 import { Gender } from '@shared/data/models/langue.model';
+import { Type } from '@shared/data/models/type.model';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
 import { MessageService } from '@shared/ui-messaging/message/message.service';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -133,6 +134,15 @@ export class WordFormComponent implements AfterViewInit, OnChanges, OnDestroy {
         const key = `gender.${normalized}`;
         const translated = this.#translate.instant(key);
         return translated && translated !== key ? translated : raw;
+    }
+
+    protected typeLabel(type: Type | { id?: number; name?: string } | null | undefined): string {
+        if (!type || !type.id) {
+            return type?.name ?? '';
+        }
+        const key = `word.type.${type.id}`;
+        const translated = this.#translate.instant(key);
+        return translated && translated !== key ? translated : type.name ?? '';
     }
 
     constructor() {
