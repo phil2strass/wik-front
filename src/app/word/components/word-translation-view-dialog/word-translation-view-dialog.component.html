@@ -35,7 +35,7 @@
         <div class="word-translation-dialog__translation-list">
             <div
                 class="word-translation-dialog__translation-row"
-                *ngFor="let formGroup of filteredTranslationForms; track trackFormGroup"
+                *ngFor="let formGroup of filteredTranslationForms; trackBy: trackFormGroup"
                 [class.word-translation-dialog__item--active]="formGroup === editingForm || formGroup === selectedForm"
                 (click)="selectTranslationByForm(formGroup)">
                 <div class="word-translation-dialog__item-details">
