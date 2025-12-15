@@ -7,7 +7,7 @@ import { Configuration } from '../config/configuration';
 import { mapResponse } from '@ngrx/operators';
 import { finalize } from 'rxjs';
 import { Langue } from '@shared/data/models/langue.model';
-import { Profil, ProfilStorage, User } from '@shared/models/user.model';
+import { ProfilStorage, User } from '@shared/models/user.model';
 
 export interface SecurityState {
     loaded: boolean;
@@ -28,6 +28,41 @@ export const ANONYMOUS_USER: User = {
     roles: [],
     groups: []
 };
+
+function normalizeLangueId(value: unknown): number | undefined {
+    if (typeof value === 'number' && Number.isFinite(value)) {
+        return value;
+    }
+    if (typeof value === 'string') {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : undefined;
+    }
+    if (value && typeof value === 'object' && 'id' in (value as { id?: unknown })) {
+        const parsed = Number((value as { id?: unknown }).id);
+        return Number.isFinite(parsed) ? parsed : undefined;
+    }
+    return undefined;
+}
+
+function normalizeProfil(profil?: ProfilStorage | null): ProfilStorage | undefined {
+    if (!profil) {
+        return undefined;
+    }
+    const langueMaternelle = normalizeLangueId(profil.langueMaternelle);
+    const langueSelected = normalizeLangueId(profil.langueSelected);
+    const langues = Array.isArray(profil.langues)
+        ? profil.langues
+              .map(langue => normalizeLangueId(langue))
+              .filter((id): id is number => id !== undefined)
+        : [];
+
+    return {
+        ...profil,
+        langueMaternelle: langueMaternelle ?? undefined,
+        langueSelected: langueSelected ?? undefined,
+        langues
+    };
+}
 
 export const SecurityStore = signalStore(
     { providedIn: 'root' },
@@ -74,20 +109,30 @@ export const SecurityStore = signalStore(
                 await keycloakService.logout();
             },
             updateProfil(profilStorage: ProfilStorage) {
-                localStorage.setItem('profil', JSON.stringify(profilStorage));
+                const normalizedProfil = normalizeProfil(profilStorage);
+                if (normalizedProfil) {
+                    localStorage.setItem('profil', JSON.stringify(normalizedProfil));
+                } else {
+                    localStorage.removeItem('profil');
+                }
                 patchState(store, state => ({
                     loaded: true,
-                    user: state.user ? { ...state.user, profil: profilStorage } : undefined
+                    user: state.user ? { ...state.user, profil: normalizedProfil } : undefined
                 }));
             },
             updateLangueSelected(langue: Langue) {
-                patchState(store, state => ({
-                    user: state.user
-                        ? { ...state.user, profil: state.user.profil ? { ...state.user.profil, langueSelected: langue.id } : undefined }
-                        : undefined
-                }));
-                if (store.user()?.profil) {
-                    localStorage.setItem('profil', JSON.stringify(store.user()?.profil));
+                let normalizedProfil: ProfilStorage | undefined;
+                patchState(store, state => {
+                    const updatedProfil = state.user?.profil ? { ...state.user.profil, langueSelected: langue.id } : undefined;
+                    normalizedProfil = normalizeProfil(updatedProfil);
+                    return {
+                        user: state.user ? { ...state.user, profil: normalizedProfil } : undefined
+                    };
+                });
+                if (normalizedProfil) {
+                    localStorage.setItem('profil', JSON.stringify(normalizedProfil));
+                } else {
+                    localStorage.removeItem('profil');
                 }
                 httpClient.put(baseUrl + 'user/profil/langue', langue.id).subscribe();
             },
@@ -138,13 +183,22 @@ export const SecurityStore = signalStore(
                     patchState(store, { user, loaded: true });
 
                     let data = localStorage.getItem('profil');
+                    let loadedFromStorage = false;
                     if (data) {
-                        const profilLocalStorage = JSON.parse(data);
-                        patchState(store, state => ({
-                            loaded: true,
-                            user: state.user ? { ...state.user, profil: profilLocalStorage } : undefined
-                        }));
-                    } else {
+                        try {
+                            const profilLocalStorage = normalizeProfil(JSON.parse(data));
+                            if (profilLocalStorage) {
+                                patchState(store, state => ({
+                                    loaded: true,
+                                    user: state.user ? { ...state.user, profil: profilLocalStorage } : undefined
+                                }));
+                                loadedFromStorage = true;
+                            }
+                        } catch {
+                            loadedFromStorage = false;
+                        }
+                    }
+                    if (!loadedFromStorage) {
                         store.loadProfil();
                     }
                 } else {
