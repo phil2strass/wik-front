@@ -20,6 +20,7 @@ export interface Word {
     langue: number;
     name: string;
     type: Type;
+    types?: string; // comma-separated list when multiple types are present
     gender: Gender;
     plural: string;
     translations?: WordTranslations;

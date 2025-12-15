@@ -13,47 +13,76 @@
     </span>
 </h2>
 <mat-dialog-content class="word-translation-dialog__content">
-    <div class="word-translation-dialog__sidebar">
-        <div class="word-translation-dialog__sidebar-header">
+    <div class="word-translation-dialog__types">
+        <div class="word-translation-dialog__types-title">{{ 'word.table.column.type' | translate }}</div>
+        <mat-chip-listbox aria-label="Types">
+            <mat-chip-option
+                *ngFor="let typeId of typeOptions"
+                [selected]="typeId === activeTypeId"
+                (selectionChange)="selectType(typeId)">
+                {{ typeLabel(typeId) }}
+            </mat-chip-option>
+        </mat-chip-listbox>
+    </div>
+    <div class="word-translation-dialog__translations">
+        <div class="word-translation-dialog__translations-header">
+            <div class="word-translation-dialog__translations-title">{{ 'word.translation.section' | translate }}</div>
             <button mat-stroked-button type="button" (click)="addTranslation()">
-                {{ 'word.translation.add' | translate }}
+                <mat-icon>add</mat-icon>
+                <span>{{ 'word.translation.add' | translate }}</span>
             </button>
         </div>
-        <mat-nav-list>
-            <a
-                mat-list-item
-                *ngFor="let formGroup of translationForms; let index = index"
-                (click)="selectTranslation(index)"
-                [class.word-translation-dialog__item--active]="index === selectedIndex">
-                <div class="word-translation-dialog__item-title">
-                    {{ formGroup.value.name?.trim() || ('word.translation.new' | translate) }}
+        <div class="word-translation-dialog__translation-list">
+            <div
+                class="word-translation-dialog__translation-row"
+                *ngFor="let formGroup of filteredTranslationForms; track trackFormGroup"
+                [class.word-translation-dialog__item--active]="formGroup === editingForm || formGroup === selectedForm"
+                (click)="selectTranslationByForm(formGroup)">
+                <div class="word-translation-dialog__item-details">
+                    <div class="word-translation-dialog__item-title">
+                        {{ formGroup.value.name?.trim() || ('word.translation.new' | translate) }}
+                    </div>
+                    <div class="word-translation-dialog__item-meta">
+                        <span *ngIf="formGroup.value.plural?.trim() as plural">{{ 'word.table.column.plural' | translate }}: {{ plural }}</span>
+                        <span *ngIf="genderLabel(formGroup) as gender">{{ gender }}</span>
+                    </div>
                 </div>
-            </a>
-        </mat-nav-list>
-    </div>
-    <div class="word-translation-dialog__form" *ngIf="selectedForm as activeForm">
-        <app-word-form
-            [form]="activeForm"
-            mode="update"
-            [useCard]="false"
-            [disableTypeSelection]="true"
-            [showTypeField]="false"
-            [showPlural]="true"
-            [genderOptional]="!requiresGenderField"
-            [showTitle]="false"
-            [handleSubmit]="false"
-            [gendersOverride]="activeLang?.genders ?? data.langue.genders"
-            [autoFocusName]="false"></app-word-form>
-        <div class="word-translation-dialog__form-footer" *ngIf="translationForms.length > 1">
-            <button
-                mat-button
-                color="warn"
-                type="button"
-                class="word-translation-dialog__delete-btn"
-                (click)="deleteTranslation(selectedIndex, $event)"
-                [disabled]="loading">
-                {{ 'word.translation.delete' | translate }}
-            </button>
+                <div class="word-translation-dialog__item-actions">
+                    <button
+                        mat-icon-button
+                        type="button"
+                        (click)="startEditing(formGroup, $event)"
+                        [disabled]="loading">
+                        <mat-icon>edit</mat-icon>
+                    </button>
+                    <button
+                        mat-icon-button
+                        color="warn"
+                        type="button"
+                        (click)="deleteTranslation(translationForms.indexOf(formGroup), $event)"
+                        [disabled]="loading">
+                        <mat-icon>delete</mat-icon>
+                    </button>
+                </div>
+            </div>
+            <div class="word-translation-dialog__empty" *ngIf="filteredTranslationForms.length === 0">
+                {{ 'word.translation.empty' | translate }}
+            </div>
+        </div>
+
+        <div class="word-translation-dialog__form" *ngIf="editingForm as activeForm">
+            <app-word-form
+                [form]="activeForm"
+                mode="update"
+                [useCard]="false"
+                [disableTypeSelection]="true"
+                [showTypeField]="false"
+                [showPlural]="true"
+                [genderOptional]="!requiresGenderField"
+                [showTitle]="false"
+                [handleSubmit]="false"
+                [gendersOverride]="activeLang?.genders ?? data.langue.genders"
+                [autoFocusName]="false"></app-word-form>
         </div>
     </div>
 </mat-dialog-content>

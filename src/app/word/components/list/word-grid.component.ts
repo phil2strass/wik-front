@@ -186,6 +186,17 @@ export class WordGridComponent implements OnDestroy {
         return translated && translated !== key ? translated : type.name ?? '';
     }
 
+    typesLabel(row: Word): string {
+        if (row.types && row.types.trim().length > 0) {
+            return row.types
+                .split(',')
+                .map(part => part.trim())
+                .filter(part => part.length > 0)
+                .join(', ');
+        }
+        return this.typeLabel(row.type) || '-';
+    }
+
     translationColumnId(langueId: number): string {
         return `translation-${langueId}`;
     }
