@@ -45,6 +45,24 @@
     margin-bottom: 8px;
 }
 
+.word-translation-dialog__type-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.word-translation-dialog__type-btn {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+    padding: 6px 10px;
+}
+
+.word-translation-dialog__type-btn--active {
+    background-color: rgba(25, 118, 210, 0.12);
+    border-color: #1976d2;
+}
+
 .word-translation-dialog__translations {
     flex: 1;
     display: flex;
@@ -68,23 +86,26 @@
 .word-translation-dialog__translation-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 6px;
-    padding: 8px;
+    gap: 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 0;
+}
+
+.word-translation-dialog__translation-list mat-progress-bar {
+    height: 4px;
+    border-radius: 4px;
 }
 
 .word-translation-dialog__translation-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 8px;
-    border-radius: 4px;
+    padding: 10px 8px;
     cursor: pointer;
 }
 
-.word-translation-dialog__translation-row.word-translation-dialog__item--active {
-    background-color: rgba(25, 118, 210, 0.12);
+.word-translation-dialog__translation-row + .word-translation-dialog__translation-row {
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .word-translation-dialog__item-details {
@@ -93,6 +114,19 @@
     gap: 2px;
     flex: 1;
     min-width: 0;
+}
+
+.word-translation-dialog__inline-field {
+    width: 100%;
+}
+
+.word-translation-dialog__meaning-label {
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.word-translation-dialog__inline-field .mat-mdc-form-field-subscript-wrapper {
+    display: none;
 }
 
 .word-translation-dialog__item-title {

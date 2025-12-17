@@ -1,7 +1,7 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MAT_DIALOG_DATA, MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { HttpClient } from '@angular/common/http';
@@ -9,14 +9,17 @@ import { Configuration } from '../../../shared/config/configuration';
 import { MessageService } from '@shared/ui-messaging/message/message.service';
 import { Word, WordTranslationValue } from '../../models/word.model';
 import { Langue } from '@shared/data/models/langue.model';
-import { WordFormComponent } from '../word-form/word-form.component';
-import { forkJoin, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatRippleModule } from '@angular/material/core';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { DataStore } from '@shared/data/data-store';
-import { inject } from '@angular/core';
+import { WordMeaningTranslation, WordTranslationModalStore } from '../../word-translation-modal-store';
+import { WordTranslationDeleteConfirmDialogComponent } from '../word-translation-delete-confirm-dialog.component';
 
 type WordTranslationEditDialogData = {
     parentWord: Word;
@@ -33,8 +36,10 @@ type WordTranslationEditDialogData = {
     templateUrl: './word-translation-view-dialog.component.html',
     styleUrls: ['./word-translation-view-dialog.component.scss'],
     standalone: true,
+    providers: [WordTranslationModalStore],
     imports: [
         CommonModule,
+        ReactiveFormsModule,
         MatDialogTitle,
         MatDialogContent,
         MatDialogActions,
@@ -43,7 +48,9 @@ type WordTranslationEditDialogData = {
         MatIconModule,
         MatChipsModule,
         MatRippleModule,
-        WordFormComponent,
+        MatProgressBarModule,
+        MatFormFieldModule,
+        MatInputModule,
         TranslateModule
     ]
 })
@@ -53,55 +60,87 @@ export class WordTranslationEditDialogComponent {
     translationForms: FormGroup[] = [];
     selectedIndex = 0;
     editingForm: FormGroup | null = null;
-    loading = false;
+    private editingSnapshot: unknown | null = null;
+    private formsByMeaningId = new Map<number, FormGroup>();
+    saving = false;
     requiresGenderField: boolean;
-    languages: Langue[] = [];
-    activeLang: Langue;
-    activeTypeId: number | null = null;
-    private pendingDeleteWordTypeIds: number[] = [];
     constructor(
         @Inject(MAT_DIALOG_DATA) public data: WordTranslationEditDialogData,
         private dialogRef: MatDialogRef<WordTranslationEditDialogComponent>,
+        private dialog: MatDialog,
         private fb: FormBuilder,
         private http: HttpClient,
         private configuration: Configuration,
         private messageService: MessageService,
         private translate: TranslateService
     ) {
-        this.languages = data.languages ?? [data.langue];
-        this.activeLang = data.langue;
+        this.translationModalStore.init({
+            parentWord: data.parentWord,
+            langue: data.langue,
+            languages: data.languages,
+            initialTypeId: data.typeId
+        });
         this.targetWordLabel = this.formatLocalizedWord(
             data.parentWord,
             data.sourceLangueIso ?? data.langue.iso
         );
         this.title = `${this.targetWordLabel} ->`;
-        this.requiresGenderField = this.shouldRequireGender(this.activeLang, data.typeId);
-        this.translationForms = this.buildFormsForLang(this.activeLang);
-        this.activeTypeId = this.resolveInitialTypeId(data.typeId);
-        if (this.activeTypeId == null && this.typeOptions.length > 0) {
-            this.activeTypeId = this.typeOptions[0];
-        }
-        this.selectedIndex = this.translationForms.length ? 0 : -1;
+        this.requiresGenderField = this.shouldRequireGender(this.activeLang, this.activeTypeId);
+        this.selectedIndex = -1;
+
+        effect(() => {
+            this.requiresGenderField = this.shouldRequireGender(this.activeLang, this.activeTypeId);
+        });
+
+        effect(() => {
+            const status = this.translationModalStore.status();
+            const meanings = this.translationModalStore.meaningTranslations();
+            const pendingEditMeaningId = this.translationModalStore.pendingEditMeaningId();
+            if (status !== 'loaded') {
+                return;
+            }
+            this.editingForm = null;
+            this.editingSnapshot = null;
+            this.syncMeaningForms(meanings);
+            this.selectedIndex = this.translationForms.length ? 0 : -1;
+            if (pendingEditMeaningId != null) {
+                const form = this.formsByMeaningId.get(pendingEditMeaningId);
+                if (form) {
+                    this.startEditing(form);
+                }
+            }
+        });
     }
 
     private readonly dataStore = inject(DataStore);
+    private readonly translationModalStore = inject(WordTranslationModalStore);
+
+    get languages(): Langue[] {
+        return this.translationModalStore.languages();
+    }
+
+    get activeLang(): Langue {
+        return this.translationModalStore.selectedLanguage() ?? this.data.langue;
+    }
+
+    get activeTypeId(): number | null {
+        return this.translationModalStore.selectedTypeId();
+    }
+
+    get loading(): boolean {
+        return this.saving || this.translationModalStore.status() === 'loading';
+    }
+
+    get displayWordLabel(): string {
+        return this.meaningMode ? `${this.targetWordLabel} 1` : this.targetWordLabel;
+    }
+
+    get meaningMode(): boolean {
+        return this.translationModalStore.meanings().length > 1;
+    }
 
     get typeOptions(): number[] {
-        const ids = new Set<number>();
-        if (this.data.typeId != null) {
-            ids.add(this.data.typeId);
-        }
-        if (this.data.parentWord?.type?.id != null) {
-            ids.add(this.data.parentWord.type.id);
-        }
-        this.resolveTypeIdsFromBaseTypes().forEach(id => ids.add(id));
-        this.translationForms.forEach(form => {
-            const id = this.translationTypeId(form);
-            if (typeof id === 'number') {
-                ids.add(id);
-            }
-        });
-        return Array.from(ids.values());
+        return this.translationModalStore.typeOptionIds();
     }
 
     get baseTypes(): string[] {
@@ -131,16 +170,8 @@ export class WordTranslationEditDialogComponent {
         return this.translationForms.filter(f => this.translationTypeId(f) === this.activeTypeId);
     }
 
-    addTranslation(): void {
-        const targetTypeId = this.activeTypeId ?? this.typeOptions[0] ?? null;
-        if (targetTypeId == null) {
-            return;
-        }
-        this.activeTypeId = targetTypeId;
-        const form = this.createTranslationForm(undefined, this.activeLang, this.data, targetTypeId);
-        this.translationForms.push(form);
-        this.selectedIndex = this.translationForms.length - 1;
-        this.editingForm = form;
+    addMeaning(): void {
+        this.translationModalStore.addMeaning();
     }
 
     selectTranslation(index: number): void {
@@ -158,117 +189,141 @@ export class WordTranslationEditDialogComponent {
 
     startEditing(form: FormGroup, event?: Event): void {
         event?.stopPropagation();
+        if (this.loading) {
+            return;
+        }
         this.editingForm = form;
+        this.editingSnapshot = form.getRawValue();
         this.selectTranslationByForm(form);
     }
 
-    deleteTranslation(index: number, event: Event): void {
+    deleteTranslation(form: FormGroup, event: Event): void {
         event.stopPropagation();
         if (this.loading) {
             return;
         }
-        const form = this.translationForms[index];
-        if (!form) {
-            return;
-        }
-        if (this.editingForm === form) {
-            this.editingForm = null;
-        }
-        const wordTypeId = form.get('wordTypeId')?.value;
-        if (wordTypeId) {
-            this.pendingDeleteWordTypeIds.push(wordTypeId);
-        }
-        this.translationForms.splice(index, 1);
-        if (this.selectedIndex >= this.translationForms.length) {
-            this.selectedIndex = this.translationForms.length - 1;
-        }
+        if (!form) return;
+
+        const name = typeof form.get('name')?.value === 'string' ? (form.get('name')?.value as string).trim() : '';
+        const confirmRef = this.dialog.open(WordTranslationDeleteConfirmDialogComponent, {
+            width: '420px',
+            data: { name: name || null }
+        });
+
+        confirmRef.afterClosed().subscribe(confirm => {
+            if (!confirm) {
+                return;
+            }
+
+            if (this.editingForm === form) {
+                this.editingForm = null;
+                this.editingSnapshot = null;
+            }
+
+            const wordTypeId = this.extractNumber(form.get('wordTypeId')?.value);
+            if (!wordTypeId) {
+                const idx = this.translationForms.indexOf(form);
+                if (idx >= 0) {
+                    this.translationForms.splice(idx, 1);
+                    if (this.selectedIndex >= this.translationForms.length) {
+                        this.selectedIndex = this.translationForms.length - 1;
+                    }
+                }
+                return;
+            }
+
+            this.saving = true;
+            this.http.delete(`${this.configuration.baseUrl}word/${wordTypeId}`).subscribe({
+                next: () => {
+                    this.messageService.info('Suppression réussie');
+                    this.translationModalStore.reloadTranslations();
+                },
+                error: err => {
+                    this.messageService.error(err?.error ?? 'Erreur lors de la suppression');
+                },
+                complete: () => {
+                    this.saving = false;
+                }
+            });
+        });
     }
 
     onCancel(): void {
         this.dialogRef.close();
     }
 
-    save(): void {
-        if (!this.translationForms.length && this.pendingDeleteWordTypeIds.length === 0) {
-            this.dialogRef.close();
+    validateEdit(form: FormGroup, event?: Event): void {
+        event?.stopPropagation();
+        if (this.loading) {
             return;
         }
-        let hasInvalid = false;
-        const actionableForms = this.translationForms.filter(form => {
-            if (form.invalid) {
-                hasInvalid = true;
-                form.markAllAsTouched();
-                return false;
-            }
-            const nameValue = form.get('name')?.value;
-            return typeof nameValue === 'string' && nameValue.trim().length > 0;
-        });
-        if (hasInvalid) {
+        if (form.invalid) {
+            form.markAllAsTouched();
             return;
         }
-        if (actionableForms.length === 0 && this.pendingDeleteWordTypeIds.length === 0) {
-            this.dialogRef.close();
+        const nameValue = form.get('name')?.value;
+        if (typeof nameValue !== 'string' || nameValue.trim().length === 0) {
+            form.get('name')?.setErrors({ required: true });
+            form.markAllAsTouched();
             return;
         }
-        this.loading = true;
-        const requests: Observable<unknown>[] = [];
-        actionableForms.forEach(form => {
-            const payload = form.getRawValue();
-            const hasId = !!payload.wordTypeId;
-            const request$ = hasId
-                ? this.http.put(`${this.configuration.baseUrl}word`, payload)
-                : this.http.post(`${this.configuration.baseUrl}word/${this.data.parentWord.wordTypeId}/translation`, payload);
-            requests.push(request$);
-        });
-        this.pendingDeleteWordTypeIds.forEach(id => {
-            requests.push(this.http.delete(`${this.configuration.baseUrl}word/${id}`));
-        });
-        this.pendingDeleteWordTypeIds = [];
-        forkJoin(requests).subscribe({
+
+        this.saving = true;
+        const payload = form.getRawValue();
+        const hasId = !!payload.wordTypeId;
+        const request$: Observable<unknown> = hasId
+            ? this.http.put(`${this.configuration.baseUrl}word`, payload)
+            : this.http.post(`${this.configuration.baseUrl}word/${this.data.parentWord.wordTypeId}/translation`, payload);
+        request$.subscribe({
             next: () => {
-                this.messageService.info('Traductions enregistrées');
-                this.dialogRef.close(true);
+                this.messageService.info('Bien enregistré !');
+                this.editingForm = null;
+                this.editingSnapshot = null;
+                this.translationModalStore.reloadTranslations();
             },
             error: err => {
                 this.messageService.error(err?.error ?? 'Erreur lors de la sauvegarde');
             },
             complete: () => {
-                this.loading = false;
+                this.saving = false;
             }
         });
+    }
+
+    cancelEdit(form: FormGroup, event?: Event): void {
+        event?.stopPropagation();
+        if (this.loading) {
+            return;
+        }
+        const snapshot = this.editingSnapshot as any;
+        const isNewUnsaved = !this.extractNumber(form.get('wordTypeId')?.value) && snapshot?.wordTypeId == null;
+        if (isNewUnsaved) {
+            const meaningId = this.extractNumber(form.get('baseWordLangueTypeId')?.value);
+            if (meaningId) {
+                this.translationModalStore.deleteMeaning(meaningId);
+            } else {
+                const idx = this.translationForms.indexOf(form);
+                if (idx >= 0) {
+                    this.translationForms.splice(idx, 1);
+                }
+            }
+        } else if (snapshot && typeof snapshot === 'object') {
+            form.reset(snapshot, { emitEvent: false });
+            form.markAsPristine();
+            form.markAsUntouched();
+        }
+        this.editingForm = null;
+        this.editingSnapshot = null;
     }
 
     selectLanguage(lang: Langue): void {
         if (!lang || this.activeLang?.id === lang.id) {
             return;
         }
-        this.activeLang = lang;
         this.editingForm = null;
-        this.pendingDeleteWordTypeIds = [];
-        this.requiresGenderField = this.shouldRequireGender(this.activeLang, this.data.typeId);
-        this.loading = true;
-        const url = `${this.configuration.baseUrl}word/${this.data.parentWord.wordTypeId}/translations/${lang.id}`;
-        this.http.get<WordTranslationValue[]>(url).subscribe({
-            next: translations => {
-                this.translationForms = this.buildFormsForLang(this.activeLang, translations);
-                this.activeTypeId = this.resolveInitialTypeId(this.data.typeId);
-                if (this.activeTypeId == null && this.typeOptions.length > 0) {
-                    this.activeTypeId = this.typeOptions[0];
-                }
-                this.selectedIndex = this.translationForms.length ? 0 : -1;
-            },
-            error: () => {
-                this.translationForms = this.buildFormsForLang(this.activeLang);
-                this.activeTypeId = this.resolveInitialTypeId(this.data.typeId);
-                if (this.activeTypeId == null && this.typeOptions.length > 0) {
-                    this.activeTypeId = this.typeOptions[0];
-                }
-                this.selectedIndex = this.translationForms.length ? 0 : -1;
-            },
-            complete: () => {
-                this.loading = false;
-            }
-        });
+        this.editingSnapshot = null;
+        this.selectedIndex = -1;
+        this.translationModalStore.selectLanguage(lang.id);
     }
 
     private buildFormsForLang(lang: Langue, provided?: WordTranslationValue[]): FormGroup[] {
@@ -279,7 +334,7 @@ export class WordTranslationEditDialogComponent {
         if (!translations.length) {
             return [];
         }
-        return translations.map(tr => this.createTranslationForm(tr, lang, this.data, this.activeTypeId));
+        return translations.map(tr => this.createTranslationForm(tr, lang, this.data, null));
     }
 
     private createTranslationForm(
@@ -304,13 +359,75 @@ export class WordTranslationEditDialogComponent {
             return;
         }
         this.editingForm = null;
-        this.activeTypeId = typeId;
-        const match = this.translationForms.find(f => this.translationTypeId(f) === typeId);
-        if (match) {
-            this.selectTranslationByForm(match);
+        this.requiresGenderField = this.shouldRequireGender(this.activeLang, typeId);
+        if (typeId == null) {
+            this.selectedIndex = -1;
             return;
         }
         this.selectedIndex = -1;
+        this.translationModalStore.selectType(typeId);
+    }
+
+    meaningLabel(form: FormGroup): string {
+        const idx = this.extractNumber(form.get('meaningIndex')?.value) ?? 1;
+        return this.meaningMode ? `${this.targetWordLabel} ${idx}` : this.targetWordLabel;
+    }
+
+    private syncMeaningForms(items: WordMeaningTranslation[]): void {
+        const nextForms: FormGroup[] = [];
+        const ids = new Set<number>();
+        const sorted = Array.isArray(items) ? [...items].sort((a, b) => (a.index ?? 0) - (b.index ?? 0)) : [];
+
+        sorted.forEach(item => {
+            const meaningId = item?.wordLangueTypeId;
+            if (!meaningId) return;
+            ids.add(meaningId);
+
+            let form = this.formsByMeaningId.get(meaningId);
+            if (!form) {
+                form = this.createMeaningForm(item);
+                this.formsByMeaningId.set(meaningId, form);
+            } else if (this.editingForm !== form) {
+                form.patchValue(
+                    {
+                        wordTypeId: item.wordTypeId ?? null,
+                        name: item.name ?? '',
+                        plural: item.plural ?? '',
+                        langueId: item.langueId,
+                        typeId: item.typeId,
+                        genderId: item.genderId ?? null,
+                        baseWordTypeId: this.data.parentWord.wordTypeId,
+                        baseWordLangueTypeId: meaningId,
+                        meaningIndex: item.index
+                    },
+                    { emitEvent: false }
+                );
+                form.markAsPristine();
+            }
+            nextForms.push(form);
+        });
+
+        Array.from(this.formsByMeaningId.keys()).forEach(id => {
+            if (!ids.has(id)) {
+                this.formsByMeaningId.delete(id);
+            }
+        });
+
+        this.translationForms = nextForms;
+    }
+
+    private createMeaningForm(item: WordMeaningTranslation): FormGroup {
+        return this.fb.group({
+            wordTypeId: [item.wordTypeId ?? null],
+            name: [item.name ?? '', Validators.required],
+            plural: [item.plural ?? ''],
+            langueId: [item.langueId ?? this.activeLang.id, Validators.required],
+            typeId: [item.typeId ?? this.activeTypeId ?? this.data.typeId ?? null, Validators.required],
+            genderId: [item.genderId ?? null],
+            baseWordTypeId: [this.data.parentWord.wordTypeId],
+            baseWordLangueTypeId: [item.wordLangueTypeId],
+            meaningIndex: [item.index]
+        });
     }
 
     typeLabel(typeId?: number | null): string {
@@ -337,12 +454,6 @@ export class WordTranslationEditDialogComponent {
             return Number.isFinite(parsed) ? parsed : null;
         }
         return null;
-    }
-
-    private resolveInitialTypeId(fallback?: number | null): number | null {
-        if (fallback != null) return fallback;
-        const fromForms = this.translationForms.find(f => this.translationTypeId(f) != null);
-        return fromForms ? this.translationTypeId(fromForms) : null;
     }
 
     genderLabel(form: FormGroup): string {
@@ -381,41 +492,6 @@ export class WordTranslationEditDialogComponent {
             return Number.isFinite(parsed) ? parsed : null;
         }
         return null;
-    }
-
-    private resolveTypeIdsFromBaseTypes(): number[] {
-        const baseTypes = this.baseTypes;
-        if (!baseTypes.length) {
-            return [];
-        }
-        const storeTypes = this.dataStore.types();
-        if (!Array.isArray(storeTypes) || !storeTypes.length) {
-            return [];
-        }
-        const normalizedMap = new Map<string, number>();
-        storeTypes.forEach(type => {
-            const norm = this.normalizeString(type.name);
-            if (norm) {
-                normalizedMap.set(norm, type.id);
-            }
-        });
-        const ids: number[] = [];
-        baseTypes.forEach(name => {
-            const norm = this.normalizeString(name);
-            const id = norm ? normalizedMap.get(norm) : undefined;
-            if (typeof id === 'number') {
-                ids.push(id);
-            }
-        });
-        return ids;
-    }
-
-    private normalizeString(value?: string | null): string {
-        return (value ?? '')
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .trim()
-            .toLowerCase();
     }
 
     private shouldRequireGender(langue: Langue, typeId?: number | null): boolean {
