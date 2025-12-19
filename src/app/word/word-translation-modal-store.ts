@@ -50,6 +50,7 @@ interface WordTranslationModalState {
 
     selectedLangueId: number | null;
     selectedTypeId: number | null;
+    referenceLangueId: number | null;
 
     meanings: WordMeaning[];
     meaningTranslations: WordMeaningTranslation[];
@@ -70,6 +71,7 @@ const initialState: WordTranslationModalState = {
 
     selectedLangueId: null,
     selectedTypeId: null,
+    referenceLangueId: null,
 
     meanings: [],
     meaningTranslations: [],
@@ -139,6 +141,7 @@ export const WordTranslationModalStore = signalStore(
         typeOptionIds: computed(() => state.typeOptionIds()),
         selectedLangueId: computed(() => state.selectedLangueId()),
         selectedTypeId: computed(() => state.selectedTypeId()),
+        referenceLangueId: computed(() => state.referenceLangueId()),
         selectedLanguage: computed(() => state.languages().find(l => l.id === state.selectedLangueId()) ?? null),
         meanings: computed(() => state.meanings()),
         meaningTranslations: computed(() => state.meaningTranslations()),
@@ -159,7 +162,7 @@ export const WordTranslationModalStore = signalStore(
             const langueId = store.selectedLangueId();
             const typeId = store.selectedTypeId();
             const parentWordTypeId = store.parentWordTypeId();
-            if (langueId == null || typeId == null || parentWordTypeId == null) {
+            if (langueId == null || parentWordTypeId == null || typeId == null) {
                 patchState(store, { meanings: [], meaningTranslations: [], status: 'loaded', error: null });
                 return;
             }
@@ -170,40 +173,48 @@ export const WordTranslationModalStore = signalStore(
             httpClient
                 .get<WordMeaningTranslation[]>(url)
                 .pipe(
-                    mapResponse({
-                        next: (payload: WordMeaningTranslation[]) => {
-                            if (localRequestId !== requestId) {
-                                return;
-                            }
-                            const normalized = Array.isArray(payload) ? payload : [];
-                            const meanings: WordMeaning[] = normalized.map(t => ({
-                                wordLangueTypeId: t.wordLangueTypeId,
-                                index: t.index
-                            }));
-                            patchState(store, {
-                                meanings,
-                                meaningTranslations: normalized,
-                                status: 'loaded',
-                                error: null
-                            });
-                        },
-                        error: (err: any) => {
-                            if (localRequestId !== requestId) {
-                                return;
-                            }
-                            const errorMessage =
-                                typeof err?.error === 'string' ? err.error : err?.error?.message ?? err?.message ?? null;
-                            patchState(store, { status: 'error', error: errorMessage ?? 'Erreur lors du chargement des traductions' });
-                            messageService.error(err?.error ?? 'Erreur lors du chargement des traductions');
-                        }
-                    }),
                     tap(() => {
                         if (localRequestId === requestId && store.status() === 'loading') {
                             patchState(store, { status: 'loaded' });
                         }
                     })
                 )
-                .subscribe();
+                .subscribe({
+                    next: (payload: WordMeaningTranslation[]) => {
+                        if (localRequestId !== requestId) {
+                            return;
+                        }
+                        const normalized = Array.isArray(payload) ? payload : [];
+                        const meaningMap = new Map<number, WordMeaning>();
+                        normalized.forEach(t => {
+                            if (t?.wordLangueTypeId == null) return;
+                            if (!meaningMap.has(t.wordLangueTypeId)) {
+                                meaningMap.set(t.wordLangueTypeId, {
+                                    wordLangueTypeId: t.wordLangueTypeId,
+                                    index: t.index
+                                });
+                            }
+                        });
+                        const meanings: WordMeaning[] = Array.from(meaningMap.values()).sort(
+                            (a, b) => (a.index ?? 0) - (b.index ?? 0)
+                        );
+                        patchState(store, {
+                            meanings,
+                            meaningTranslations: normalized,
+                            status: 'loaded',
+                            error: null
+                        });
+                    },
+                    error: (err: any) => {
+                        if (localRequestId !== requestId) {
+                            return;
+                        }
+                        const errorMessage =
+                            typeof err?.error === 'string' ? err.error : err?.error?.message ?? err?.message ?? null;
+                        patchState(store, { status: 'error', error: errorMessage ?? 'Erreur lors du chargement des traductions' });
+                        messageService.error(err?.error ?? 'Erreur lors du chargement des traductions');
+                    }
+                });
         };
 
         return {
@@ -227,6 +238,7 @@ export const WordTranslationModalStore = signalStore(
                     explicitTypeIds: uniqSorted(explicitTypeIds),
                     meanings: [],
                     meaningTranslations: [],
+                    referenceLangueId: initData.parentWord?.langue ?? null,
                     pendingEditMeaningId: null
                 });
 
@@ -242,7 +254,7 @@ export const WordTranslationModalStore = signalStore(
                 patchSelection(langueId, store.selectedTypeId());
                 loadMeaningTranslations();
             },
-            selectType: (typeId: number): void => {
+            selectType: (typeId: number | null): void => {
                 if (typeId === store.selectedTypeId()) {
                     return;
                 }
@@ -256,13 +268,14 @@ export const WordTranslationModalStore = signalStore(
                 const parentWordTypeId = store.parentWordTypeId();
                 const typeId = store.selectedTypeId();
                 const langueId = store.selectedLangueId();
+                const referenceLangueId = store.referenceLangueId();
                 if (parentWordTypeId == null || typeId == null || langueId == null) {
                     return;
                 }
                 patchState(store, { status: 'loading', error: null, pendingEditMeaningId: null });
                 const localRequestId = ++requestId;
                 const url = `${baseUrl}word/${parentWordTypeId}/meanings/${typeId}`;
-                httpClient.post<WordMeaning>(url, {}).pipe(
+                httpClient.post<WordMeaning>(url, { langueId: referenceLangueId }).pipe(
                     mapResponse({
                         next: created => {
                             if (localRequestId !== requestId) return;
@@ -306,6 +319,7 @@ export const WordTranslationModalStore = signalStore(
 
             effect(() => {
                 const storeTypes = dataStore.types();
+                const status = store.status();
                 const baseTypeNames = store.baseTypeNames();
                 const explicitTypeIds = store.explicitTypeIds();
 

@@ -16,6 +16,9 @@
     gap: 12px;
     flex-wrap: wrap;
 }
+.word-translation-dialog__title-actions {
+    margin-left: auto;
+}
 .word-translation-dialog__lang-buttons {
     display: flex;
     flex-wrap: wrap;
@@ -83,6 +86,26 @@
     font-size: 16px;
 }
 
+.word-translation-dialog__meaning-group {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+}
+
+.word-translation-dialog__meaning-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+.word-translation-dialog__meaning-title {
+    font-size: 15px;
+    font-weight: 700;
+}
+
 .word-translation-dialog__translation-list {
     display: flex;
     flex-direction: column;
@@ -101,7 +124,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 10px 8px;
-    cursor: pointer;
+    cursor: default;
 }
 
 .word-translation-dialog__translation-row + .word-translation-dialog__translation-row {
@@ -118,6 +141,16 @@
 
 .word-translation-dialog__inline-field {
     width: 100%;
+    pointer-events: auto;
+}
+
+.word-translation-dialog__inline-field .mdc-text-field {
+    pointer-events: auto;
+}
+
+.word-translation-dialog__inline-field input {
+    pointer-events: auto;
+    user-select: text;
 }
 
 .word-translation-dialog__meaning-label {

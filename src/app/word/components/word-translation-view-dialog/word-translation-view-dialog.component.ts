@@ -1,4 +1,4 @@
-import { Component, Inject, effect, inject } from '@angular/core';
+import { Component, Inject, ElementRef, QueryList, ViewChildren, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialog, MatDialogActions, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
@@ -55,13 +55,14 @@ type WordTranslationEditDialogData = {
     ]
 })
 export class WordTranslationEditDialogComponent {
+    @ViewChildren('translationInput') translationInputs!: QueryList<ElementRef<HTMLInputElement>>;
     title: string;
     targetWordLabel = '';
     translationForms: FormGroup[] = [];
     selectedIndex = 0;
     editingForm: FormGroup | null = null;
     private editingSnapshot: unknown | null = null;
-    private formsByMeaningId = new Map<number, FormGroup>();
+    private formsByMeaningId = new Map<number, FormGroup[]>();
     saving = false;
     requiresGenderField: boolean;
     constructor(
@@ -93,21 +94,31 @@ export class WordTranslationEditDialogComponent {
         });
 
         effect(() => {
+            const currentEditing = this.editingForm;
             const status = this.translationModalStore.status();
             const meanings = this.translationModalStore.meaningTranslations();
             const pendingEditMeaningId = this.translationModalStore.pendingEditMeaningId();
             if (status !== 'loaded') {
                 return;
             }
-            this.editingForm = null;
-            this.editingSnapshot = null;
             this.syncMeaningForms(meanings);
-            this.selectedIndex = this.translationForms.length ? 0 : -1;
-            if (pendingEditMeaningId != null) {
-                const form = this.formsByMeaningId.get(pendingEditMeaningId);
+            if (!currentEditing) {
+                this.selectedIndex = this.translationForms.length ? 0 : -1;
+            } else {
+                const idx = this.formIndex(currentEditing);
+                if (idx >= 0) {
+                    this.selectedIndex = idx;
+                }
+            }
+            if (pendingEditMeaningId != null && !currentEditing) {
+                const form = this.formsByMeaningId.get(pendingEditMeaningId)?.[0];
                 if (form) {
                     this.startEditing(form);
                 }
+            }
+            if (currentEditing && !this.translationForms.includes(currentEditing)) {
+                this.editingForm = null;
+                this.editingSnapshot = null;
             }
         });
     }
@@ -170,8 +181,65 @@ export class WordTranslationEditDialogComponent {
         return this.translationForms.filter(f => this.translationTypeId(f) === this.activeTypeId);
     }
 
+    get meaningGroups(): { meaningId: number; index: number; forms: FormGroup[] }[] {
+        const typeFiltered = this.filteredTranslationForms;
+        const meaningMap = new Map<number, { meaningId: number; index: number; forms: FormGroup[] }>();
+        const meaningDefinitions = this.translationModalStore.meanings();
+        const indexMap = new Map<number, number>();
+        meaningDefinitions.forEach(def => {
+            indexMap.set(def.wordLangueTypeId, def.index);
+            meaningMap.set(def.wordLangueTypeId, { meaningId: def.wordLangueTypeId, index: def.index, forms: [] });
+        });
+
+        typeFiltered.forEach(form => {
+            const meaningId = this.extractNumber(form.get('baseWordLangueTypeId')?.value);
+            if (!meaningId) return;
+            const index = indexMap.get(meaningId) ?? this.extractNumber(form.get('meaningIndex')?.value) ?? 1;
+            const entry =
+                meaningMap.get(meaningId) ??
+                (() => {
+                    const created = { meaningId, index, forms: [] as FormGroup[] };
+                    meaningMap.set(meaningId, created);
+                    return created;
+                })();
+            entry.forms.push(form);
+        });
+
+        return Array.from(meaningMap.values()).sort((a, b) => a.index - b.index);
+    }
+
     addMeaning(): void {
         this.translationModalStore.addMeaning();
+    }
+
+    addTranslationForMeaning(meaningId: number, meaningIndex?: number): void {
+        if (!meaningId) {
+            return;
+        }
+        const idx = meaningIndex ?? this.meaningIndexFromMap(meaningId) ?? 1;
+        const newForm = this.fb.group({
+            wordTypeId: [null],
+            name: ['', Validators.required],
+            plural: [''],
+            langueId: [this.activeLang?.id ?? this.data.langue.id, Validators.required],
+            typeId: [this.activeTypeId ?? this.data.typeId ?? null, Validators.required],
+            genderId: [null],
+            baseWordTypeId: [this.data.parentWord.wordTypeId],
+            baseWordLangueTypeId: [meaningId],
+            meaningIndex: [idx]
+        });
+
+        const meaningForms = this.formsForMeaning(meaningId);
+        const insertionIndex = this.lastIndexForMeaning(meaningId);
+        if (insertionIndex >= 0 && insertionIndex < this.translationForms.length - 1) {
+            this.translationForms.splice(insertionIndex + 1, 0, newForm);
+        } else {
+            this.translationForms.push(newForm);
+        }
+        this.formsByMeaningId.set(meaningId, [...meaningForms, newForm]);
+
+        this.startEditing(newForm);
+        this.focusInput(newForm);
     }
 
     selectTranslation(index: number): void {
@@ -181,20 +249,31 @@ export class WordTranslationEditDialogComponent {
     }
 
     selectTranslationByForm(form: FormGroup): void {
-        const idx = this.translationForms.indexOf(form);
+        const idx = this.formIndex(form);
         if (idx >= 0) {
             this.selectedIndex = idx;
         }
     }
 
     startEditing(form: FormGroup, event?: Event): void {
-        event?.stopPropagation();
         if (this.loading) {
             return;
         }
+        const alreadyEditing = this.editingForm === form;
+
+        if (alreadyEditing) {
+            event?.stopPropagation();
+            this.focusInput(form, false);
+            return;
+        }
+        event?.stopPropagation();
         this.editingForm = form;
         this.editingSnapshot = form.getRawValue();
-        this.selectTranslationByForm(form);
+        const idx = this.formIndex(form);
+        if (idx >= 0) {
+            this.selectedIndex = idx;
+        }
+        this.focusInput(form, !alreadyEditing);
     }
 
     deleteTranslation(form: FormGroup, event: Event): void {
@@ -299,14 +378,7 @@ export class WordTranslationEditDialogComponent {
         const isNewUnsaved = !this.extractNumber(form.get('wordTypeId')?.value) && snapshot?.wordTypeId == null;
         if (isNewUnsaved) {
             const meaningId = this.extractNumber(form.get('baseWordLangueTypeId')?.value);
-            if (meaningId) {
-                this.translationModalStore.deleteMeaning(meaningId);
-            } else {
-                const idx = this.translationForms.indexOf(form);
-                if (idx >= 0) {
-                    this.translationForms.splice(idx, 1);
-                }
-            }
+            this.removeForm(form, meaningId ?? undefined);
         } else if (snapshot && typeof snapshot === 'object') {
             form.reset(snapshot, { emitEvent: false });
             form.markAsPristine();
@@ -362,6 +434,7 @@ export class WordTranslationEditDialogComponent {
         this.requiresGenderField = this.shouldRequireGender(this.activeLang, typeId);
         if (typeId == null) {
             this.selectedIndex = -1;
+            this.translationModalStore.selectType(null);
             return;
         }
         this.selectedIndex = -1;
@@ -373,9 +446,14 @@ export class WordTranslationEditDialogComponent {
         return this.meaningMode ? `${this.targetWordLabel} ${idx}` : this.targetWordLabel;
     }
 
+    meaningTitle(index: number): string {
+        return this.meaningMode ? `${this.targetWordLabel} ${index}` : this.targetWordLabel;
+    }
+
     private syncMeaningForms(items: WordMeaningTranslation[]): void {
         const nextForms: FormGroup[] = [];
         const ids = new Set<number>();
+        const nextMap = new Map<number, FormGroup[]>();
         const sorted = Array.isArray(items) ? [...items].sort((a, b) => (a.index ?? 0) - (b.index ?? 0)) : [];
 
         sorted.forEach(item => {
@@ -383,10 +461,17 @@ export class WordTranslationEditDialogComponent {
             if (!meaningId) return;
             ids.add(meaningId);
 
-            let form = this.formsByMeaningId.get(meaningId);
+            const meaningForms = this.formsForMeaning(meaningId);
+            let form = meaningForms.find(
+                f => this.extractNumber(f.get('wordTypeId')?.value) === item.wordTypeId
+            );
+
             if (!form) {
+                if (this.isPlaceholderTranslation(item)) {
+                    return;
+                }
                 form = this.createMeaningForm(item);
-                this.formsByMeaningId.set(meaningId, form);
+                meaningForms.push(form);
             } else if (this.editingForm !== form) {
                 form.patchValue(
                     {
@@ -405,6 +490,7 @@ export class WordTranslationEditDialogComponent {
                 form.markAsPristine();
             }
             nextForms.push(form);
+            nextMap.set(meaningId, meaningForms);
         });
 
         Array.from(this.formsByMeaningId.keys()).forEach(id => {
@@ -413,6 +499,7 @@ export class WordTranslationEditDialogComponent {
             }
         });
 
+        this.formsByMeaningId = nextMap;
         this.translationForms = nextForms;
     }
 
@@ -431,9 +518,6 @@ export class WordTranslationEditDialogComponent {
     }
 
     typeLabel(typeId?: number | null): string {
-        if (typeId == null) {
-            return '';
-        }
         const key = `word.type.${typeId}`;
         const translated = this.translate.instant(key);
         if (translated && translated !== key) {
@@ -492,6 +576,67 @@ export class WordTranslationEditDialogComponent {
             return Number.isFinite(parsed) ? parsed : null;
         }
         return null;
+    }
+
+    private meaningIndexFromMap(meaningId: number): number | null {
+        const match = this.translationModalStore.meanings().find(m => m.wordLangueTypeId === meaningId);
+        return match?.index ?? null;
+    }
+
+    private isPlaceholderTranslation(item: WordMeaningTranslation): boolean {
+        const name = (item?.name ?? '').trim();
+        const plural = (item?.plural ?? '').trim();
+        return !item?.wordTypeId && !item?.genderId && !name && !plural;
+    }
+
+    formIndex(form: FormGroup): number {
+        return this.translationForms.indexOf(form);
+    }
+
+    trackMeaningGroup = (_: number, group: { meaningId: number }) => group.meaningId;
+
+    private formsForMeaning(meaningId: number): FormGroup[] {
+        return this.formsByMeaningId.get(meaningId) ?? [];
+    }
+
+    private lastIndexForMeaning(meaningId: number): number {
+        let lastIndex = -1;
+        this.translationForms.forEach((form, idx) => {
+            const id = this.extractNumber(form.get('baseWordLangueTypeId')?.value);
+            if (id === meaningId) {
+                lastIndex = idx;
+            }
+        });
+        return lastIndex;
+    }
+
+    private focusInput(form: FormGroup, selectAll = true): void {
+        // Delay to let Angular render the input before focusing it
+        setTimeout(() => {
+            const idx = this.formIndex(form);
+            const target = this.translationInputs?.find(
+                ref => Number(ref.nativeElement.dataset['formIdx']) === idx
+            );
+            target?.nativeElement.focus();
+            if (selectAll) {
+                target?.nativeElement.select();
+            }
+        }, 0);
+    }
+
+    private removeForm(form: FormGroup, meaningId?: number): void {
+        const idx = this.translationForms.indexOf(form);
+        if (idx >= 0) {
+            this.translationForms.splice(idx, 1);
+        }
+        if (meaningId != null) {
+            const filtered = this.formsForMeaning(meaningId).filter(f => f !== form);
+            if (filtered.length) {
+                this.formsByMeaningId.set(meaningId, filtered);
+            } else {
+                this.formsByMeaningId.delete(meaningId);
+            }
+        }
     }
 
     private shouldRequireGender(langue: Langue, typeId?: number | null): boolean {
