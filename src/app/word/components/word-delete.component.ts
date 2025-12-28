@@ -29,7 +29,7 @@ import { Word } from '../models/word.model';
 export class WordDeleteDialog {
     readonly dialogRef = inject(MatDialogRef<WordDeleteDialog>);
     readonly data = inject<Word>(MAT_DIALOG_DATA);
-    readonly wordId = model(this.data.wordTypeId);
+    readonly wordId = model(this.data.wordLangueTypeId);
 
     onNoClick(): void {
         this.dialogRef.close();

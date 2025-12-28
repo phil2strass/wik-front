@@ -1,6 +1,6 @@
 export interface WordExample {
     id: number;
-    wordTypeId: number;
+    wordLangueTypeId: number;
     content: string;
     createdAt?: string;
 }
@@ -8,7 +8,7 @@ export interface WordExample {
 export interface WordExampleTranslation {
     translationId?: number | null;
     exampleId: number;
-    wordTypeId: number;
+    wordLangueTypeId: number;
     langueId: number;
     content?: string;
     exampleContent: string;

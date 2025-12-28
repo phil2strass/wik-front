@@ -4,11 +4,14 @@ import { Type } from '@shared/data/models/type.model';
 export interface WordTranslationValue {
     name: string;
     genderId: number | null;
-    wordTypeId: number | null;
+    wordLangueTypeId: number | null;
     langueId: number | null;
     typeId: number | null;
     plural: string;
     commentaire?: string;
+    baseWordLangueTypeId?: number | null;
+    targetWordLangueTypeId?: number | null;
+    meaningIndex?: number | null;
 }
 
 export type WordTranslations =
@@ -16,7 +19,7 @@ export type WordTranslations =
     | Array<[number | string, WordTranslationValue[]]>;
 
 export interface Word {
-    wordTypeId: number;
+    wordLangueTypeId: number;
     langue: number;
     name: string;
     type: Type;

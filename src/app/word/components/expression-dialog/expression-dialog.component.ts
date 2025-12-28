@@ -16,7 +16,7 @@ import { IconModule } from '@root/app/icon/icon.module';
 import { ExpressionDeleteDialogComponent } from './expression-delete-dialog.component';
 
 export type ExpressionDialogData = {
-    wordTypeId: number;
+    wordLangueTypeId: number;
     wordLabel: string;
 };
 
@@ -79,7 +79,7 @@ export class ExpressionDialogComponent {
         this.loading = true;
         this.expressionsForm.clear();
         this.#expressionService
-            .getExpressions(this.data.wordTypeId)
+            .getExpressions(this.data.wordLangueTypeId)
             .pipe(finalize(() => (this.loading = false)))
             .subscribe({
                 next: (expressions: WordExpression[]) => {
@@ -141,7 +141,7 @@ export class ExpressionDialogComponent {
         this.loading = true;
         const request$ = id
             ? this.#expressionService.updateExpression(id, content)
-            : this.#expressionService.createExpression(this.data.wordTypeId, content);
+            : this.#expressionService.createExpression(this.data.wordLangueTypeId, content);
 
         request$
             .pipe(finalize(() => (this.loading = false)))

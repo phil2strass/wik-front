@@ -15,7 +15,7 @@ import { finalize } from 'rxjs/operators';
 import { Langue } from '@shared/data/models/langue.model';
 
 export type ExpressionTranslationDialogData = {
-    wordTypeId: number;
+    wordLangueTypeId: number;
     wordLabel: string;
     langue: Langue;
 };
@@ -67,7 +67,7 @@ export class ExpressionTranslationDialogComponent {
         this.loading = true;
         this.forms.clear();
         this.#expressionService
-            .getExpressionTranslations(this.data.wordTypeId, this.data.langue.id)
+            .getExpressionTranslations(this.data.wordLangueTypeId, this.data.langue.id)
             .pipe(finalize(() => (this.loading = false)))
             .subscribe({
                 next: translations => {
@@ -157,7 +157,7 @@ export class ExpressionTranslationDialogComponent {
             payload.push({
                 translationId: group.get('translationId')?.value,
                 expressionId: group.get('expressionId')?.value,
-                wordTypeId: this.data.wordTypeId,
+                wordLangueTypeId: this.data.wordLangueTypeId,
                 langueId: this.data.langue.id,
                 content,
                 expressionContent: group.get('expressionContent')?.value
@@ -169,7 +169,7 @@ export class ExpressionTranslationDialogComponent {
         }
         this.loading = true;
         this.#expressionService
-            .saveExpressionTranslations(this.data.wordTypeId, this.data.langue.id, payload)
+            .saveExpressionTranslations(this.data.wordLangueTypeId, this.data.langue.id, payload)
             .pipe(finalize(() => (this.loading = false)))
             .subscribe({
                 next: saved => {

@@ -11,7 +11,7 @@ import { WordFormComponent } from './word-form/word-form.component';
 import { TranslateModule } from '@ngx-translate/core';
 
 interface WordDialogData {
-    wordTypeId?: number;
+    wordLangueTypeId?: number;
     langue?: number;
     langueId?: number;
     name?: string;
@@ -108,7 +108,7 @@ export class WordEditDialog {
         const typeId = this.data.type?.id ?? this.data.typeId ?? null;
         const genderId = this.data.gender?.id ?? this.data.genderId ?? null;
         this.form = this.#formBuilder.group({
-            wordTypeId: [this.data.wordTypeId, Validators.required],
+            wordLangueTypeId: [this.data.wordLangueTypeId, Validators.required],
             name: [this.data.name, Validators.required],
             langueId: [langueId, Validators.required],
             typeId: [typeId, Validators.required],

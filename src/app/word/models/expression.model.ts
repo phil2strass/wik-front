@@ -1,6 +1,6 @@
 export interface WordExpression {
     id: number;
-    wordTypeId: number;
+    wordLangueTypeId: number;
     content: string;
     createdAt?: string;
 }
@@ -8,7 +8,7 @@ export interface WordExpression {
 export interface WordExpressionTranslation {
     translationId?: number | null;
     expressionId: number;
-    wordTypeId: number;
+    wordLangueTypeId: number;
     langueId: number;
     content?: string;
     expressionContent: string;

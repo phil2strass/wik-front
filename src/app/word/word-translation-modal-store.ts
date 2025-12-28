@@ -27,7 +27,8 @@ export interface WordMeaning {
 export interface WordMeaningTranslation {
     wordLangueTypeId: number;
     index: number;
-    wordTypeId: number | null;
+    wordLangueTypeIdTarget: number | null;
+    targetWordLangueTypeId: number | null;
     langueId: number;
     typeId: number;
     name: string;
@@ -40,7 +41,7 @@ interface WordTranslationModalState {
     status: TranslationModalStatus;
     error: string | null;
 
-    parentWordTypeId: number | null;
+    parentWordLangueTypeId: number | null;
     baseTypeNames: string[];
     explicitTypeIds: number[];
 
@@ -61,7 +62,7 @@ const initialState: WordTranslationModalState = {
     status: 'init',
     error: null,
 
-    parentWordTypeId: null,
+    parentWordLangueTypeId: null,
     baseTypeNames: [],
     explicitTypeIds: [],
 
@@ -161,15 +162,15 @@ export const WordTranslationModalStore = signalStore(
         const loadMeaningTranslations = (): void => {
             const langueId = store.selectedLangueId();
             const typeId = store.selectedTypeId();
-            const parentWordTypeId = store.parentWordTypeId();
-            if (langueId == null || parentWordTypeId == null || typeId == null) {
+            const parentWordLangueTypeId = store.parentWordLangueTypeId();
+            if (langueId == null || parentWordLangueTypeId == null || typeId == null) {
                 patchState(store, { meanings: [], meaningTranslations: [], status: 'loaded', error: null });
                 return;
             }
 
             patchState(store, { status: 'loading', error: null });
             const localRequestId = ++requestId;
-            const url = `${baseUrl}word/${parentWordTypeId}/meanings/${typeId}/translations/${langueId}`;
+            const url = `${baseUrl}word/meanings/${parentWordLangueTypeId}/translations/${langueId}`;
             httpClient
                 .get<WordMeaningTranslation[]>(url)
                 .pipe(
@@ -232,7 +233,7 @@ export const WordTranslationModalStore = signalStore(
                 patchState(store, {
                     status: 'init',
                     error: null,
-                    parentWordTypeId: initData.parentWord.wordTypeId,
+                    parentWordLangueTypeId: initData.parentWord.wordLangueTypeId,
                     languages,
                     baseTypeNames,
                     explicitTypeIds: uniqSorted(explicitTypeIds),
@@ -265,16 +266,16 @@ export const WordTranslationModalStore = signalStore(
                 loadMeaningTranslations();
             },
             addMeaning: (): void => {
-                const parentWordTypeId = store.parentWordTypeId();
+                const parentWordLangueTypeId = store.parentWordLangueTypeId();
                 const typeId = store.selectedTypeId();
                 const langueId = store.selectedLangueId();
                 const referenceLangueId = store.referenceLangueId();
-                if (parentWordTypeId == null || typeId == null || langueId == null) {
+                if (parentWordLangueTypeId == null || typeId == null || langueId == null) {
                     return;
                 }
                 patchState(store, { status: 'loading', error: null, pendingEditMeaningId: null });
                 const localRequestId = ++requestId;
-                const url = `${baseUrl}word/${parentWordTypeId}/meanings/${typeId}`;
+                const url = `${baseUrl}word/meanings/${parentWordLangueTypeId}`;
                 httpClient.post<WordMeaning>(url, { langueId: referenceLangueId }).pipe(
                     mapResponse({
                         next: created => {

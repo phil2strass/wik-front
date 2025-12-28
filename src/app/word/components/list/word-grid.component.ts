@@ -223,11 +223,11 @@ export class WordGridComponent implements OnDestroy {
         const dialogRef = langue
             ? this.dialog.open(ExampleTranslationDialogComponent, {
                   ...baseConfig,
-                  data: { wordTypeId: row.wordTypeId, wordLabel: this.formatDisplayName(row), langue }
+                  data: { wordLangueTypeId: row.wordLangueTypeId, wordLabel: this.formatDisplayName(row), langue }
               })
             : this.dialog.open(ExampleDialogComponent, {
                   ...baseConfig,
-                  data: { wordTypeId: row.wordTypeId, wordLabel: this.formatDisplayName(row) }
+                  data: { wordLangueTypeId: row.wordLangueTypeId, wordLabel: this.formatDisplayName(row) }
               });
         dialogRef.afterClosed().subscribe();
     }
@@ -241,7 +241,7 @@ export class WordGridComponent implements OnDestroy {
         } as const;
         this.dialog.open(ExpressionDialogComponent, {
             ...baseConfig,
-            data: { wordTypeId: row.wordTypeId, wordLabel: this.formatDisplayName(row) }
+            data: { wordLangueTypeId: row.wordLangueTypeId, wordLabel: this.formatDisplayName(row) }
         });
     }
 
@@ -254,7 +254,7 @@ export class WordGridComponent implements OnDestroy {
         } as const;
         this.dialog.open(ExpressionTranslationDialogComponent, {
             ...baseConfig,
-            data: { wordTypeId: row.wordTypeId, wordLabel: this.formatDisplayName(row), langue }
+            data: { wordLangueTypeId: row.wordLangueTypeId, wordLabel: this.formatDisplayName(row), langue }
         });
     }
 
@@ -324,21 +324,33 @@ export class WordGridComponent implements OnDestroy {
             return {
                 name: typeof maybe.name === 'string' ? maybe.name : '',
                 genderId: typeof maybe.genderId === 'number' ? maybe.genderId : null,
-                wordTypeId: typeof maybe.wordTypeId === 'number' ? maybe.wordTypeId : null,
+                wordLangueTypeId: typeof maybe.wordLangueTypeId === 'number' ? maybe.wordLangueTypeId : null,
                 langueId: typeof maybe.langueId === 'number' ? maybe.langueId : null,
                 typeId: typeof maybe.typeId === 'number' ? maybe.typeId : null,
                 plural: typeof maybe.plural === 'string' ? maybe.plural : '',
-                commentaire: typeof maybe.commentaire === 'string' ? maybe.commentaire : ''
+                commentaire: typeof maybe.commentaire === 'string' ? maybe.commentaire : '',
+                baseWordLangueTypeId:
+                    typeof maybe.baseWordLangueTypeId === 'number' ? maybe.baseWordLangueTypeId : null,
+                targetWordLangueTypeId:
+                    typeof (maybe as any).targetWordLangueTypeId === 'number'
+                        ? (maybe as any).targetWordLangueTypeId
+                        : typeof (maybe as any).wordLangueTypeId === 'number'
+                        ? (maybe as any).wordLangueTypeId
+                        : null,
+                meaningIndex: typeof maybe.meaningIndex === 'number' ? maybe.meaningIndex : null
             };
         }
         return {
             name: String(value),
             genderId: null,
-            wordTypeId: null,
+            wordLangueTypeId: null,
             langueId: null,
             typeId: null,
             plural: '',
-            commentaire: ''
+            commentaire: '',
+            baseWordLangueTypeId: null,
+            targetWordLangueTypeId: null,
+            meaningIndex: null
         };
     }
 
@@ -497,7 +509,7 @@ export class WordGridComponent implements OnDestroy {
         if (!row) {
             return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
         }
-        return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.wordTypeId}`;
+        return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${row.wordLangueTypeId}`;
     }
 
     /** Whether the number of selected elements matches the total number of rows. */
@@ -536,7 +548,7 @@ export class WordGridComponent implements OnDestroy {
 
         dialogRef.afterClosed().subscribe(confirm => {
             if (confirm) {
-                const ids = selectedWords.map(word => word.wordTypeId);
+                const ids = selectedWords.map(word => word.wordLangueTypeId);
                 this.#wordGridStore.deleteMany(ids);
                 this.selection.clear();
             }

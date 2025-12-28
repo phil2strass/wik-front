@@ -17,7 +17,7 @@ import { Langue } from '@shared/data/models/langue.model';
 import { ExampleDeleteDialogComponent } from './example-delete-dialog.component';
 
 export type ExampleDialogData = {
-    wordTypeId: number;
+    wordLangueTypeId: number;
     wordLabel: string;
     langue?: Langue;
 };
@@ -81,7 +81,7 @@ export class ExampleDialogComponent {
         this.loading = true;
         this.examplesForm.clear();
         this.#exampleService
-            .getExamples(this.data.wordTypeId)
+            .getExamples(this.data.wordLangueTypeId)
             .pipe(finalize(() => (this.loading = false)))
             .subscribe({
                 next: (examples: WordExample[]) => {
@@ -143,7 +143,7 @@ export class ExampleDialogComponent {
         this.loading = true;
         const request$ = id
             ? this.#exampleService.updateExample(id, content)
-            : this.#exampleService.createExample(this.data.wordTypeId, content);
+            : this.#exampleService.createExample(this.data.wordLangueTypeId, content);
 
         request$
             .pipe(finalize(() => (this.loading = false)))

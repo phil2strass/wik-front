@@ -9,12 +9,12 @@ export class ExampleService {
     #http = inject(HttpClient);
     #baseUrl = inject(Configuration).baseUrl;
 
-    getExamples(wordTypeId: number): Observable<WordExample[]> {
-        return this.#http.get<WordExample[]>(`${this.#baseUrl}word/${wordTypeId}/examples`);
+    getExamples(wordLangueTypeId: number): Observable<WordExample[]> {
+        return this.#http.get<WordExample[]>(`${this.#baseUrl}word/${wordLangueTypeId}/examples`);
     }
 
-    createExample(wordTypeId: number, content: string): Observable<WordExample> {
-        return this.#http.post<WordExample>(`${this.#baseUrl}word/${wordTypeId}/examples`, { content });
+    createExample(wordLangueTypeId: number, content: string): Observable<WordExample> {
+        return this.#http.post<WordExample>(`${this.#baseUrl}word/${wordLangueTypeId}/examples`, { content });
     }
 
     updateExample(exampleId: number, content: string): Observable<WordExample> {
@@ -25,9 +25,9 @@ export class ExampleService {
         return this.#http.delete<void>(`${this.#baseUrl}examples/${exampleId}`);
     }
 
-    getExampleTranslations(wordTypeId: number, langueId: number): Observable<WordExampleTranslation[]> {
+    getExampleTranslations(wordLangueTypeId: number, langueId: number): Observable<WordExampleTranslation[]> {
         return this.#http.get<WordExampleTranslation[]>(
-            `${this.#baseUrl}word/${wordTypeId}/examples/translations/${langueId}`
+            `${this.#baseUrl}word/${wordLangueTypeId}/examples/translations/${langueId}`
         );
     }
 
@@ -39,12 +39,12 @@ export class ExampleService {
     }
 
     saveExampleTranslations(
-        wordTypeId: number,
+        wordLangueTypeId: number,
         langueId: number,
         translations: Partial<WordExampleTranslation>[]
     ): Observable<WordExampleTranslation[]> {
         return this.#http.put<WordExampleTranslation[]>(
-            `${this.#baseUrl}word/${wordTypeId}/examples/translations/${langueId}`,
+            `${this.#baseUrl}word/${wordLangueTypeId}/examples/translations/${langueId}`,
             translations
         );
     }

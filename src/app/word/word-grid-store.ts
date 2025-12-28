@@ -112,8 +112,8 @@ export const WordGridStore = signalStore(
             delete: rxMethod<number>(
                 pipe(
                     tap(() => patchState(store, { status: 'loading' })),
-                    switchMap(wordTypeId =>
-                        httpClient.delete(`${baseUrl}word/${wordTypeId}`).pipe(
+                    switchMap(wordLangueTypeId =>
+                        httpClient.delete(`${baseUrl}word/${wordLangueTypeId}`).pipe(
                             mapResponse({
                                 next: () => {
                                     messageService.info('Suppression réussie');
@@ -131,8 +131,8 @@ export const WordGridStore = signalStore(
             deleteMany: rxMethod<number[]>(
                 pipe(
                     tap(() => patchState(store, { status: 'loading' })),
-                    switchMap(wordTypeIds =>
-                        httpClient.post(`${baseUrl}word/bulk-delete`, wordTypeIds).pipe(
+                    switchMap(wordLangueTypeIds =>
+                        httpClient.post(`${baseUrl}word/bulk-delete`, wordLangueTypeIds).pipe(
                             mapResponse({
                                 next: () => {
                                     messageService.info('Suppression réussie');

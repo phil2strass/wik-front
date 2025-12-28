@@ -218,14 +218,15 @@ export class WordTranslationEditDialogComponent {
         }
         const idx = meaningIndex ?? this.meaningIndexFromMap(meaningId) ?? 1;
         const newForm = this.fb.group({
-            wordTypeId: [null],
+            wordLangueTypeId: [null],
             name: ['', Validators.required],
             plural: [''],
             langueId: [this.activeLang?.id ?? this.data.langue.id, Validators.required],
             typeId: [this.activeTypeId ?? this.data.typeId ?? null, Validators.required],
             genderId: [null],
-            baseWordTypeId: [this.data.parentWord.wordTypeId],
+            baseWordTypeId: [this.data.parentWord.wordLangueTypeId],
             baseWordLangueTypeId: [meaningId],
+            targetWordLangueTypeId: [null],
             meaningIndex: [idx]
         });
 
@@ -299,8 +300,11 @@ export class WordTranslationEditDialogComponent {
                 this.editingSnapshot = null;
             }
 
-            const wordTypeId = this.extractNumber(form.get('wordTypeId')?.value);
-            if (!wordTypeId) {
+            const wordLangueTypeId = this.extractNumber(form.get('wordLangueTypeId')?.value);
+            const resolvedWordTypeId = wordLangueTypeId ?? this.lookupWordTypeId(form);
+            const sourceMeaningId = this.resolveSourceMeaningId(form);
+            const targetMeaningId = this.resolveTargetMeaningId(form, resolvedWordTypeId);
+            if (!resolvedWordTypeId || !sourceMeaningId || !targetMeaningId) {
                 const idx = this.translationForms.indexOf(form);
                 if (idx >= 0) {
                     this.translationForms.splice(idx, 1);
@@ -308,11 +312,18 @@ export class WordTranslationEditDialogComponent {
                         this.selectedIndex = this.translationForms.length - 1;
                     }
                 }
+                if (this.hasPersistedEntry(form, resolvedWordTypeId)) {
+                    this.messageService.error(this.translate.instant('Erreur lors de la suppression'));
+                }
                 return;
             }
 
             this.saving = true;
-            this.http.delete(`${this.configuration.baseUrl}word/${wordTypeId}`).subscribe({
+            this.http
+                .delete(
+                    `${this.configuration.baseUrl}word/meanings/${sourceMeaningId}/translations/meaning/${targetMeaningId}`
+                )
+                .subscribe({
                 next: () => {
                     this.messageService.info('Suppression réussie');
                     this.translationModalStore.reloadTranslations();
@@ -349,10 +360,10 @@ export class WordTranslationEditDialogComponent {
 
         this.saving = true;
         const payload = form.getRawValue();
-        const hasId = !!payload.wordTypeId;
+        const hasId = !!payload.wordLangueTypeId;
         const request$: Observable<unknown> = hasId
             ? this.http.put(`${this.configuration.baseUrl}word`, payload)
-            : this.http.post(`${this.configuration.baseUrl}word/${this.data.parentWord.wordTypeId}/translation`, payload);
+            : this.http.post(`${this.configuration.baseUrl}word/${this.data.parentWord.wordLangueTypeId}/translation`, payload);
         request$.subscribe({
             next: () => {
                 this.messageService.info('Bien enregistré !');
@@ -375,7 +386,7 @@ export class WordTranslationEditDialogComponent {
             return;
         }
         const snapshot = this.editingSnapshot as any;
-        const isNewUnsaved = !this.extractNumber(form.get('wordTypeId')?.value) && snapshot?.wordTypeId == null;
+        const isNewUnsaved = !this.extractNumber(form.get('wordLangueTypeId')?.value) && snapshot?.wordLangueTypeId == null;
         if (isNewUnsaved) {
             const meaningId = this.extractNumber(form.get('baseWordLangueTypeId')?.value);
             this.removeForm(form, meaningId ?? undefined);
@@ -416,13 +427,16 @@ export class WordTranslationEditDialogComponent {
         forcedTypeId?: number | null
     ): FormGroup {
         return this.fb.group({
-            wordTypeId: [translation?.wordTypeId ?? null],
+            wordLangueTypeId: [translation?.wordLangueTypeId ?? null],
             name: [translation?.name ?? '', Validators.required],
             plural: [translation?.plural ?? ''],
             langueId: [translation?.langueId ?? lang.id, Validators.required],
             typeId: [translation?.typeId ?? forcedTypeId ?? data.typeId ?? null, Validators.required],
             genderId: [translation?.genderId ?? null],
-            baseWordTypeId: [data.parentWord.wordTypeId]
+            baseWordTypeId: [data.parentWord.wordLangueTypeId],
+            baseWordLangueTypeId: [translation?.baseWordLangueTypeId ?? null],
+            targetWordLangueTypeId: [translation?.targetWordLangueTypeId ?? null],
+            meaningIndex: [translation?.meaningIndex ?? null]
         });
     }
 
@@ -463,7 +477,7 @@ export class WordTranslationEditDialogComponent {
 
             const meaningForms = this.formsForMeaning(meaningId);
             let form = meaningForms.find(
-                f => this.extractNumber(f.get('wordTypeId')?.value) === item.wordTypeId
+                f => this.extractNumber(f.get('wordLangueTypeId')?.value) === item.wordLangueTypeId
             );
 
             if (!form) {
@@ -475,14 +489,15 @@ export class WordTranslationEditDialogComponent {
             } else if (this.editingForm !== form) {
                 form.patchValue(
                     {
-                        wordTypeId: item.wordTypeId ?? null,
+                        wordLangueTypeId: item.wordLangueTypeId ?? null,
                         name: item.name ?? '',
                         plural: item.plural ?? '',
                         langueId: item.langueId,
                         typeId: item.typeId,
                         genderId: item.genderId ?? null,
-                        baseWordTypeId: this.data.parentWord.wordTypeId,
+                        baseWordTypeId: this.data.parentWord.wordLangueTypeId,
                         baseWordLangueTypeId: meaningId,
+                        targetWordLangueTypeId: item.targetWordLangueTypeId ?? null,
                         meaningIndex: item.index
                     },
                     { emitEvent: false }
@@ -505,14 +520,15 @@ export class WordTranslationEditDialogComponent {
 
     private createMeaningForm(item: WordMeaningTranslation): FormGroup {
         return this.fb.group({
-            wordTypeId: [item.wordTypeId ?? null],
+            wordLangueTypeId: [item.wordLangueTypeId ?? null],
             name: [item.name ?? '', Validators.required],
             plural: [item.plural ?? ''],
             langueId: [item.langueId ?? this.activeLang.id, Validators.required],
             typeId: [item.typeId ?? this.activeTypeId ?? this.data.typeId ?? null, Validators.required],
             genderId: [item.genderId ?? null],
-            baseWordTypeId: [this.data.parentWord.wordTypeId],
+            baseWordTypeId: [this.data.parentWord.wordLangueTypeId],
             baseWordLangueTypeId: [item.wordLangueTypeId],
+            targetWordLangueTypeId: [item.targetWordLangueTypeId ?? null],
             meaningIndex: [item.index]
         });
     }
@@ -586,7 +602,7 @@ export class WordTranslationEditDialogComponent {
     private isPlaceholderTranslation(item: WordMeaningTranslation): boolean {
         const name = (item?.name ?? '').trim();
         const plural = (item?.plural ?? '').trim();
-        return !item?.wordTypeId && !item?.genderId && !name && !plural;
+        return !item?.wordLangueTypeId && !item?.genderId && !name && !plural;
     }
 
     formIndex(form: FormGroup): number {
@@ -623,6 +639,91 @@ export class WordTranslationEditDialogComponent {
             }
         }, 0);
     }
+
+    /**
+     * Fallback to recover translation id when the form lost it (e.g. after refresh).
+     */
+    private lookupWordTypeId(form: FormGroup): number | null {
+        const meaningId = this.extractNumber(form.get('baseWordLangueTypeId')?.value);
+        const langId = this.extractNumber(form.get('langueId')?.value);
+        const typeId = this.extractNumber(form.get('typeId')?.value);
+        const name = (form.get('name')?.value ?? '').toString().trim().toLowerCase();
+        if (!meaningId || !langId || !typeId || !name) {
+            return null;
+        }
+        const match = this.translationModalStore
+            .meaningTranslations()
+            .find(
+                t =>
+                    t.wordLangueTypeId === meaningId &&
+                    t.langueId === langId &&
+                    t.typeId === typeId &&
+                    (t.name ?? '').trim().toLowerCase() === name &&
+                    t.wordLangueTypeId
+            );
+        return match?.wordLangueTypeId ?? null;
+    }
+
+    /**
+     * Check whether the translation exists in the store (persisted server-side).
+     */
+    private hasPersistedEntry(form: FormGroup, resolvedWordTypeId?: number | null): boolean {
+        const meaningId = this.extractNumber(form.get('baseWordLangueTypeId')?.value);
+        const langId = this.extractNumber(form.get('langueId')?.value);
+        const typeId = this.extractNumber(form.get('typeId')?.value);
+        const name = (form.get('name')?.value ?? '').toString().trim().toLowerCase();
+        const fallbackWordTypeId = resolvedWordTypeId ?? this.extractNumber(form.get('wordLangueTypeId')?.value);
+        return this.translationModalStore
+            .meaningTranslations()
+            .some(t => {
+                const sameMeaning = meaningId ? t.wordLangueTypeId === meaningId : false;
+                const sameLang = langId ? t.langueId === langId : false;
+                const sameType = typeId ? t.typeId === typeId : false;
+                const sameName = (t.name ?? '').trim().toLowerCase() === name;
+                const sameWordType = fallbackWordTypeId ? t.wordLangueTypeId === fallbackWordTypeId : false;
+                return sameName && (sameWordType || (sameMeaning && sameLang && sameType));
+            });
+    }
+
+    private resolveSourceMeaningId(form: FormGroup): number | null {
+        const fromForm = this.extractNumber(form.get('baseWordLangueTypeId')?.value);
+        if (fromForm) {
+            return fromForm;
+        }
+        const wordLangueTypeId = this.extractNumber(form.get('wordLangueTypeId')?.value);
+        if (!wordLangueTypeId) {
+            return null;
+        }
+        const match = this.translationModalStore.meaningTranslations().find(t => t.wordLangueTypeId === wordLangueTypeId);
+        return match?.wordLangueTypeId ?? null;
+    }
+
+    private resolveTargetMeaningId(form: FormGroup, resolvedWordTypeId?: number | null): number | null {
+        const direct = this.extractNumber(form.get('targetWordLangueTypeId')?.value);
+        if (direct) {
+            return direct;
+        }
+        const translations = this.translationModalStore.meaningTranslations();
+        if (resolvedWordTypeId) {
+            const byId = translations.find(t => t.wordLangueTypeId === resolvedWordTypeId);
+            if (byId?.targetWordLangueTypeId) {
+                return byId.targetWordLangueTypeId;
+            }
+        }
+        const langId = this.extractNumber(form.get('langueId')?.value);
+        const typeId = this.extractNumber(form.get('typeId')?.value);
+        const name = (form.get('name')?.value ?? '').toString().trim().toLowerCase();
+        const byFields = translations.find(
+            t =>
+                t.langueId === langId &&
+                t.typeId === typeId &&
+                (t.name ?? '').trim().toLowerCase() === name &&
+                t.targetWordLangueTypeId
+        );
+        return byFields?.targetWordLangueTypeId ?? null;
+    }
+
+    // meaning resolution no longer required for deletion (handled server-side by wordType ids)
 
     private removeForm(form: FormGroup, meaningId?: number): void {
         const idx = this.translationForms.indexOf(form);
@@ -698,7 +799,7 @@ export class WordTranslationEditDialogComponent {
             return {
                 name: typeof maybe.name === 'string' ? maybe.name : '',
                 genderId: typeof maybe.genderId === 'number' ? maybe.genderId : null,
-                wordTypeId: typeof maybe.wordTypeId === 'number' ? maybe.wordTypeId : null,
+                wordLangueTypeId: typeof maybe.wordLangueTypeId === 'number' ? maybe.wordLangueTypeId : null,
                 langueId: typeof maybe.langueId === 'number' ? maybe.langueId : null,
                 typeId: typeof maybe.typeId === 'number' ? maybe.typeId : null,
                 plural: typeof maybe.plural === 'string' ? maybe.plural : ''
@@ -707,7 +808,7 @@ export class WordTranslationEditDialogComponent {
         return {
             name: String(value),
             genderId: null,
-            wordTypeId: null,
+            wordLangueTypeId: null,
             langueId: null,
             typeId: null,
             plural: ''
