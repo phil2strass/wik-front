@@ -476,9 +476,8 @@ export class WordTranslationEditDialogComponent {
             ids.add(meaningId);
 
             const meaningForms = this.formsForMeaning(meaningId);
-            let form = meaningForms.find(
-                f => this.extractNumber(f.get('wordLangueTypeId')?.value) === item.wordLangueTypeId
-            );
+            const targetId = item.targetWordLangueTypeId ?? item.wordLangueTypeId;
+            let form = meaningForms.find(f => this.extractNumber(f.get('wordLangueTypeId')?.value) === targetId);
 
             if (!form) {
                 if (this.isPlaceholderTranslation(item)) {
@@ -489,7 +488,7 @@ export class WordTranslationEditDialogComponent {
             } else if (this.editingForm !== form) {
                 form.patchValue(
                     {
-                        wordLangueTypeId: item.wordLangueTypeId ?? null,
+                        wordLangueTypeId: item.targetWordLangueTypeId ?? null,
                         name: item.name ?? '',
                         plural: item.plural ?? '',
                         langueId: item.langueId,
@@ -520,7 +519,7 @@ export class WordTranslationEditDialogComponent {
 
     private createMeaningForm(item: WordMeaningTranslation): FormGroup {
         return this.fb.group({
-            wordLangueTypeId: [item.wordLangueTypeId ?? null],
+            wordLangueTypeId: [item.targetWordLangueTypeId ?? null],
             name: [item.name ?? '', Validators.required],
             plural: [item.plural ?? ''],
             langueId: [item.langueId ?? this.activeLang.id, Validators.required],
@@ -659,9 +658,9 @@ export class WordTranslationEditDialogComponent {
                     t.langueId === langId &&
                     t.typeId === typeId &&
                     (t.name ?? '').trim().toLowerCase() === name &&
-                    t.wordLangueTypeId
+                    t.targetWordLangueTypeId
             );
-        return match?.wordLangueTypeId ?? null;
+        return match?.targetWordLangueTypeId ?? null;
     }
 
     /**
@@ -680,8 +679,8 @@ export class WordTranslationEditDialogComponent {
                 const sameLang = langId ? t.langueId === langId : false;
                 const sameType = typeId ? t.typeId === typeId : false;
                 const sameName = (t.name ?? '').trim().toLowerCase() === name;
-                const sameWordType = fallbackWordTypeId ? t.wordLangueTypeId === fallbackWordTypeId : false;
-                return sameName && (sameWordType || (sameMeaning && sameLang && sameType));
+                const sameTarget = fallbackWordTypeId ? t.targetWordLangueTypeId === fallbackWordTypeId : false;
+                return sameName && (sameTarget || (sameMeaning && sameLang && sameType));
             });
     }
 
