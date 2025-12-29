@@ -13,12 +13,12 @@ export class ExampleService {
         return this.#http.get<WordExample[]>(`${this.#baseUrl}word/${wordLangueTypeId}/examples`);
     }
 
-    createExample(wordLangueTypeId: number, content: string): Observable<WordExample> {
-        return this.#http.post<WordExample>(`${this.#baseUrl}word/${wordLangueTypeId}/examples`, { content });
+    createExample(wordLangueTypeId: number, content: string, pos?: number): Observable<WordExample> {
+        return this.#http.post<WordExample>(`${this.#baseUrl}word/${wordLangueTypeId}/examples`, { content, pos });
     }
 
-    updateExample(exampleId: number, content: string): Observable<WordExample> {
-        return this.#http.put<WordExample>(`${this.#baseUrl}examples/${exampleId}`, { content });
+    updateExample(exampleId: number, content: string, pos?: number): Observable<WordExample> {
+        return this.#http.put<WordExample>(`${this.#baseUrl}examples/${exampleId}`, { content, pos });
     }
 
     deleteExample(exampleId: number): Observable<void> {

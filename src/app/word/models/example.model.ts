@@ -3,6 +3,7 @@ export interface WordExample {
     wordLangueTypeId: number;
     content: string;
     createdAt?: string;
+    pos?: number;
 }
 
 export interface WordExampleTranslation {
@@ -12,4 +13,5 @@ export interface WordExampleTranslation {
     langueId: number;
     content?: string;
     exampleContent: string;
+    pos?: number;
 }

@@ -7,11 +7,6 @@
     <div class="example-dialog__list" *ngIf="forms.length; else noExamples">
         @for (group of forms.controls; track $index; let idx = $index) {
             <div class="example-dialog__item" [formGroup]="group">
-                <div class="example-dialog__view-row">
-                    <div class="example-dialog__text">
-                        {{ group.get('exampleContent')?.value }}
-                    </div>
-                </div>
                 <div class="example-dialog__translation-display">
                     <div class="example-dialog__translation-text" *ngIf="!isEditing(idx) && hasTranslation(idx)">
                         <span class="example-dialog__arrow">&#8594;</span>
@@ -52,6 +47,11 @@
                             {{ 'word.examples.errors.maxlength' | translate:{ max: 500 } }}
                         </mat-error>
                     </mat-form-field>
+                </div>
+                <div class="example-dialog__view-row example-dialog__view-row--original">
+                    <div class="example-dialog__text example-dialog__text--muted">
+                        {{ group.get('exampleContent')?.value }}
+                    </div>
                 </div>
             </div>
         }
