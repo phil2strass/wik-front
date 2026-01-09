@@ -20,7 +20,6 @@ import { SecurityStore } from '@shared/security/security-store';
 import { WordTranslationEditDialogComponent } from '../word-translation-view-dialog/word-translation-view-dialog.component';
 import { MatPaginatorIntl } from '@angular/material/paginator';
 import { Subscription } from 'rxjs';
-import { ExampleDialogComponent } from '../example-dialog/example-dialog.component';
 import { ExampleTranslationDialogComponent } from '../example-dialog/example-translation-dialog.component';
 import { ExpressionDialogComponent } from '../expression-dialog/expression-dialog.component';
 import { ExpressionTranslationDialogComponent } from '../expression-dialog/expression-translation-dialog.component';
@@ -214,21 +213,25 @@ export class WordGridComponent implements OnDestroy {
     }
 
     openExamples(row: Word, langue?: Langue): void {
+        const targetLangue = langue ?? this.translationLanguages[0] ?? this.getLangueById(this.langueSelectedId());
+        if (!targetLangue) {
+            return;
+        }
         const baseConfig = {
             width: '1000px',
             maxWidth: '1000px',
             autoFocus: false,
             restoreFocus: false
         } as const;
-        const dialogRef = langue
-            ? this.dialog.open(ExampleTranslationDialogComponent, {
-                  ...baseConfig,
-                  data: { wordLangueTypeId: row.wordLangueTypeId, wordLabel: this.formatDisplayName(row), langue }
-              })
-            : this.dialog.open(ExampleDialogComponent, {
-                  ...baseConfig,
-                  data: { wordLangueTypeId: row.wordLangueTypeId, wordLabel: this.formatDisplayName(row) }
-              });
+        const dialogRef = this.dialog.open(ExampleTranslationDialogComponent, {
+            ...baseConfig,
+            data: {
+                wordLangueTypeId: row.wordLangueTypeId,
+                wordLabel: this.formatDisplayName(row),
+                langue: targetLangue,
+                languages: this.translationLanguages
+            }
+        });
         dialogRef.afterClosed().subscribe();
     }
 

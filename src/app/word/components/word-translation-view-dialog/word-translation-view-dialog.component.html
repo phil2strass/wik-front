@@ -38,10 +38,16 @@
         <div class="word-translation-dialog__meaning-group" *ngFor="let group of meaningGroups; trackBy: trackMeaningGroup">
             <div class="word-translation-dialog__meaning-header">
                 <div class="word-translation-dialog__meaning-title">{{ meaningTitle(group.index) }}</div>
-                <button mat-stroked-button type="button" (click)="addTranslationForMeaning(group.meaningId, group.index)" [disabled]="loading">
-                    <mat-icon>add</mat-icon>
-                    <span>Add translation</span>
-                </button>
+                <div class="word-translation-dialog__meaning-actions">
+                    <button
+                        mat-stroked-button
+                        type="button"
+                        (click)="addTranslationForMeaning(group.meaningId, group.index)"
+                        [disabled]="loading">
+                        <mat-icon>add</mat-icon>
+                        <span>Add translation</span>
+                    </button>
+                </div>
             </div>
             <div class="word-translation-dialog__translation-list">
                 <div
@@ -74,6 +80,12 @@
                             <div class="word-translation-dialog__item-meta">
                                 <span *ngIf="formGroup.value.plural?.trim() as plural">{{ 'word.table.column.plural' | translate }}: {{ plural }}</span>
                                 <span *ngIf="genderLabel(formGroup) as gender">{{ gender }}</span>
+                            </div>
+                            <div class="word-translation-dialog__example-action" *ngIf="formGroup.value.wordLangueTypeId">
+                                <button mat-stroked-button type="button" (click)="openExamplesForTranslation(formGroup)" [disabled]="loading">
+                                    <mat-icon>menu_book</mat-icon>
+                                    <span>{{ 'word.examples.add' | translate }}</span>
+                                </button>
                             </div>
                         </div>
                     </div>

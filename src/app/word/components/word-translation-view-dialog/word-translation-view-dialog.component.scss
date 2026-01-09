@@ -101,6 +101,11 @@
     margin-bottom: 6px;
 }
 
+.word-translation-dialog__meaning-actions {
+    display: flex;
+    gap: 8px;
+}
+
 .word-translation-dialog__meaning-title {
     font-size: 15px;
     font-weight: 700;
@@ -175,6 +180,10 @@
     gap: 8px;
     font-size: 12px;
     color: rgba(0, 0, 0, 0.6);
+}
+
+.word-translation-dialog__example-action {
+    margin-top: 6px;
 }
 
 .word-translation-dialog__item-actions {

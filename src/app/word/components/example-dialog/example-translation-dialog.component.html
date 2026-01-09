@@ -2,6 +2,16 @@
     <h2 class="example-dialog__title">
         {{ data.wordLabel }}: {{ 'word.examples.titleByLangShort' | translate:{ lang: langLabel } }}
     </h2>
+    <div class="example-dialog__lang-select" *ngIf="availableLangues.length > 1">
+        <mat-form-field appearance="outline" color="primary" class="example-dialog__lang-field" hideRequiredMarker="true">
+            <mat-label>{{ 'word.translation.section' | translate }}</mat-label>
+            <mat-select [value]="currentLangue?.id" (selectionChange)="changeLangue($event.value)">
+                @for (lang of availableLangues; track lang.id) {
+                    <mat-option [value]="lang.id">{{ computeLangLabel(lang) }}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+    </div>
 </div>
 <mat-dialog-content class="example-dialog__content">
     <div class="example-dialog__list" *ngIf="forms.length; else noExamples">
@@ -49,8 +59,39 @@
                     </mat-form-field>
                 </div>
                 <div class="example-dialog__view-row example-dialog__view-row--original">
-                    <div class="example-dialog__text example-dialog__text--muted">
-                        {{ group.get('exampleContent')?.value }}
+                    <ng-container *ngIf="exampleEditingIndex !== idx; else editOriginal">
+                        <div class="example-dialog__text example-dialog__text--muted">
+                            {{ group.get('exampleContent')?.value }}
+                        </div>
+                    </ng-container>
+                    <ng-template #editOriginal>
+                        <div class="example-dialog__edit-container w-100">
+                            <mat-form-field appearance="outline" class="w-100 example-dialog__field" color="primary" hideRequiredMarker="true">
+                                <textarea matInput formControlName="exampleContent" rows="3"></textarea>
+                                <mat-error *ngIf="group.get('exampleContent')?.hasError('required')">
+                                    {{ 'word.examples.errors.required' | translate }}
+                                </mat-error>
+                                <mat-error *ngIf="group.get('exampleContent')?.hasError('maxlength')">
+                                    {{ 'word.examples.errors.maxlength' | translate:{ max: 500 } }}
+                                </mat-error>
+                            </mat-form-field>
+                            <div class="example-dialog__action-icons example-dialog__action-icons--inline">
+                                <button mat-icon-button color="primary" type="button" (click)="saveExample()" [disabled]="loading">
+                                    <mat-icon>check</mat-icon>
+                                </button>
+                                <button mat-icon-button type="button" (click)="cancelExampleEdit()" [disabled]="loading">
+                                    <mat-icon>close</mat-icon>
+                                </button>
+                            </div>
+                        </div>
+                    </ng-template>
+                    <div class="example-dialog__view-actions">
+                        <button mat-icon-button type="button" (click)="startExampleEdit(idx)" [disabled]="loading">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" type="button" (click)="deleteExample(idx)" [disabled]="loading">
+                            <mat-icon>delete</mat-icon>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -59,6 +100,34 @@
     <ng-template #noExamples>
         <div class="example-dialog__empty">{{ 'word.examples.empty' | translate }}</div>
     </ng-template>
+    <div class="example-dialog__new-example">
+        <mat-form-field appearance="outline" class="w-100" color="primary" hideRequiredMarker="true">
+            <mat-label>{{ 'word.examples.add' | translate }}</mat-label>
+            <textarea
+                matInput
+                [formControl]="newExampleControl"
+                rows="3"
+                [placeholder]="'word.examples.placeholder' | translate">
+            </textarea>
+            <mat-error *ngIf="newExampleControl.hasError('required')">
+                {{ 'word.examples.errors.required' | translate }}
+            </mat-error>
+            <mat-error *ngIf="newExampleControl.hasError('maxlength')">
+                {{ 'word.examples.errors.maxlength' | translate:{ max: 500 } }}
+            </mat-error>
+        </mat-form-field>
+        <div class="example-dialog__new-actions">
+            <button mat-stroked-button type="button" (click)="resetNewExample()" [disabled]="loading">
+                {{ 'word.examples.cancel' | translate }}
+            </button>
+            <button mat-flat-button color="primary" type="button" (click)="addExample()" [disabled]="loading">
+                <div class="d-flex align-items-center">
+                    <tabler-icon name="plus" class="m-r-5"></tabler-icon>
+                    <span>{{ 'word.examples.add' | translate }}</span>
+                </div>
+            </button>
+        </div>
+    </div>
 </mat-dialog-content>
 <mat-dialog-actions align="end" class="example-dialog__actions-bar">
     <ng-container *ngIf="hasEditing(); else closeOnly">

@@ -55,3 +55,30 @@
     color: var(--mat-sys-outline, #6f6f6f);
     font-size: 14px;
 }
+
+.example-dialog__new-example {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.example-dialog__new-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.example-dialog__lang-select {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+.example-dialog__lang-field {
+    min-width: 200px;
+}
+
+.example-dialog__action-icons--inline {
+    top: 0;
+}

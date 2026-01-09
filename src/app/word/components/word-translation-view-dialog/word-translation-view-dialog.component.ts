@@ -20,6 +20,7 @@ import { MatInputModule } from '@angular/material/input';
 import { DataStore } from '@shared/data/data-store';
 import { WordMeaningTranslation, WordTranslationModalStore } from '../../word-translation-modal-store';
 import { WordTranslationDeleteConfirmDialogComponent } from '../word-translation-delete-confirm-dialog.component';
+import { ExampleTranslationDialogComponent } from '../example-dialog/example-translation-dialog.component';
 
 type WordTranslationEditDialogData = {
     parentWord: Word;
@@ -462,6 +463,27 @@ export class WordTranslationEditDialogComponent {
 
     meaningTitle(index: number): string {
         return this.meaningMode ? `${this.targetWordLabel} ${index}` : this.targetWordLabel;
+    }
+
+    openExamplesForTranslation(form: FormGroup): void {
+        const langue = this.activeLang;
+        const translationId = this.extractNumber(form.get('wordLangueTypeId')?.value);
+        if (!langue || !translationId) {
+            return;
+        }
+        const meaningIndex = this.extractNumber(form.get('meaningIndex')?.value) ?? 1;
+        this.dialog.open(ExampleTranslationDialogComponent, {
+            width: '1000px',
+            maxWidth: '1000px',
+            autoFocus: false,
+            restoreFocus: false,
+            data: {
+                wordLangueTypeId: translationId,
+                wordLabel: this.meaningTitle(meaningIndex),
+                langue,
+                languages: this.languages
+            }
+        });
     }
 
     private syncMeaningForms(items: WordMeaningTranslation[]): void {
