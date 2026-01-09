@@ -109,12 +109,6 @@
                         <span>{{ 'word.expressions.menu' | translate }}</span>
                     </div>
                 </button>
-                <button mat-menu-item (click)="openExamples(row)">
-                    <div class="d-flex align-items-center">
-                        <tabler-icon name="book-2" class="m-x-6"></tabler-icon>
-                        <span>{{ 'word.examples.menu' | translate }}</span>
-                    </div>
-                </button>
                 <button mat-menu-item (click)="openDelete(row)">
                     <div class="d-flex align-items-center text-error">
                         <tabler-icon name="trash" class="m-x-6"></tabler-icon>
@@ -133,17 +127,6 @@
                 </div>
                 @for (lang of translationLanguages; track lang.id) {
                     <button mat-menu-item (click)="openExpressionTranslationDialog(row, lang)">
-                        <div class="d-flex align-items-center">
-                            <mat-icon class="m-r-8">translate</mat-icon>
-                            <span>{{ langHeaderLabel(lang) }}</span>
-                        </div>
-                    </button>
-                }
-                <div class="mat-menu-item word-grid__menu-section" *ngIf="translationLanguages.length">
-                    <span>{{ 'word.examples.section' | translate }}</span>
-                </div>
-                @for (lang of translationLanguages; track lang.id) {
-                    <button mat-menu-item (click)="openExamples(row, lang)">
                         <div class="d-flex align-items-center">
                             <mat-icon class="m-r-8">translate</mat-icon>
                             <span>{{ langHeaderLabel(lang) }}</span>

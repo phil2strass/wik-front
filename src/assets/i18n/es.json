@@ -100,6 +100,13 @@
   "Menu 1": "Menu 1",
   "Menu 2": "Menu 2",
   "Disabled": "Desabilitada",
+  "common": {
+    "actions": {
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "close": "Cerrar"
+    }
+  },
   "welcome": {
     "message": "Pronto, un sitio para aprender vocabulario y guardar tu conocimiento."
   }

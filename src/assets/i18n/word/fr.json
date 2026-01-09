@@ -47,6 +47,7 @@
         "required": "Ce champ est requis"
     },
     "common.actions.reset": "Réinitialiser",
+    "common.actions.close": "Fermer",
     "word.examples": {
         "menu": "Exemples",
         "section": "Exemples",
@@ -78,10 +79,23 @@
     },
     "word.translation": {
         "add": "Ajouter",
+        "addTitle": "Ajouter une traduction",
         "new": "Nouvelle traduction",
         "delete": "Supprimer",
         "section": "Traductions",
-        "motherTongue": "Langue maternelle"
+        "motherTongue": "Langue maternelle",
+        "label": "Traduction",
+        "save": "Enregistrer",
+        "editTitle": "Modifier la traduction",
+        "errors": {
+            "required": "La traduction est requise"
+        },
+        "homonym": {
+            "add": "Ajouter un homonyme",
+            "delete": "Supprimer",
+            "deleteTitle": "Supprimer l'homonyme",
+            "deleteConfirm": "Voulez-vous vraiment supprimer cet homonyme ?"
+        }
     },
     "word.expressions": {
         "menu": "Expressions",

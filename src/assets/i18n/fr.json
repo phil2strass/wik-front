@@ -68,7 +68,8 @@
     },
     "actions": {
       "save": "Enregistrer",
-      "cancel": "Annuler"
+      "cancel": "Annuler",
+      "close": "Fermer"
     }
   },
   "Area": "Zone",

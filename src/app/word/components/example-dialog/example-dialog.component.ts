@@ -15,6 +15,7 @@ import { finalize } from 'rxjs/operators';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Langue } from '@shared/data/models/langue.model';
 import { ExampleDeleteDialogComponent } from './example-delete-dialog.component';
+import { ExampleAddDialogComponent, ExampleAddDialogResult } from './example-add-dialog.component';
 
 export type ExampleDialogData = {
     wordLangueTypeId: number;
@@ -53,7 +54,6 @@ export class ExampleDialogComponent {
     examplesForm: FormArray<FormGroup> = this.#fb.array<FormGroup>([]);
     loading = false;
     editingIndex: number | null = null;
-    addingNew = false;
 
     constructor(
         @Inject(MAT_DIALOG_DATA) public data: ExampleDialogData,
@@ -66,15 +66,34 @@ export class ExampleDialogComponent {
         return this.examplesForm;
     }
 
-    addExample(): void {
-        this.forms.push(
-            this.#fb.group({
-                id: [null],
-                content: ['', [Validators.required, Validators.maxLength(500)]]
-            })
-        );
-        this.editingIndex = this.forms.length - 1;
-        this.addingNew = true;
+    openAddExampleDialog(): void {
+        const dialogRef = this.#dialog.open(ExampleAddDialogComponent, {
+            width: '520px'
+        });
+
+        dialogRef.afterClosed().subscribe((result?: ExampleAddDialogResult) => {
+            if (!result?.content) {
+                return;
+            }
+            this.loading = true;
+            this.#exampleService
+                .createExample(this.data.wordLangueTypeId, result.content)
+                .pipe(finalize(() => (this.loading = false)))
+                .subscribe({
+                    next: example => {
+                        this.forms.push(
+                            this.#fb.group({
+                                id: [example.id],
+                                content: [example.content, [Validators.required, Validators.maxLength(500)]]
+                            })
+                        );
+                        this.#messageService.info('Exemple enregistré');
+                    },
+                    error: err => {
+                        this.#messageService.error(err?.error ?? 'Erreur lors de la sauvegarde');
+                    }
+                });
+        });
     }
 
     loadExamples(): void {
@@ -86,7 +105,6 @@ export class ExampleDialogComponent {
             .subscribe({
                 next: (examples: WordExample[]) => {
                     this.editingIndex = null;
-                    this.addingNew = false;
                     if (examples.length) {
                         examples.forEach(example =>
                             this.forms.push(
@@ -112,19 +130,13 @@ export class ExampleDialogComponent {
         if (this.editingIndex !== null) {
             const idx = this.editingIndex;
             const group = this.forms.at(idx);
-            const id = group?.get('id')?.value;
             const content = (group?.get('content')?.value ?? '').toString().trim();
             const contentControl = group?.get('content');
             contentControl?.markAsPristine();
             contentControl?.markAsUntouched();
             contentControl?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
-            if (group && !id) {
-                if (!content) {
-                    this.forms.removeAt(idx);
-                } else {
-                    group.get('content')?.setValue(content);
-                }
-                this.addingNew = false;
+            if (group) {
+                group.get('content')?.setValue(content);
             }
         }
         this.editingIndex = null;
@@ -151,7 +163,6 @@ export class ExampleDialogComponent {
                 next: example => {
                     group.patchValue({ id: example.id });
                     this.#messageService.info('Exemple enregistré');
-                    this.addingNew = false;
                     this.editingIndex = null;
                 },
                 error: err => {
@@ -180,7 +191,6 @@ export class ExampleDialogComponent {
                 if (this.editingIndex === index) {
                     this.editingIndex = null;
                 }
-                this.addingNew = false;
                 return;
             }
             this.loading = true;

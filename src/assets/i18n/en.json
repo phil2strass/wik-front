@@ -68,7 +68,8 @@
         },
         "actions": {
             "save": "Save",
-            "cancel": "Cancel"
+            "cancel": "Cancel",
+            "close": "Close"
         }
     },
     "Area": "Area",

@@ -56,12 +56,13 @@
             </div>
         }
     </div>
-    <div class="example-dialog__footer" *ngIf="!addingNew">
+    <div class="example-dialog__footer">
         <button
             mat-flat-button
             type="button"
             class="bg-light-primary text-primary example-dialog__add-btn"
-            (click)="addExample()">
+            (click)="openAddExampleDialog()"
+            [disabled]="loading">
             <div class="d-flex align-items-center">
                 <tabler-icon name="plus" class="m-r-5"></tabler-icon>
                 <span>{{ 'word.examples.add' | translate }}</span>

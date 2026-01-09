@@ -17,10 +17,12 @@ import { MatRippleModule } from '@angular/material/core';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { DataStore } from '@shared/data/data-store';
 import { WordMeaningTranslation, WordTranslationModalStore } from '../../word-translation-modal-store';
 import { WordTranslationDeleteConfirmDialogComponent } from '../word-translation-delete-confirm-dialog.component';
-import { ExampleTranslationDialogComponent } from '../example-dialog/example-translation-dialog.component';
+import { ExampleTranslationDialogComponent } from '@root/app/word/components/example-dialog/example-translation-dialog.component';
+import { WordTranslationEntryDialogComponent } from '@root/app/word/components/word-translation-entry-dialog.component';
 
 type WordTranslationEditDialogData = {
     parentWord: Word;
@@ -52,6 +54,7 @@ type WordTranslationEditDialogData = {
         MatProgressBarModule,
         MatFormFieldModule,
         MatInputModule,
+        MatTooltipModule,
         TranslateModule
     ]
 })
@@ -209,39 +212,142 @@ export class WordTranslationEditDialogComponent {
         return Array.from(meaningMap.values()).sort((a, b) => a.index - b.index);
     }
 
-    addMeaning(): void {
-        this.translationModalStore.addMeaning();
+    addHomonym(): void {
+        if (this.loading) {
+            return;
+        }
+        const sourceForm = this.selectedForm ?? this.editingForm ?? this.translationForms[0] ?? null;
+        const sourceMeaningId =
+            this.extractNumber(sourceForm?.get('baseWordLangueTypeId')?.value) ?? this.data.parentWord.wordLangueTypeId;
+        if (!sourceMeaningId) {
+            this.messageService.error('Selectionnez un sens existant pour creer un homonyme.');
+            return;
+        }
+
+        this.saving = true;
+        this.http.post(`${this.configuration.baseUrl}word/meanings/${sourceMeaningId}`, {}).subscribe({
+            next: () => {
+                this.messageService.info('Homonyme ajouté');
+                this.translationModalStore.reloadTranslations();
+            },
+            error: err => {
+                this.messageService.error(err?.error ?? 'Erreur lors de la creation de l\'homonyme');
+            },
+            complete: () => {
+                this.saving = false;
+            }
+        });
     }
 
     addTranslationForMeaning(meaningId: number, meaningIndex?: number): void {
         if (!meaningId) {
             return;
         }
-        const idx = meaningIndex ?? this.meaningIndexFromMap(meaningId) ?? 1;
-        const newForm = this.fb.group({
-            wordLangueTypeId: [null],
-            name: ['', Validators.required],
-            plural: [''],
-            langueId: [this.activeLang?.id ?? this.data.langue.id, Validators.required],
-            typeId: [this.activeTypeId ?? this.data.typeId ?? null, Validators.required],
-            genderId: [null],
-            baseWordTypeId: [this.data.parentWord.wordLangueTypeId],
-            baseWordLangueTypeId: [meaningId],
-            targetWordLangueTypeId: [null],
-            meaningIndex: [idx]
-        });
-
-        const meaningForms = this.formsForMeaning(meaningId);
-        const insertionIndex = this.lastIndexForMeaning(meaningId);
-        if (insertionIndex >= 0 && insertionIndex < this.translationForms.length - 1) {
-            this.translationForms.splice(insertionIndex + 1, 0, newForm);
-        } else {
-            this.translationForms.push(newForm);
+        if (this.loading) {
+            return;
         }
-        this.formsByMeaningId.set(meaningId, [...meaningForms, newForm]);
+        const dialogRef = this.dialog.open(WordTranslationEntryDialogComponent, {
+            width: '420px',
+            data: {
+                titleKey: 'word.translation.addTitle',
+                confirmKey: 'word.translation.add',
+                labelKey: 'word.translation.label'
+            }
+        });
+        dialogRef.afterClosed().subscribe((value?: string | null) => {
+            if (!value) {
+                return;
+            }
+            const idx = meaningIndex ?? this.meaningIndexFromMap(meaningId) ?? 1;
+            const langueId = this.activeLang?.id ?? this.data.langue.id;
+            const typeId = this.activeTypeId ?? this.data.typeId ?? null;
+            if (!langueId || !typeId) {
+                this.messageService.error('Langue ou type manquant pour ajouter une traduction.');
+                return;
+            }
+            const payload = {
+                wordLangueTypeId: null,
+                name: value,
+                plural: '',
+                langueId,
+                typeId,
+                genderId: null,
+                baseWordTypeId: this.data.parentWord.wordLangueTypeId,
+                baseWordLangueTypeId: meaningId,
+                targetWordLangueTypeId: null,
+                meaningIndex: idx
+            };
+            this.saving = true;
+            this.http.post(`${this.configuration.baseUrl}word/${this.data.parentWord.wordLangueTypeId}/translation`, payload).subscribe({
+                next: () => {
+                    this.messageService.info('Bien enregistré !');
+                    this.translationModalStore.reloadTranslations();
+                },
+                error: err => {
+                    this.messageService.error(err?.error ?? 'Erreur lors de la sauvegarde');
+                },
+                complete: () => {
+                    this.saving = false;
+                }
+            });
+        });
+    }
 
-        this.startEditing(newForm);
-        this.focusInput(newForm);
+    openEditTranslationDialog(form: FormGroup, event?: Event): void {
+        event?.stopPropagation();
+        if (this.loading) {
+            return;
+        }
+        const currentName = typeof form.get('name')?.value === 'string' ? (form.get('name')?.value as string).trim() : '';
+        const dialogRef = this.dialog.open(WordTranslationEntryDialogComponent, {
+            width: '420px',
+            data: {
+                titleKey: 'word.translation.editTitle',
+                confirmKey: 'word.translation.save',
+                labelKey: 'word.translation.label',
+                initialValue: currentName
+            }
+        });
+        dialogRef.afterClosed().subscribe((value?: string | null) => {
+            if (!value) {
+                return;
+            }
+            const payload = form.getRawValue();
+            payload.name = value;
+            this.saving = true;
+            this.http.put(`${this.configuration.baseUrl}word`, payload).subscribe({
+                next: () => {
+                    this.messageService.info('Bien enregistré !');
+                    this.translationModalStore.reloadTranslations();
+                },
+                error: err => {
+                    this.messageService.error(err?.error ?? 'Erreur lors de la sauvegarde');
+                },
+                complete: () => {
+                    this.saving = false;
+                }
+            });
+        });
+    }
+
+    confirmDeleteMeaning(meaningId: number): void {
+        if (!meaningId || this.loading) {
+            return;
+        }
+        const dialogRef = this.dialog.open(WordTranslationDeleteConfirmDialogComponent, {
+            width: '420px',
+            data: {
+                title: 'Supprimer l\'homonyme',
+                message: 'Voulez-vous vraiment supprimer cet homonyme ?',
+                confirmLabel: 'Supprimer'
+            }
+        });
+        dialogRef.afterClosed().subscribe(confirm => {
+            if (!confirm) {
+                return;
+            }
+            this.translationModalStore.deleteMeaning(meaningId);
+        });
     }
 
     selectTranslation(index: number): void {
@@ -467,8 +573,10 @@ export class WordTranslationEditDialogComponent {
 
     openExamplesForTranslation(form: FormGroup): void {
         const langue = this.activeLang;
+        const baseWordLangueTypeId = this.extractNumber(form.get('baseWordLangueTypeId')?.value);
         const translationId = this.extractNumber(form.get('wordLangueTypeId')?.value);
-        if (!langue || !translationId) {
+        const wordLangueTypeId = baseWordLangueTypeId ?? translationId;
+        if (!langue || !wordLangueTypeId) {
             return;
         }
         const meaningIndex = this.extractNumber(form.get('meaningIndex')?.value) ?? 1;
@@ -478,7 +586,7 @@ export class WordTranslationEditDialogComponent {
             autoFocus: false,
             restoreFocus: false,
             data: {
-                wordLangueTypeId: translationId,
+                wordLangueTypeId,
                 wordLabel: this.meaningTitle(meaningIndex),
                 langue,
                 languages: this.languages
@@ -623,7 +731,8 @@ export class WordTranslationEditDialogComponent {
     private isPlaceholderTranslation(item: WordMeaningTranslation): boolean {
         const name = (item?.name ?? '').trim();
         const plural = (item?.plural ?? '').trim();
-        return !item?.wordLangueTypeId && !item?.genderId && !name && !plural;
+        const targetId = this.extractNumber(item?.targetWordLangueTypeId);
+        return !targetId && !item?.genderId && !name && !plural;
     }
 
     formIndex(form: FormGroup): number {

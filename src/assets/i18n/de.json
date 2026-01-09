@@ -69,7 +69,8 @@
     },
     "actions": {
       "save": "Speichern",
-      "cancel": "Abbrechen"
+      "cancel": "Abbrechen",
+      "close": "Schliessen"
     }
   },
   "Candlestick": "Leuchter",

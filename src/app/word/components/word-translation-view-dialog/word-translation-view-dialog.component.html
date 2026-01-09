@@ -11,9 +11,9 @@
         </button>
     </span>
     <span class="word-translation-dialog__title-actions">
-        <button mat-stroked-button type="button" (click)="addMeaning()">
+        <button mat-stroked-button type="button" (click)="addHomonym()" [disabled]="loading">
             <mat-icon>add</mat-icon>
-            <span>Add meaning</span>
+            <span>{{ 'word.translation.homonym.add' | translate }}</span>
         </button>
     </span>
 </h2>
@@ -45,7 +45,16 @@
                         (click)="addTranslationForMeaning(group.meaningId, group.index)"
                         [disabled]="loading">
                         <mat-icon>add</mat-icon>
-                        <span>Add translation</span>
+                        <span>{{ 'word.translation.add' | translate }}</span>
+                    </button>
+                    <button
+                        mat-icon-button
+                        type="button"
+                        color="warn"
+                        (click)="confirmDeleteMeaning(group.meaningId)"
+                        [disabled]="loading"
+                        matTooltip="{{ 'word.translation.homonym.delete' | translate }}">
+                        <mat-icon>delete</mat-icon>
                     </button>
                 </div>
             </div>
@@ -81,12 +90,6 @@
                                 <span *ngIf="formGroup.value.plural?.trim() as plural">{{ 'word.table.column.plural' | translate }}: {{ plural }}</span>
                                 <span *ngIf="genderLabel(formGroup) as gender">{{ gender }}</span>
                             </div>
-                            <div class="word-translation-dialog__example-action" *ngIf="formGroup.value.wordLangueTypeId">
-                                <button mat-stroked-button type="button" (click)="openExamplesForTranslation(formGroup)" [disabled]="loading">
-                                    <mat-icon>menu_book</mat-icon>
-                                    <span>{{ 'word.examples.add' | translate }}</span>
-                                </button>
-                            </div>
                         </div>
                     </div>
                     <div class="word-translation-dialog__item-actions">
@@ -111,7 +114,7 @@
                             <button
                                 mat-icon-button
                                 type="button"
-                                (click)="startEditing(formGroup, $event)"
+                                (click)="openEditTranslationDialog(formGroup, $event)"
                                 [disabled]="loading">
                                 <mat-icon>edit</mat-icon>
                             </button>

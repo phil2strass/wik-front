@@ -47,6 +47,7 @@
         "required": "This field is required"
     },
     "common.actions.reset": "Reset",
+    "common.actions.close": "Close",
     "word.examples": {
         "menu": "Examples",
         "section": "Examples",
@@ -78,10 +79,23 @@
     },
     "word.translation": {
         "add": "Add",
+        "addTitle": "Add translation",
         "new": "New translation",
         "delete": "Delete",
         "section": "Translations",
-        "motherTongue": "Mother tongue"
+        "motherTongue": "Mother tongue",
+        "label": "Translation",
+        "save": "Save",
+        "editTitle": "Edit translation",
+        "errors": {
+            "required": "Translation is required"
+        },
+        "homonym": {
+            "add": "Add homonym",
+            "delete": "Delete",
+            "deleteTitle": "Delete homonym",
+            "deleteConfirm": "Are you sure you want to delete this homonym?"
+        }
     },
     "word.expressions": {
         "menu": "Expressions",
