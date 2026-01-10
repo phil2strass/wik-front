@@ -36,36 +36,6 @@
     border-color: #1976d2;
 }
 
-.word-translation-dialog__types {
-    width: 240px;
-    border-right: 1px solid rgba(0, 0, 0, 0.08);
-    padding-right: 12px;
-    padding-top: 12px;
-}
-
-.word-translation-dialog__types-title {
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.word-translation-dialog__type-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.word-translation-dialog__type-btn {
-    width: 100%;
-    justify-content: flex-start;
-    text-align: left;
-    padding: 6px 10px;
-}
-
-.word-translation-dialog__type-btn--active {
-    background-color: rgba(25, 118, 210, 0.12);
-    border-color: #1976d2;
-}
-
 .word-translation-dialog__translations {
     flex: 1;
     display: flex;

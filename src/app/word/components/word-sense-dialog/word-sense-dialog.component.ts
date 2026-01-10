@@ -7,7 +7,6 @@ import { MatInputModule } from '@angular/material/input';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatChipsModule } from '@angular/material/chips';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { finalize } from 'rxjs/operators';
@@ -20,7 +19,6 @@ import { ExampleAddDialogComponent, ExampleAddDialogResult } from '../example-di
 import { ExampleDeleteDialogComponent } from '../example-dialog/example-delete-dialog.component';
 import { SenseEntryDialogComponent, SenseEntryDialogResult } from './sense-entry-dialog.component';
 import { Langue } from '@shared/data/models/langue.model';
-import { Type } from '@shared/data/models/type.model';
 import { WordTranslationDeleteConfirmDialogComponent } from '../word-translation-delete-confirm-dialog.component';
 
 export type WordSenseDialogData = {
@@ -49,7 +47,6 @@ type SenseState = {
         MatIconModule,
         MatProgressBarModule,
         MatTooltipModule,
-        MatChipsModule,
         ReactiveFormsModule,
         TranslateModule
     ]
@@ -75,18 +72,6 @@ export class WordSenseDialogComponent {
 
     get busy(): boolean {
         return this.loading || this.saving;
-    }
-
-    get typeChips(): string[] {
-        const raw = this.data.word.types;
-        if (raw && raw.trim().length > 0) {
-            return raw
-                .split(',')
-                .map(value => value.trim())
-                .filter(value => value.length > 0);
-        }
-        const label = this.typeLabel(this.data.word.type);
-        return label ? [label] : [];
     }
 
     get wordLabel(): string {
@@ -451,15 +436,6 @@ export class WordSenseDialogComponent {
     private wordLangue(): Langue | undefined {
         const langues = this.#dataStore.langues();
         return langues?.find(langue => langue.id === this.data.word.langue);
-    }
-
-    private typeLabel(type?: Type | null): string {
-        if (!type || !type.id) {
-            return type?.name ?? '';
-        }
-        const key = `word.type.${type.id}`;
-        const translated = this.#translate.instant(key);
-        return translated && translated !== key ? translated : type.name ?? '';
     }
 
     private formatLocalizedWord(word: Word, iso?: string | null): string {

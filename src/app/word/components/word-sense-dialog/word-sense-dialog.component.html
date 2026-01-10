@@ -8,17 +8,6 @@
     </span>
 </h2>
 <mat-dialog-content class="word-sense-dialog__content">
-    <div class="word-sense-dialog__types">
-        <div class="word-sense-dialog__types-title">{{ 'word.table.column.type' | translate }}</div>
-        <div class="word-sense-dialog__type-list" aria-label="Types">
-            @for (label of typeChips; track label) {
-                <div class="word-sense-dialog__type-item">{{ label }}</div>
-            }
-            @if (!typeChips.length) {
-                <div class="word-sense-dialog__type-item">-</div>
-            }
-        </div>
-    </div>
     <div class="word-sense-dialog__list">
         @if (!senses.length && !loading) {
             <div class="word-sense-dialog__empty">{{ 'word.senses.empty' | translate }}</div>

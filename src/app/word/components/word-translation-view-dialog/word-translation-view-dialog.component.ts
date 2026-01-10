@@ -17,7 +17,6 @@ import { MatRippleModule } from '@angular/material/core';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { DataStore } from '@shared/data/data-store';
 import { WordMeaningTranslation, WordTranslationModalStore } from '../../word-translation-modal-store';
 import { WordTranslationDeleteConfirmDialogComponent } from '../word-translation-delete-confirm-dialog.component';
 import { ExampleTranslationDialogComponent } from '@root/app/word/components/example-dialog/example-translation-dialog.component';
@@ -125,7 +124,6 @@ export class WordTranslationEditDialogComponent {
         });
     }
 
-    private readonly dataStore = inject(DataStore);
     private readonly translationModalStore = inject(WordTranslationModalStore);
 
     get languages(): Langue[] {
@@ -137,7 +135,7 @@ export class WordTranslationEditDialogComponent {
     }
 
     get activeTypeId(): number | null {
-        return this.translationModalStore.selectedTypeId();
+        return this.data.typeId ?? this.translationModalStore.selectedTypeId();
     }
 
     get loading(): boolean {
@@ -152,22 +150,6 @@ export class WordTranslationEditDialogComponent {
         return this.translationModalStore.meanings().length > 1;
     }
 
-    get typeOptions(): number[] {
-        return this.translationModalStore.typeOptionIds();
-    }
-
-    get baseTypes(): string[] {
-        const raw = this.data.parentWord.types;
-        if (typeof raw === 'string' && raw.trim().length > 0) {
-            return raw
-                .split(',')
-                .map(v => v.trim())
-                .filter(v => v.length > 0);
-        }
-        const single = this.data.parentWord.type?.name;
-        return single ? [single] : [];
-    }
-
     get selectedForm(): FormGroup | null {
         if (!this.translationForms.length) {
             return null;
@@ -176,15 +158,8 @@ export class WordTranslationEditDialogComponent {
         return form ?? null;
     }
 
-    get filteredTranslationForms(): FormGroup[] {
-        if (this.activeTypeId == null) {
-            return this.translationForms;
-        }
-        return this.translationForms.filter(f => this.translationTypeId(f) === this.activeTypeId);
-    }
-
     get meaningGroups(): { meaningId: number; index: number; forms: FormGroup[] }[] {
-        const typeFiltered = this.filteredTranslationForms;
+        const typeFiltered = this.translationForms;
         const meaningMap = new Map<number, { meaningId: number; index: number; forms: FormGroup[] }>();
         const meaningDefinitions = this.translationModalStore.meanings();
         const indexMap = new Map<number, number>();
@@ -498,21 +473,6 @@ export class WordTranslationEditDialogComponent {
         });
     }
 
-    selectType(typeId: number | null): void {
-        if (typeId === this.activeTypeId) {
-            return;
-        }
-        this.editingForm = null;
-        this.requiresGenderField = this.shouldRequireGender(this.activeLang, typeId);
-        if (typeId == null) {
-            this.selectedIndex = -1;
-            this.translationModalStore.selectType(null);
-            return;
-        }
-        this.selectedIndex = -1;
-        this.translationModalStore.selectType(typeId);
-    }
-
     meaningLabel(form: FormGroup): string {
         const idx = this.extractNumber(form.get('meaningIndex')?.value) ?? 1;
         return this.meaningMode ? `${this.targetWordLabel} ${idx}` : this.targetWordLabel;
@@ -549,7 +509,14 @@ export class WordTranslationEditDialogComponent {
         const nextForms: FormGroup[] = [];
         const ids = new Set<number>();
         const nextMap = new Map<number, FormGroup[]>();
-        const sorted = Array.isArray(items) ? [...items].sort((a, b) => (a.index ?? 0) - (b.index ?? 0)) : [];
+        const activeTypeId = this.activeTypeId;
+        const filteredItems =
+            activeTypeId == null
+                ? items
+                : items.filter(item => item?.typeId == null || item?.typeId === activeTypeId);
+        const sorted = Array.isArray(filteredItems)
+            ? [...filteredItems].sort((a, b) => (a.index ?? 0) - (b.index ?? 0))
+            : [];
 
         sorted.forEach(item => {
             const meaningId = item?.wordLangueTypeId;
@@ -611,29 +578,6 @@ export class WordTranslationEditDialogComponent {
             targetWordLangueTypeId: [item.targetWordLangueTypeId ?? null],
             meaningIndex: [item.index]
         });
-    }
-
-    typeLabel(typeId?: number | null): string {
-        const key = `word.type.${typeId}`;
-        const translated = this.translate.instant(key);
-        if (translated && translated !== key) {
-            return translated;
-        }
-        const types = this.dataStore.types();
-        const match = Array.isArray(types) ? types.find(t => t.id === typeId) : undefined;
-        return match?.name ?? `Type ${typeId}`;
-    }
-
-    private translationTypeId(form: FormGroup): number | null {
-        const value = form.get('typeId')?.value;
-        if (typeof value === 'number') {
-            return value;
-        }
-        if (value != null) {
-            const parsed = Number(value);
-            return Number.isFinite(parsed) ? parsed : null;
-        }
-        return null;
     }
 
     genderLabel(form: FormGroup): string {

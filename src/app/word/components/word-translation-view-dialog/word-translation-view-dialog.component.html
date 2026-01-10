@@ -12,21 +12,6 @@
     </span>
 </h2>
 <mat-dialog-content class="word-translation-dialog__content">
-        <div class="word-translation-dialog__types">
-            <div class="word-translation-dialog__types-title">{{ 'word.table.column.type' | translate }}</div>
-            <div class="word-translation-dialog__type-buttons" aria-label="Types">
-                <button
-                    mat-stroked-button
-                    type="button"
-                    class="word-translation-dialog__type-btn"
-                    *ngFor="let typeId of typeOptions"
-                    [class.word-translation-dialog__type-btn--active]="typeId === activeTypeId"
-                    [disabled]="loading"
-                    (click)="selectType(typeId)">
-                    {{ typeLabel(typeId) }}
-                </button>
-        </div>
-    </div>
     <div class="word-translation-dialog__translations">
         <div class="word-translation-dialog__meaning-group" *ngFor="let group of meaningGroups; trackBy: trackMeaningGroup">
             <div class="word-translation-dialog__meaning-header">
