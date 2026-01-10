@@ -109,6 +109,12 @@
                         <span>{{ 'word.expressions.menu' | translate }}</span>
                     </div>
                 </button>
+                <button mat-menu-item (click)="openSenses(row)">
+                    <div class="d-flex align-items-center">
+                        <tabler-icon name="list-details" class="m-x-6"></tabler-icon>
+                        <span>{{ 'word.senses.menu' | translate }}</span>
+                    </div>
+                </button>
                 <button mat-menu-item (click)="openDelete(row)">
                     <div class="d-flex align-items-center text-error">
                         <tabler-icon name="trash" class="m-x-6"></tabler-icon>

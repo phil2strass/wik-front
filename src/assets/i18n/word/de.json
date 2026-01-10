@@ -54,11 +54,14 @@
         "title": "Beispiele für {{word}}",
         "titleByLang": "Beispiele auf {{lang}} für {{word}}",
         "titleByLangShort": "beispiele auf {{lang}}",
+        "editTitle": "Beispiel bearbeiten",
         "add": "Beispiel hinzufügen",
         "label": "Beispiel {{index}}",
         "placeholder": "Geben Sie Ihr Beispiel ein",
         "newLabel": "Neues Beispiel",
         "save": "Speichern",
+        "saved": "Beispiel gespeichert",
+        "deleted": "Beispiel gelöscht",
         "close": "Schließen",
         "cancel": "Abbrechen",
         "edit": "Bearbeiten",
@@ -73,6 +76,9 @@
             "deleted": "Übersetzung gelöscht"
         },
         "errors": {
+            "load": "Fehler beim Laden der Beispiele",
+            "save": "Fehler beim Speichern",
+            "delete": "Fehler beim Löschen",
             "required": "Beispieltext ist erforderlich",
             "maxlength": "Maximal {{max}} Zeichen"
         }
@@ -120,6 +126,29 @@
         },
         "errors": {
             "required": "Ausdruckstext ist erforderlich",
+            "maxlength": "Maximal {{max}} Zeichen"
+        }
+    },
+    "word.senses": {
+        "menu": "Bedeutungen",
+        "title": "Bedeutungen für {{word}}",
+        "add": "Bedeutung hinzufügen",
+        "addTitle": "Bedeutung hinzufügen",
+        "editTitle": "Bedeutung bearbeiten",
+        "save": "Speichern",
+        "placeholder": "Bedeutung eingeben",
+        "empty": "Keine Bedeutungen verfügbar",
+        "fallback": "Bedeutung {{index}}",
+        "saved": "Bedeutung gespeichert",
+        "deleted": "Bedeutung gelöscht",
+        "delete": "Löschen",
+        "deleteTitle": "Bedeutung löschen",
+        "deleteConfirm": "Möchten Sie diese Bedeutung wirklich löschen?",
+        "errors": {
+            "load": "Fehler beim Laden der Bedeutungen",
+            "save": "Fehler beim Speichern der Bedeutung",
+            "delete": "Fehler beim Löschen der Bedeutung",
+            "missing": "Bitte zuerst die Bedeutung speichern",
             "maxlength": "Maximal {{max}} Zeichen"
         }
     },

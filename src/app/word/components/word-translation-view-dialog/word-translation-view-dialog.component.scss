@@ -124,6 +124,16 @@
     border-radius: 4px;
 }
 
+.word-translation-dialog__footer-loader {
+    margin-top: 12px;
+    height: 4px;
+    visibility: hidden;
+}
+
+.word-translation-dialog__footer-loader--visible {
+    visibility: visible;
+}
+
 .word-translation-dialog__translation-row {
     display: flex;
     align-items: center;

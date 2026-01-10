@@ -54,11 +54,14 @@
         "title": "Exemples pour {{word}}",
         "titleByLang": "Exemples en {{lang}} pour {{word}}",
         "titleByLangShort": "exemples en {{lang}}",
+        "editTitle": "Modifier l'exemple",
         "add": "Ajouter un exemple",
         "label": "Exemple {{index}}",
         "placeholder": "Saisir votre exemple",
         "newLabel": "Nouvel exemple",
         "save": "Enregistrer",
+        "saved": "Exemple enregistré",
+        "deleted": "Exemple supprimé",
         "close": "Fermer",
         "cancel": "Annuler",
         "edit": "Modifier",
@@ -73,6 +76,9 @@
             "deleted": "Traduction supprimée"
         },
         "errors": {
+            "load": "Erreur lors du chargement des exemples",
+            "save": "Erreur lors de la sauvegarde",
+            "delete": "Erreur lors de la suppression",
             "required": "Le texte de l'exemple est requis",
             "maxlength": "Maximum {{max}} caractères"
         }
@@ -120,6 +126,29 @@
         },
         "errors": {
             "required": "Le texte de l'expression est requis",
+            "maxlength": "Maximum {{max}} caractères"
+        }
+    },
+    "word.senses": {
+        "menu": "Sens",
+        "title": "Sens pour {{word}}",
+        "add": "Ajouter un sens",
+        "addTitle": "Ajouter un sens",
+        "editTitle": "Modifier le sens",
+        "save": "Enregistrer",
+        "placeholder": "Saisir le sens",
+        "empty": "Aucun sens disponible",
+        "fallback": "Sens {{index}}",
+        "saved": "Sens enregistré",
+        "deleted": "Sens supprimé",
+        "delete": "Supprimer",
+        "deleteTitle": "Supprimer le sens",
+        "deleteConfirm": "Voulez-vous vraiment supprimer ce sens ?",
+        "errors": {
+            "load": "Erreur lors du chargement des sens",
+            "save": "Erreur lors de la sauvegarde du sens",
+            "delete": "Erreur lors de la suppression du sens",
+            "missing": "Enregistrez d'abord le sens",
             "maxlength": "Maximum {{max}} caractères"
         }
     },

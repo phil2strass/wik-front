@@ -1,0 +1,176 @@
+.word-sense-dialog__content {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    gap: 24px;
+    min-height: 400px;
+}
+
+.word-sense-dialog__title {
+    margin-top: 4px;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.word-sense-dialog__title-actions {
+    margin-left: auto;
+}
+
+.word-sense-dialog__empty {
+    padding: 12px;
+    font-style: italic;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.word-sense-dialog__list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 12px;
+}
+
+.word-sense-dialog__types {
+    width: 240px;
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    padding-right: 12px;
+    padding-top: 12px;
+}
+
+.word-sense-dialog__types-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.word-sense-dialog__type-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.word-sense-dialog__type-item {
+    padding: 6px 10px;
+    border-radius: 6px;
+    background-color: rgba(25, 118, 210, 0.08);
+    border: 1px solid rgba(25, 118, 210, 0.2);
+    font-size: 13px;
+}
+
+.word-sense-dialog__card {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.word-sense-dialog__card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.word-sense-dialog__card-title {
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.word-sense-dialog__card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.word-sense-dialog__card-content {
+    white-space: pre-wrap;
+    color: rgba(0, 0, 0, 0.8);
+}
+
+.word-sense-dialog__examples {
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    padding-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.word-sense-dialog__examples-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.word-sense-dialog__examples-title {
+    font-weight: 600;
+}
+
+.word-sense-dialog__examples-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.word-sense-dialog__examples-empty {
+    font-style: italic;
+    color: rgba(0, 0, 0, 0.6);
+}
+
+.word-sense-dialog__example-item {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.word-sense-dialog__example-view {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.word-sense-dialog__example-text {
+    white-space: pre-wrap;
+}
+
+.word-sense-dialog__example-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.word-sense-dialog__example-edit {
+    position: relative;
+}
+
+.word-sense-dialog__example-edit .word-sense-dialog__example-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
+
+.word-sense-dialog__footer-loader {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.word-sense-dialog__footer-loader--visible {
+    opacity: 1;
+}
+
+.word-sense-dialog__actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.word-sense-dialog__close-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}

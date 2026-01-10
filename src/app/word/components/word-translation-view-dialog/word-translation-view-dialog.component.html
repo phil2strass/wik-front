@@ -34,7 +34,6 @@
         </div>
     </div>
     <div class="word-translation-dialog__translations">
-        <mat-progress-bar *ngIf="loading" mode="indeterminate"></mat-progress-bar>
         <div class="word-translation-dialog__meaning-group" *ngFor="let group of meaningGroups; trackBy: trackMeaningGroup">
             <div class="word-translation-dialog__meaning-header">
                 <div class="word-translation-dialog__meaning-title">{{ meaningTitle(group.index) }}</div>
@@ -133,6 +132,10 @@
         </div>
     </div>
 </mat-dialog-content>
+<mat-progress-bar
+    mode="indeterminate"
+    class="word-translation-dialog__footer-loader"
+    [class.word-translation-dialog__footer-loader--visible]="loading"></mat-progress-bar>
 <mat-dialog-actions align="end" class="word-translation-dialog__actions-bar">
     <button
         mat-button

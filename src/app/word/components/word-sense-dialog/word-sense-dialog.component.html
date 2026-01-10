@@ -1,0 +1,93 @@
+<h2 mat-dialog-title class="word-sense-dialog__title">
+    <span>{{ 'word.senses.title' | translate:{ word: wordLabel } }}</span>
+    <span class="word-sense-dialog__title-actions">
+        <button mat-stroked-button type="button" (click)="addSense()" [disabled]="busy">
+            <mat-icon>add</mat-icon>
+            <span>{{ 'word.senses.add' | translate }}</span>
+        </button>
+    </span>
+</h2>
+<mat-dialog-content class="word-sense-dialog__content">
+    <div class="word-sense-dialog__types">
+        <div class="word-sense-dialog__types-title">{{ 'word.table.column.type' | translate }}</div>
+        <div class="word-sense-dialog__type-list" aria-label="Types">
+            @for (label of typeChips; track label) {
+                <div class="word-sense-dialog__type-item">{{ label }}</div>
+            }
+            @if (!typeChips.length) {
+                <div class="word-sense-dialog__type-item">-</div>
+            }
+        </div>
+    </div>
+    <div class="word-sense-dialog__list">
+        @if (!senses.length && !loading) {
+            <div class="word-sense-dialog__empty">{{ 'word.senses.empty' | translate }}</div>
+        }
+        @for (state of senses; track trackSense; let idx = $index) {
+            <div class="word-sense-dialog__card">
+                <div class="word-sense-dialog__card-header">
+                    <div class="word-sense-dialog__card-title">
+                        {{ senseLabel(state, idx) }}
+                    </div>
+                    <div class="word-sense-dialog__card-actions">
+                        <button mat-icon-button type="button" (click)="openEditSenseDialog(state)" [disabled]="busy">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button type="button" color="warn" (click)="confirmDeleteSense(state)" [disabled]="busy">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </div>
+                </div>
+                <div class="word-sense-dialog__card-body">
+                    <div class="word-sense-dialog__card-content">
+                        {{ senseDisplay(state, idx) }}
+                    </div>
+                </div>
+                <div class="word-sense-dialog__examples">
+                    <div class="word-sense-dialog__examples-header">
+                        <div class="word-sense-dialog__examples-title">{{ 'word.examples.section' | translate }}</div>
+                        <button
+                            mat-stroked-button
+                            type="button"
+                            class="word-sense-dialog__examples-add"
+                            (click)="openAddExampleDialog(state)"
+                            [disabled]="busy || !state.form.get('id')?.value">
+                            <mat-icon>add</mat-icon>
+                            <span>{{ 'word.examples.add' | translate }}</span>
+                        </button>
+                    </div>
+                    <div class="word-sense-dialog__examples-list">
+                        @if (!state.examples.length && !state.loadingExamples) {
+                            <div class="word-sense-dialog__examples-empty">{{ 'word.examples.empty' | translate }}</div>
+                        }
+                        @for (example of state.examples.controls; track example; let exIdx = $index) {
+                            <div class="word-sense-dialog__example-item" [formGroup]="example">
+                                <div class="word-sense-dialog__example-view">
+                                    <div class="word-sense-dialog__example-text">{{ example.get('content')?.value }}</div>
+                                    <div class="word-sense-dialog__example-actions">
+                                        <button mat-icon-button type="button" (click)="openEditExampleDialog(state, exIdx)" [disabled]="busy">
+                                            <mat-icon>edit</mat-icon>
+                                        </button>
+                                        <button mat-icon-button type="button" color="warn" (click)="confirmDeleteExample(state, exIdx)" [disabled]="busy">
+                                            <mat-icon>delete</mat-icon>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</mat-dialog-content>
+<mat-progress-bar
+    mode="indeterminate"
+    class="word-sense-dialog__footer-loader"
+    [class.word-sense-dialog__footer-loader--visible]="busy"></mat-progress-bar>
+<mat-dialog-actions align="end" class="word-sense-dialog__actions">
+    <button mat-button type="button" class="word-sense-dialog__close-btn" (click)="close()" [disabled]="busy">
+        <mat-icon>close</mat-icon>
+        <span>{{ 'common.actions.close' | translate }}</span>
+    </button>
+</mat-dialog-actions>

@@ -22,6 +22,7 @@ import { MatPaginatorIntl } from '@angular/material/paginator';
 import { Subscription } from 'rxjs';
 import { ExpressionDialogComponent } from '../expression-dialog/expression-dialog.component';
 import { ExpressionTranslationDialogComponent } from '../expression-dialog/expression-translation-dialog.component';
+import { WordSenseDialogComponent } from '../word-sense-dialog/word-sense-dialog.component';
 
 @Component({
     selector: 'app-word-list',
@@ -221,6 +222,16 @@ export class WordGridComponent implements OnDestroy {
         this.dialog.open(ExpressionDialogComponent, {
             ...baseConfig,
             data: { wordLangueTypeId: row.wordLangueTypeId, wordLabel: this.formatDisplayName(row) }
+        });
+    }
+
+    openSenses(row: Word): void {
+        this.dialog.open(WordSenseDialogComponent, {
+            width: '1000px',
+            maxWidth: '1100px',
+            autoFocus: false,
+            restoreFocus: false,
+            data: { word: row }
         });
     }
 
