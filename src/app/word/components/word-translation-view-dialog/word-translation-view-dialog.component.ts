@@ -17,7 +17,6 @@ import { MatRippleModule } from '@angular/material/core';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatTooltipModule } from '@angular/material/tooltip';
 import { DataStore } from '@shared/data/data-store';
 import { WordMeaningTranslation, WordTranslationModalStore } from '../../word-translation-modal-store';
 import { WordTranslationDeleteConfirmDialogComponent } from '../word-translation-delete-confirm-dialog.component';
@@ -54,7 +53,6 @@ type WordTranslationEditDialogData = {
         MatProgressBarModule,
         MatFormFieldModule,
         MatInputModule,
-        MatTooltipModule,
         TranslateModule
     ]
 })
@@ -212,33 +210,6 @@ export class WordTranslationEditDialogComponent {
         return Array.from(meaningMap.values()).sort((a, b) => a.index - b.index);
     }
 
-    addHomonym(): void {
-        if (this.loading) {
-            return;
-        }
-        const sourceForm = this.selectedForm ?? this.editingForm ?? this.translationForms[0] ?? null;
-        const sourceMeaningId =
-            this.extractNumber(sourceForm?.get('baseWordLangueTypeId')?.value) ?? this.data.parentWord.wordLangueTypeId;
-        if (!sourceMeaningId) {
-            this.messageService.error('Selectionnez un sens existant pour creer un homonyme.');
-            return;
-        }
-
-        this.saving = true;
-        this.http.post(`${this.configuration.baseUrl}word/meanings/${sourceMeaningId}`, {}).subscribe({
-            next: () => {
-                this.messageService.info('Homonyme ajouté');
-                this.translationModalStore.reloadTranslations();
-            },
-            error: err => {
-                this.messageService.error(err?.error ?? 'Erreur lors de la creation de l\'homonyme');
-            },
-            complete: () => {
-                this.saving = false;
-            }
-        });
-    }
-
     addTranslationForMeaning(meaningId: number, meaningIndex?: number): void {
         if (!meaningId) {
             return;
@@ -327,26 +298,6 @@ export class WordTranslationEditDialogComponent {
                     this.saving = false;
                 }
             });
-        });
-    }
-
-    confirmDeleteMeaning(meaningId: number): void {
-        if (!meaningId || this.loading) {
-            return;
-        }
-        const dialogRef = this.dialog.open(WordTranslationDeleteConfirmDialogComponent, {
-            width: '420px',
-            data: {
-                title: 'Supprimer l\'homonyme',
-                message: 'Voulez-vous vraiment supprimer cet homonyme ?',
-                confirmLabel: 'Supprimer'
-            }
-        });
-        dialogRef.afterClosed().subscribe(confirm => {
-            if (!confirm) {
-                return;
-            }
-            this.translationModalStore.deleteMeaning(meaningId);
         });
     }
 

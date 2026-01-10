@@ -10,12 +10,6 @@
             {{ lang.name }}
         </button>
     </span>
-    <span class="word-translation-dialog__title-actions">
-        <button mat-stroked-button type="button" (click)="addHomonym()" [disabled]="loading">
-            <mat-icon>add</mat-icon>
-            <span>{{ 'word.translation.homonym.add' | translate }}</span>
-        </button>
-    </span>
 </h2>
 <mat-dialog-content class="word-translation-dialog__content">
         <div class="word-translation-dialog__types">
@@ -45,15 +39,6 @@
                         [disabled]="loading">
                         <mat-icon>add</mat-icon>
                         <span>{{ 'word.translation.add' | translate }}</span>
-                    </button>
-                    <button
-                        mat-icon-button
-                        type="button"
-                        color="warn"
-                        (click)="confirmDeleteMeaning(group.meaningId)"
-                        [disabled]="loading"
-                        matTooltip="{{ 'word.translation.homonym.delete' | translate }}">
-                        <mat-icon>delete</mat-icon>
                     </button>
                 </div>
             </div>

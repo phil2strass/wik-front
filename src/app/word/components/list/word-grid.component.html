@@ -115,30 +115,18 @@
                         <span>{{ 'word.senses.menu' | translate }}</span>
                     </div>
                 </button>
+                <button mat-menu-item *ngIf="translationLanguages.length" (click)="openTranslationPicker(row)">
+                    <div class="d-flex align-items-center">
+                        <mat-icon class="m-x-6">translate</mat-icon>
+                        <span>{{ 'word.translation.section' | translate }}</span>
+                    </div>
+                </button>
                 <button mat-menu-item (click)="openDelete(row)">
                     <div class="d-flex align-items-center text-error">
                         <tabler-icon name="trash" class="m-x-6"></tabler-icon>
                         <span>Delete</span>
                     </div>
                 </button>
-                <mat-divider *ngIf="translationLanguages.length"></mat-divider>
-                <button mat-menu-item *ngIf="translationLanguages.length" (click)="openTranslationPicker(row)">
-                    <div class="d-flex align-items-center">
-                        <mat-icon class="m-r-8">translate</mat-icon>
-                        <span>{{ 'word.translation.section' | translate }}</span>
-                    </div>
-                </button>
-                <div class="mat-menu-item word-grid__menu-section" *ngIf="translationLanguages.length">
-                    <span>{{ 'word.expressions.section' | translate }}</span>
-                </div>
-                @for (lang of translationLanguages; track lang.id) {
-                    <button mat-menu-item (click)="openExpressionTranslationDialog(row, lang)">
-                        <div class="d-flex align-items-center">
-                            <mat-icon class="m-r-8">translate</mat-icon>
-                            <span>{{ langHeaderLabel(lang) }}</span>
-                        </div>
-                    </button>
-                }
             </mat-menu>
         </td>
     </ng-container>

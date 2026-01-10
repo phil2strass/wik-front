@@ -186,8 +186,12 @@ export const WordTranslationModalStore = signalStore(
                             return;
                         }
                         const normalized = Array.isArray(payload) ? payload : [];
+                        const parentWordLangueTypeId = store.parentWordLangueTypeId();
+                        const filtered = parentWordLangueTypeId != null
+                            ? normalized.filter(t => t?.wordLangueTypeId === parentWordLangueTypeId)
+                            : normalized;
                         const meaningMap = new Map<number, WordMeaning>();
-                        normalized.forEach(t => {
+                        filtered.forEach(t => {
                             if (t?.wordLangueTypeId == null) return;
                             if (!meaningMap.has(t.wordLangueTypeId)) {
                                 meaningMap.set(t.wordLangueTypeId, {
@@ -201,7 +205,7 @@ export const WordTranslationModalStore = signalStore(
                         );
                         patchState(store, {
                             meanings,
-                            meaningTranslations: normalized,
+                            meaningTranslations: filtered,
                             status: 'loaded',
                             error: null
                         });
