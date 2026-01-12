@@ -69,16 +69,22 @@
         "confirmDelete": "Dieses Beispiel löschen?",
         "empty": "Keine Beispiele verfügbar",
         "translation": {
+            "title": "Übersetzungen",
             "label": "Übersetzung auf {{lang}}",
             "required": "Übersetzungstext ist erforderlich",
             "add": "Übersetzung hinzufügen",
             "saved": "Übersetzungen gespeichert",
-            "deleted": "Übersetzung gelöscht"
+            "deleted": "Übersetzung gelöscht",
+            "errors": {
+                "load": "Fehler beim Laden der Übersetzungen",
+                "save": "Fehler beim Speichern der Übersetzungen"
+            }
         },
         "errors": {
             "load": "Fehler beim Laden der Beispiele",
             "save": "Fehler beim Speichern",
             "delete": "Fehler beim Löschen",
+            "missing": "Bitte zuerst das Beispiel speichern",
             "required": "Beispieltext ist erforderlich",
             "maxlength": "Maximal {{max}} Zeichen"
         }
@@ -88,6 +94,8 @@
         "addTitle": "Übersetzung hinzufügen",
         "new": "Neue Übersetzung",
         "delete": "Löschen",
+        "deleteTitle": "Übersetzung löschen",
+        "deleteMessage": "Möchten Sie die Übersetzung{{name}} wirklich löschen?",
         "section": "Übersetzungen",
         "motherTongue": "Muttersprache",
         "label": "Übersetzung",
@@ -102,6 +110,19 @@
             "deleteTitle": "Homonym löschen",
             "deleteConfirm": "Möchten Sie dieses Homonym wirklich löschen?"
         }
+    },
+    "word.delete": {
+        "title": "{{name}} löschen",
+        "message": "Möchten Sie dieses Wort wirklich löschen?"
+    },
+    "word.deleteSelected": {
+        "titleOne": "{{count}} Wort löschen",
+        "titleMany": "{{count}} Wörter löschen",
+        "message": "Möchten Sie die ausgewählten Elemente wirklich löschen?"
+    },
+    "word.category": {
+        "createTitle": "Kategorie erstellen",
+        "nameLabel": "Name"
     },
     "word.expressions": {
         "menu": "Ausdrücke",
@@ -144,11 +165,21 @@
         "delete": "Löschen",
         "deleteTitle": "Bedeutung löschen",
         "deleteConfirm": "Möchten Sie diese Bedeutung wirklich löschen?",
+        "translation": {
+            "title": "Übersetzungen",
+            "button": "Übersetzungen",
+            "saved": "Übersetzungen gespeichert",
+            "errors": {
+                "load": "Fehler beim Laden der Übersetzungen",
+                "save": "Fehler beim Speichern der Übersetzungen"
+            }
+        },
         "errors": {
             "load": "Fehler beim Laden der Bedeutungen",
             "save": "Fehler beim Speichern der Bedeutung",
             "delete": "Fehler beim Löschen der Bedeutung",
             "missing": "Bitte zuerst die Bedeutung speichern",
+            "required": "Bedeutungstext ist erforderlich",
             "maxlength": "Maximal {{max}} Zeichen"
         }
     },
@@ -160,6 +191,7 @@
     "word.table": {
         "column": {
             "name": "Name",
+            "plural": "Plural",
             "type": "Typ",
             "actions": "Aktionen"
         }

@@ -16,6 +16,10 @@
     gap: 12px;
     flex-wrap: wrap;
 }
+.word-translation-dialog__title-word {
+    font-size: 18px;
+    font-weight: 700;
+}
 .word-translation-dialog__title-actions {
     margin-left: auto;
 }
@@ -69,6 +73,31 @@
     justify-content: space-between;
     gap: 12px;
     margin-bottom: 6px;
+    flex-wrap: wrap;
+}
+
+.word-translation-dialog__language-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.word-translation-dialog__language-option {
+    margin-right: 0;
+}
+
+.word-translation-dialog__language-group .mat-mdc-radio-button,
+.word-translation-dialog__language-group .mat-mdc-radio-button .mdc-form-field,
+.word-translation-dialog__language-group .mat-mdc-radio-button .mdc-label,
+.word-translation-dialog__language-group .mat-mdc-radio-button .mat-mdc-radio-label,
+.word-translation-dialog__language-group .mat-mdc-radio-button label,
+.word-translation-dialog__language-group .mat-mdc-radio-button input[type='radio'] {
+    cursor: pointer;
+}
+
+::ng-deep .word-translation-dialog__language-group .mdc-label {
+    cursor: pointer;
 }
 
 .word-translation-dialog__meaning-actions {
@@ -210,4 +239,9 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
+}
+
+.word-translation-dialog__close-btn {
+    border: 1px solid #f28c28;
+    color: #f28c28;
 }

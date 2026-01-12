@@ -25,7 +25,10 @@ type SenseEntryDialogData = {
         <mat-dialog-content>
             <mat-form-field appearance="outline" class="w-100 sense-entry-dialog__field" color="primary" hideRequiredMarker="true">
                 <mat-label>{{ 'word.senses.placeholder' | translate }}</mat-label>
-                <input matInput [formControl]="contentControl" type="text" />
+                <textarea matInput [formControl]="contentControl" rows="3"></textarea>
+                <mat-error *ngIf="contentControl.hasError('required')">
+                    {{ 'word.senses.errors.required' | translate }}
+                </mat-error>
                 <mat-error *ngIf="contentControl.hasError('maxlength')">
                     {{ 'word.senses.errors.maxlength' | translate:{ max: 500 } }}
                 </mat-error>
@@ -35,7 +38,7 @@ type SenseEntryDialogData = {
             <button mat-button type="button" (click)="cancel()">
                 {{ 'common.actions.cancel' | translate }}
             </button>
-            <button mat-flat-button color="primary" type="button" (click)="submit()">
+            <button mat-flat-button color="primary" type="button" (click)="submit()" [disabled]="contentControl.invalid">
                 {{ data.confirmKey | translate }}
             </button>
         </mat-dialog-actions>
@@ -64,7 +67,7 @@ export class SenseEntryDialogComponent {
     readonly #fb = inject(FormBuilder);
     readonly data = inject<SenseEntryDialogData>(MAT_DIALOG_DATA);
 
-    readonly contentControl = this.#fb.control(this.data.initialValue ?? '', [Validators.maxLength(500)]);
+    readonly contentControl = this.#fb.control(this.data.initialValue ?? '', [Validators.required, Validators.maxLength(500)]);
 
     cancel(): void {
         this.#dialogRef.close();
@@ -76,6 +79,11 @@ export class SenseEntryDialogComponent {
             return;
         }
         const content = (this.contentControl.value ?? '').toString().trim();
+        if (!content) {
+            this.contentControl.setErrors({ required: true });
+            this.contentControl.markAsTouched();
+            return;
+        }
         this.#dialogRef.close({ content } satisfies SenseEntryDialogResult);
     }
 }

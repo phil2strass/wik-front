@@ -4,18 +4,19 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { TranslateModule } from '@ngx-translate/core';
 import { Word } from '../models/word.model';
 
 @Component({
     selector: 'word-delete-dialog',
     template: `
-        <h2 mat-dialog-title>Suppression {{ data.name }}</h2>
+        <h2 mat-dialog-title>{{ 'word.delete.title' | translate : { name: data.name } }}</h2>
         <mat-dialog-content class="mat-typography">
-            <p>Êtes-vous sûr de vouloir supprimer ce mot ?</p>
+            <p>{{ 'word.delete.message' | translate }}</p>
         </mat-dialog-content>
         <div mat-dialog-actions class="d-flex justify-content-end gap-12">
-            <button mat-button (click)="onNoClick()">Annuler</button>
-            <button color="warn" mat-flat-button [mat-dialog-close]="wordId()">Supprimer</button>
+            <button mat-button (click)="onNoClick()">{{ 'common.actions.cancel' | translate }}</button>
+            <button color="warn" mat-flat-button [mat-dialog-close]="wordId()">{{ 'common.actions.delete' | translate }}</button>
         </div>
         <!--
         <mat-dialog-actions>
@@ -24,7 +25,17 @@ import { Word } from '../models/word.model';
         </mat-dialog-actions>
         -->
     `,
-    imports: [MatFormFieldModule, MatInputModule, FormsModule, MatButtonModule, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose]
+    imports: [
+        MatFormFieldModule,
+        MatInputModule,
+        FormsModule,
+        MatButtonModule,
+        MatDialogTitle,
+        MatDialogContent,
+        MatDialogActions,
+        MatDialogClose,
+        TranslateModule
+    ]
 })
 export class WordDeleteDialog {
     readonly dialogRef = inject(MatDialogRef<WordDeleteDialog>);

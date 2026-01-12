@@ -11,3 +11,17 @@ export interface WordSenseExample {
     content: string;
     pos?: number;
 }
+
+export interface WordSenseTranslation {
+    id?: number;
+    sensId: number;
+    langueId: number;
+    content: string;
+}
+
+export interface WordSenseExampleTranslation {
+    id?: number;
+    sensExampleId: number;
+    langueId: number;
+    content: string;
+}

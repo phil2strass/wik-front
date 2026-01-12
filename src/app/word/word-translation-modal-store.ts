@@ -30,11 +30,20 @@ export interface WordMeaningTranslation {
     wordLangueTypeIdTarget: number | null;
     targetWordLangueTypeId: number | null;
     langueId: number;
-    typeId: number;
+    typeId: number | null;
     name: string;
     genderId: number | null;
     plural: string;
     commentaire?: string | null;
+}
+
+interface WordGridTranslation {
+    wordLangueTypeId: number;
+    langueId: number;
+    typeId: number;
+    name: string;
+    genderId: number | null;
+    plural: string;
 }
 
 interface WordTranslationModalState {
@@ -170,9 +179,9 @@ export const WordTranslationModalStore = signalStore(
 
             patchState(store, { status: 'loading', error: null });
             const localRequestId = ++requestId;
-            const url = `${baseUrl}word/meanings/${parentWordLangueTypeId}/translations/${langueId}`;
+            const url = `${baseUrl}word/${parentWordLangueTypeId}/translations/${langueId}`;
             httpClient
-                .get<WordMeaningTranslation[]>(url)
+                .get<WordGridTranslation[]>(url)
                 .pipe(
                     tap(() => {
                         if (localRequestId === requestId && store.status() === 'loading') {
@@ -181,15 +190,31 @@ export const WordTranslationModalStore = signalStore(
                     })
                 )
                 .subscribe({
-                    next: (payload: WordMeaningTranslation[]) => {
+                    next: (payload: WordGridTranslation[]) => {
                         if (localRequestId !== requestId) {
                             return;
                         }
                         const normalized = Array.isArray(payload) ? payload : [];
+                        const filteredByLangue = normalized.filter(item => item?.langueId === langueId);
                         const parentWordLangueTypeId = store.parentWordLangueTypeId();
+                        const mapped: WordMeaningTranslation[] =
+                            parentWordLangueTypeId == null
+                                ? []
+                                : filteredByLangue.map(item => ({
+                                      wordLangueTypeId: parentWordLangueTypeId,
+                                      index: 1,
+                                      wordLangueTypeIdTarget: item.wordLangueTypeId ?? null,
+                                      targetWordLangueTypeId: item.wordLangueTypeId ?? null,
+                                      langueId: item.langueId ?? langueId,
+                                      typeId: item.typeId ?? typeId ?? null,
+                                      name: item.name ?? '',
+                                      genderId: item.genderId ?? null,
+                                      plural: item.plural ?? '',
+                                      commentaire: null
+                                  }));
                         const filtered = parentWordLangueTypeId != null
-                            ? normalized.filter(t => t?.wordLangueTypeId === parentWordLangueTypeId)
-                            : normalized;
+                            ? mapped.filter(t => t?.wordLangueTypeId === parentWordLangueTypeId)
+                            : mapped;
                         const meaningMap = new Map<number, WordMeaning>();
                         filtered.forEach(t => {
                             if (t?.wordLangueTypeId == null) return;
@@ -200,9 +225,11 @@ export const WordTranslationModalStore = signalStore(
                                 });
                             }
                         });
-                        const meanings: WordMeaning[] = Array.from(meaningMap.values()).sort(
-                            (a, b) => (a.index ?? 0) - (b.index ?? 0)
-                        );
+                        const meanings: WordMeaning[] = Array.from(meaningMap.values()).length
+                            ? Array.from(meaningMap.values()).sort((a, b) => (a.index ?? 0) - (b.index ?? 0))
+                            : parentWordLangueTypeId != null
+                              ? [{ wordLangueTypeId: parentWordLangueTypeId, index: 1 }]
+                              : [];
                         patchState(store, {
                             meanings,
                             meaningTranslations: filtered,

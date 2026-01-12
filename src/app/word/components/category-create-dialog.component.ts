@@ -5,23 +5,26 @@ import { MatDialogActions, MatDialogClose, MatDialogContent, MatDialogRef, MatDi
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'app-category-create-dialog',
     standalone: true,
     template: `
-        <h2 mat-dialog-title>Créer une catégorie</h2>
+        <h2 mat-dialog-title>{{ 'word.category.createTitle' | translate }}</h2>
         <mat-dialog-content>
             <form [formGroup]="form" class="category-create-dialog__form">
                 <mat-form-field appearance="outline" class="w-100" color="primary">
-                    <mat-label>Nom</mat-label>
+                    <mat-label>{{ 'word.category.nameLabel' | translate }}</mat-label>
                     <input matInput formControlName="name" />
                 </mat-form-field>
             </form>
         </mat-dialog-content>
         <mat-dialog-actions align="end">
-            <button mat-button mat-dialog-close>Annuler</button>
-            <button mat-flat-button color="primary" [disabled]="form.invalid" (click)="save()">Créer</button>
+            <button mat-button mat-dialog-close>{{ 'common.actions.cancel' | translate }}</button>
+            <button mat-flat-button color="primary" [disabled]="form.invalid" (click)="save()">
+                {{ 'common.actions.create' | translate }}
+            </button>
         </mat-dialog-actions>
     `,
     styles: [
@@ -40,7 +43,8 @@ import { MatInputModule } from '@angular/material/input';
         MatDialogClose,
         MatButtonModule,
         MatFormFieldModule,
-        MatInputModule
+        MatInputModule,
+        TranslateModule
     ]
 })
 export class CategoryCreateDialogComponent {

@@ -13,13 +13,18 @@ import { finalize } from 'rxjs/operators';
 import { DataStore } from '@shared/data/data-store';
 import { MessageService } from '@shared/ui-messaging/message/message.service';
 import { Word } from '../../models/word.model';
-import { WordSense } from '../../models/sense.model';
+import { WordSense, WordSenseExampleTranslation, WordSenseTranslation } from '../../models/sense.model';
 import { SenseService } from '../../services/sense.service';
 import { ExampleAddDialogComponent, ExampleAddDialogResult } from '../example-dialog/example-add-dialog.component';
 import { ExampleDeleteDialogComponent } from '../example-dialog/example-delete-dialog.component';
 import { SenseEntryDialogComponent, SenseEntryDialogResult } from './sense-entry-dialog.component';
 import { Langue } from '@shared/data/models/langue.model';
 import { WordTranslationDeleteConfirmDialogComponent } from '../word-translation-delete-confirm-dialog.component';
+import { SenseTranslationDialogComponent, SenseTranslationDialogResult } from './sense-translation-dialog.component';
+import {
+    SenseExampleTranslationDialogComponent,
+    SenseExampleTranslationDialogResult
+} from './sense-example-translation-dialog.component';
 
 export type WordSenseDialogData = {
     word: Word;
@@ -29,6 +34,15 @@ type SenseState = {
     form: FormGroup;
     examples: FormArray<FormGroup>;
     loadingExamples: boolean;
+    translations: Record<number, string>;
+    exampleTranslations: Record<number, Record<number, string>>;
+};
+
+type SenseTranslationItem = {
+    langueId: number;
+    content: string;
+    flagSrc: string | null;
+    langLabel: string;
 };
 
 @Component({
@@ -115,6 +129,7 @@ export class WordSenseDialogComponent {
                             return idA - idB;
                         });
                         this.loadExamples(state);
+                        this.loadTranslations(state);
                         this.#messageService.info(this.#translate.instant('word.senses.saved'));
                     },
                     error: err => {
@@ -205,6 +220,58 @@ export class WordSenseDialogComponent {
         });
     }
 
+    openSenseTranslationDialog(state: SenseState): void {
+        if (this.busy) {
+            return;
+        }
+        const senseId = this.extractNumber(state.form.get('id')?.value);
+        if (!senseId) {
+            this.#messageService.error(this.#translate.instant('word.senses.errors.missing'));
+            return;
+        }
+        const languages = (this.#dataStore.langues() ?? []).filter(lang => lang.id !== this.data.word.langue);
+        this.saving = true;
+        this.#senseService
+            .getSenseTranslations(senseId)
+            .pipe(finalize(() => (this.saving = false)))
+            .subscribe({
+                next: translations => {
+                    state.translations = this.toTranslationMap(translations);
+                    const dialogRef = this.#dialog.open(SenseTranslationDialogComponent, {
+                        width: '640px',
+                        data: {
+                            languages,
+                            initial: state.translations
+                        }
+                    });
+                    dialogRef.afterClosed().subscribe((result?: SenseTranslationDialogResult) => {
+                        if (!result) {
+                            return;
+                        }
+                        const payload = this.buildTranslationPayload(senseId, result.translations);
+                        this.saving = true;
+                        this.#senseService
+                            .saveSenseTranslations(senseId, payload)
+                            .pipe(finalize(() => (this.saving = false)))
+                            .subscribe({
+                                next: saved => {
+                                    state.translations = this.toTranslationMap(saved);
+                                    this.#messageService.info(this.#translate.instant('word.senses.translation.saved'));
+                                },
+                                error: err => {
+                                    this.#messageService.error(
+                                        err?.error ?? this.#translate.instant('word.senses.translation.errors.save')
+                                    );
+                                }
+                            });
+                    });
+                },
+                error: err => {
+                    this.#messageService.error(err?.error ?? this.#translate.instant('word.senses.translation.errors.load'));
+                }
+            });
+    }
+
     openEditExampleDialog(state: SenseState, index: number): void {
         if (this.busy) {
             return;
@@ -250,6 +317,58 @@ export class WordSenseDialogComponent {
                     }
                 });
         });
+    }
+
+    openExampleTranslationDialog(state: SenseState, example: FormGroup): void {
+        if (this.busy) {
+            return;
+        }
+        const exampleId = this.extractNumber(example.get('id')?.value);
+        if (!exampleId) {
+            this.#messageService.error(this.#translate.instant('word.examples.errors.missing'));
+            return;
+        }
+        const languages = (this.#dataStore.langues() ?? []).filter(lang => lang.id !== this.data.word.langue);
+        this.saving = true;
+        this.#senseService
+            .getSenseExampleTranslations(exampleId)
+            .pipe(finalize(() => (this.saving = false)))
+            .subscribe({
+                next: translations => {
+                    const initial = this.toExampleTranslationMap(translations);
+                    const dialogRef = this.#dialog.open(SenseExampleTranslationDialogComponent, {
+                        width: '640px',
+                        data: {
+                            languages,
+                            initial
+                        }
+                    });
+                    dialogRef.afterClosed().subscribe((result?: SenseExampleTranslationDialogResult) => {
+                        if (!result) {
+                            return;
+                        }
+                        const payload = this.buildExampleTranslationPayload(exampleId, result.translations);
+                        this.saving = true;
+                        this.#senseService
+                            .saveSenseExampleTranslations(exampleId, payload)
+                            .pipe(finalize(() => (this.saving = false)))
+                            .subscribe({
+                                next: () => {
+                                    state.exampleTranslations[exampleId] = result.translations;
+                                    this.#messageService.info(this.#translate.instant('word.examples.translation.saved'));
+                                },
+                                error: err => {
+                                    this.#messageService.error(
+                                        err?.error ?? this.#translate.instant('word.examples.translation.errors.save')
+                                    );
+                                }
+                            });
+                    });
+                },
+                error: err => {
+                    this.#messageService.error(err?.error ?? this.#translate.instant('word.examples.translation.errors.load'));
+                }
+            });
     }
 
     confirmDeleteSense(state: SenseState): void {
@@ -327,20 +446,61 @@ export class WordSenseDialogComponent {
     }
 
     senseLabel(state: SenseState, index: number): string {
-        const content = (state.form.get('content')?.value ?? '').toString().trim();
-        if (content.length > 0) {
-            return content;
-        }
         return this.#translate.instant('word.senses.fallback', { index: index + 1 });
     }
 
-    senseDisplay(state: SenseState, index: number): string {
-        const content = (state.form.get('content')?.value ?? '').toString().trim();
-        if (content.length > 0) {
-            return content;
-        }
-        return this.#translate.instant('word.senses.fallback', { index: index + 1 });
+    senseContent(state: SenseState): string {
+        return (state.form.get('content')?.value ?? '').toString().trim();
     }
+
+    senseTranslations(state: SenseState): SenseTranslationItem[] {
+        const items: SenseTranslationItem[] = [];
+        const languages = this.#dataStore.langues() ?? [];
+        Object.entries(state.translations ?? {}).forEach(([langueId, content]) => {
+            const value = (content ?? '').toString().trim();
+            if (!value) {
+                return;
+            }
+            const id = Number(langueId);
+            const lang = languages.find(item => item.id === id);
+            const iso = lang?.iso?.trim().toLowerCase();
+            items.push({
+                langueId: id,
+                content: value,
+                flagSrc: iso ? `assets/images/flag/icon-flag-${iso}.svg` : null,
+                langLabel: lang?.name ?? `Lang ${id}`
+            });
+        });
+        return items;
+    }
+
+    exampleTranslations(state: SenseState, example: FormGroup): SenseTranslationItem[] {
+        const exampleId = this.extractNumber(example.get('id')?.value);
+        if (!exampleId) {
+            return [];
+        }
+        const translations = state.exampleTranslations?.[exampleId] ?? {};
+        const items: SenseTranslationItem[] = [];
+        const languages = this.#dataStore.langues() ?? [];
+        Object.entries(translations).forEach(([langueId, content]) => {
+            const value = (content ?? '').toString().trim();
+            if (!value) {
+                return;
+            }
+            const id = Number(langueId);
+            const lang = languages.find(item => item.id === id);
+            const iso = lang?.iso?.trim().toLowerCase();
+            items.push({
+                langueId: id,
+                content: value,
+                flagSrc: iso ? `assets/images/flag/icon-flag-${iso}.svg` : null,
+                langLabel: lang?.name ?? `Lang ${id}`
+            });
+        });
+        return items;
+    }
+
+    trackTranslation = (_: number, item: SenseTranslationItem) => item.langueId;
 
     trackSense = (_: number, state: SenseState) => this.extractNumber(state.form.get('id')?.value) ?? state.form;
 
@@ -365,7 +525,10 @@ export class WordSenseDialogComponent {
                         return (a.id ?? 0) - (b.id ?? 0);
                     });
                     this.senses = sorted.map(sense => this.createSenseState(sense));
-                    this.senses.forEach(state => this.loadExamples(state));
+                    this.senses.forEach(state => {
+                        this.loadExamples(state);
+                        this.loadTranslations(state);
+                    });
                 },
                 error: err => {
                     this.#messageService.error(err?.error ?? this.#translate.instant('word.senses.errors.load'));
@@ -394,11 +557,42 @@ export class WordSenseDialogComponent {
                             })
                         )
                     );
+                    examples.forEach(example => {
+                        if (example?.id != null) {
+                            this.loadExampleTranslations(state, example.id);
+                        }
+                    });
                 },
                 error: err => {
                     this.#messageService.error(err?.error ?? this.#translate.instant('word.examples.errors.load'));
                 }
             });
+    }
+
+    private loadExampleTranslations(state: SenseState, exampleId: number): void {
+        this.#senseService.getSenseExampleTranslations(exampleId).subscribe({
+            next: translations => {
+                state.exampleTranslations[exampleId] = this.toExampleTranslationMap(translations);
+            },
+            error: err => {
+                this.#messageService.error(err?.error ?? this.#translate.instant('word.examples.translation.errors.load'));
+            }
+        });
+    }
+
+    private loadTranslations(state: SenseState): void {
+        const senseId = this.extractNumber(state.form.get('id')?.value);
+        if (!senseId) {
+            return;
+        }
+        this.#senseService.getSenseTranslations(senseId).subscribe({
+            next: translations => {
+                state.translations = this.toTranslationMap(translations);
+            },
+            error: err => {
+                this.#messageService.error(err?.error ?? this.#translate.instant('word.senses.translation.errors.load'));
+            }
+        });
     }
 
     private createSenseState(sense: WordSense): SenseState {
@@ -410,8 +604,49 @@ export class WordSenseDialogComponent {
                 wordLangueTypeId: [sense.wordLangueTypeId]
             }),
             examples: this.#fb.array<FormGroup>([]),
-            loadingExamples: false
+            loadingExamples: false,
+            translations: {},
+            exampleTranslations: {}
         };
+    }
+
+    private toTranslationMap(translations: WordSenseTranslation[]): Record<number, string> {
+        const map: Record<number, string> = {};
+        translations?.forEach(item => {
+            if (item?.langueId != null) {
+                map[item.langueId] = item.content ?? '';
+            }
+        });
+        return map;
+    }
+
+    private buildTranslationPayload(senseId: number, translations: Record<number, string>): WordSenseTranslation[] {
+        return Object.entries(translations).map(([langueId, content]) => ({
+            sensId: senseId,
+            langueId: Number(langueId),
+            content: (content ?? '').toString()
+        }));
+    }
+
+    private toExampleTranslationMap(translations: WordSenseExampleTranslation[]): Record<number, string> {
+        const map: Record<number, string> = {};
+        translations?.forEach(item => {
+            if (item?.langueId != null) {
+                map[item.langueId] = item.content ?? '';
+            }
+        });
+        return map;
+    }
+
+    private buildExampleTranslationPayload(
+        exampleId: number,
+        translations: Record<number, string>
+    ): WordSenseExampleTranslation[] {
+        return Object.entries(translations).map(([langueId, content]) => ({
+            sensExampleId: exampleId,
+            langueId: Number(langueId),
+            content: (content ?? '').toString()
+        }));
     }
 
     private nextSensePos(): number {

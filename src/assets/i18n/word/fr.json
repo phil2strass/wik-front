@@ -69,16 +69,22 @@
         "confirmDelete": "Supprimer cet exemple ?",
         "empty": "Aucun exemple disponible",
         "translation": {
+            "title": "Traductions",
             "label": "Traduction en {{lang}}",
             "required": "Le texte de la traduction est requis",
             "add": "Ajouter une traduction",
             "saved": "Traductions enregistrées",
-            "deleted": "Traduction supprimée"
+            "deleted": "Traduction supprimée",
+            "errors": {
+                "load": "Erreur lors du chargement des traductions",
+                "save": "Erreur lors de la sauvegarde des traductions"
+            }
         },
         "errors": {
             "load": "Erreur lors du chargement des exemples",
             "save": "Erreur lors de la sauvegarde",
             "delete": "Erreur lors de la suppression",
+            "missing": "Enregistrez d'abord l'exemple",
             "required": "Le texte de l'exemple est requis",
             "maxlength": "Maximum {{max}} caractères"
         }
@@ -88,6 +94,8 @@
         "addTitle": "Ajouter une traduction",
         "new": "Nouvelle traduction",
         "delete": "Supprimer",
+        "deleteTitle": "Supprimer la traduction",
+        "deleteMessage": "Voulez-vous vraiment supprimer la traduction{{name}} ?",
         "section": "Traductions",
         "motherTongue": "Langue maternelle",
         "label": "Traduction",
@@ -102,6 +110,19 @@
             "deleteTitle": "Supprimer l'homonyme",
             "deleteConfirm": "Voulez-vous vraiment supprimer cet homonyme ?"
         }
+    },
+    "word.delete": {
+        "title": "Suppression {{name}}",
+        "message": "Êtes-vous sûr de vouloir supprimer ce mot ?"
+    },
+    "word.deleteSelected": {
+        "titleOne": "Supprimer {{count}} mot",
+        "titleMany": "Supprimer {{count}} mots",
+        "message": "Êtes-vous sûr de vouloir supprimer les éléments sélectionnés ?"
+    },
+    "word.category": {
+        "createTitle": "Créer une catégorie",
+        "nameLabel": "Nom"
     },
     "word.expressions": {
         "menu": "Expressions",
@@ -144,11 +165,21 @@
         "delete": "Supprimer",
         "deleteTitle": "Supprimer le sens",
         "deleteConfirm": "Voulez-vous vraiment supprimer ce sens ?",
+        "translation": {
+            "title": "Traductions",
+            "button": "Traductions",
+            "saved": "Traductions enregistrées",
+            "errors": {
+                "load": "Erreur lors du chargement des traductions",
+                "save": "Erreur lors de la sauvegarde des traductions"
+            }
+        },
         "errors": {
             "load": "Erreur lors du chargement des sens",
             "save": "Erreur lors de la sauvegarde du sens",
             "delete": "Erreur lors de la suppression du sens",
             "missing": "Enregistrez d'abord le sens",
+            "required": "Le texte du sens est requis",
             "maxlength": "Maximum {{max}} caractères"
         }
     },
@@ -160,6 +191,7 @@
     "word.table": {
         "column": {
             "name": "Nom",
+            "plural": "Pluriel",
             "type": "Type",
             "actions": "Actions"
         }

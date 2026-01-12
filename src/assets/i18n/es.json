@@ -104,7 +104,9 @@
     "actions": {
       "save": "Guardar",
       "cancel": "Cancelar",
-      "close": "Cerrar"
+      "close": "Cerrar",
+      "delete": "Eliminar",
+      "create": "Crear"
     }
   },
   "welcome": {

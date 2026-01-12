@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { TranslateModule } from '@ngx-translate/core';
 
 type WordTranslationDeleteConfirmDialogData = {
     name?: string | null;
@@ -13,16 +14,23 @@ type WordTranslationDeleteConfirmDialogData = {
     standalone: true,
     selector: 'word-translation-delete-confirm-dialog',
     template: `
-        <h2 mat-dialog-title>{{ data.title || 'Supprimer la traduction' }}</h2>
+        <h2 mat-dialog-title>{{ data.title || ('word.translation.deleteTitle' | translate) }}</h2>
         <mat-dialog-content class="mat-typography">
-            <p>{{ data.message || ('Voulez-vous vraiment supprimer la traduction' + (data.name ? ' “' + data.name + '”' : '') + ' ?') }}</p>
+            <p>
+                {{
+                    data.message ||
+                        ('word.translation.deleteMessage' | translate : { name: data.name ? ' “' + data.name + '”' : '' })
+                }}
+            </p>
         </mat-dialog-content>
         <div mat-dialog-actions class="d-flex justify-content-end gap-12">
-            <button mat-button (click)="onCancel()">Annuler</button>
-            <button color="warn" mat-flat-button [mat-dialog-close]="true">{{ data.confirmLabel || 'Supprimer' }}</button>
+            <button mat-button (click)="onCancel()">{{ 'common.actions.cancel' | translate }}</button>
+            <button color="warn" mat-flat-button [mat-dialog-close]="true">
+                {{ data.confirmLabel || ('word.translation.delete' | translate) }}
+            </button>
         </div>
     `,
-    imports: [MatButtonModule, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose]
+    imports: [MatButtonModule, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose, TranslateModule]
 })
 export class WordTranslationDeleteConfirmDialogComponent {
     readonly dialogRef = inject(MatDialogRef<WordTranslationDeleteConfirmDialogComponent>);

@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogActions, MatDialogClose, MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
+import { TranslateModule } from '@ngx-translate/core';
 
 type WordDeleteSelectedDialogData = {
     count: number;
@@ -10,16 +11,22 @@ type WordDeleteSelectedDialogData = {
     standalone: true,
     selector: 'word-delete-selected-dialog',
     template: `
-        <h2 mat-dialog-title>Supprimer {{ data.count }} mot{{ data.count > 1 ? 's' : '' }}</h2>
+        <h2 mat-dialog-title>
+            {{
+                data.count > 1
+                    ? ('word.deleteSelected.titleMany' | translate : { count: data.count })
+                    : ('word.deleteSelected.titleOne' | translate : { count: data.count })
+            }}
+        </h2>
         <mat-dialog-content class="mat-typography">
-            <p>Êtes-vous sûr de vouloir supprimer les éléments sélectionnés ?</p>
+            <p>{{ 'word.deleteSelected.message' | translate }}</p>
         </mat-dialog-content>
         <div mat-dialog-actions class="d-flex justify-content-end gap-12">
-            <button mat-button (click)="onCancel()">Annuler</button>
-            <button color="warn" mat-flat-button [mat-dialog-close]="true">Supprimer</button>
+            <button mat-button (click)="onCancel()">{{ 'common.actions.cancel' | translate }}</button>
+            <button color="warn" mat-flat-button [mat-dialog-close]="true">{{ 'common.actions.delete' | translate }}</button>
         </div>
     `,
-    imports: [MatButtonModule, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose]
+    imports: [MatButtonModule, MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose, TranslateModule]
 })
 export class WordDeleteSelectedDialogComponent {
     readonly dialogRef = inject(MatDialogRef<WordDeleteSelectedDialogComponent>);

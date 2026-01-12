@@ -69,7 +69,9 @@
     "actions": {
       "save": "Enregistrer",
       "cancel": "Annuler",
-      "close": "Fermer"
+      "close": "Fermer",
+      "delete": "Supprimer",
+      "create": "Créer"
     }
   },
   "Area": "Zone",

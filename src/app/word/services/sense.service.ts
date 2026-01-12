@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Configuration } from '@shared/config/configuration';
 import { Observable } from 'rxjs';
-import { WordSense, WordSenseExample } from '../models/sense.model';
+import { WordSense, WordSenseExample, WordSenseExampleTranslation, WordSenseTranslation } from '../models/sense.model';
 
 @Injectable({ providedIn: 'root' })
 export class SenseService {
@@ -27,6 +27,28 @@ export class SenseService {
 
     getSenseExamples(sensId: number): Observable<WordSenseExample[]> {
         return this.#http.get<WordSenseExample[]>(`${this.#baseUrl}sens/${sensId}/examples`);
+    }
+
+    getSenseTranslations(sensId: number): Observable<WordSenseTranslation[]> {
+        return this.#http.get<WordSenseTranslation[]>(`${this.#baseUrl}sens/${sensId}/translations`);
+    }
+
+    saveSenseTranslations(sensId: number, translations: WordSenseTranslation[]): Observable<WordSenseTranslation[]> {
+        return this.#http.put<WordSenseTranslation[]>(`${this.#baseUrl}sens/${sensId}/translations`, translations);
+    }
+
+    getSenseExampleTranslations(exampleId: number): Observable<WordSenseExampleTranslation[]> {
+        return this.#http.get<WordSenseExampleTranslation[]>(`${this.#baseUrl}sens/examples/${exampleId}/translations`);
+    }
+
+    saveSenseExampleTranslations(
+        exampleId: number,
+        translations: WordSenseExampleTranslation[]
+    ): Observable<WordSenseExampleTranslation[]> {
+        return this.#http.put<WordSenseExampleTranslation[]>(
+            `${this.#baseUrl}sens/examples/${exampleId}/translations`,
+            translations
+        );
     }
 
     createSenseExample(sensId: number, content: string, pos?: number): Observable<WordSenseExample> {

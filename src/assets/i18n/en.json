@@ -69,7 +69,9 @@
         "actions": {
             "save": "Save",
             "cancel": "Cancel",
-            "close": "Close"
+            "close": "Close",
+            "delete": "Delete",
+            "create": "Create"
         }
     },
     "Area": "Area",

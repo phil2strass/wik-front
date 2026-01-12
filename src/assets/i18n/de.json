@@ -70,7 +70,9 @@
     "actions": {
       "save": "Speichern",
       "cancel": "Abbrechen",
-      "close": "Schliessen"
+      "close": "Schliessen",
+      "delete": "Löschen",
+      "create": "Erstellen"
     }
   },
   "Candlestick": "Leuchter",

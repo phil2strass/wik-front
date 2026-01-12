@@ -17,6 +17,7 @@ import { MatRippleModule } from '@angular/material/core';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
 import { WordMeaningTranslation, WordTranslationModalStore } from '../../word-translation-modal-store';
 import { WordTranslationDeleteConfirmDialogComponent } from '../word-translation-delete-confirm-dialog.component';
 import { ExampleTranslationDialogComponent } from '@root/app/word/components/example-dialog/example-translation-dialog.component';
@@ -52,6 +53,7 @@ type WordTranslationEditDialogData = {
         MatProgressBarModule,
         MatFormFieldModule,
         MatInputModule,
+        MatRadioModule,
         TranslateModule
     ]
 })
@@ -192,29 +194,31 @@ export class WordTranslationEditDialogComponent {
         if (this.loading) {
             return;
         }
+        const typeId = this.activeTypeId ?? this.data.typeId ?? null;
+        const showPlural = this.shouldShowPlural(typeId);
         const dialogRef = this.dialog.open(WordTranslationEntryDialogComponent, {
             width: '420px',
             data: {
                 titleKey: 'word.translation.addTitle',
                 confirmKey: 'word.translation.add',
-                labelKey: 'word.translation.label'
+                labelKey: 'word.translation.label',
+                showPlural
             }
         });
-        dialogRef.afterClosed().subscribe((value?: string | null) => {
-            if (!value) {
+        dialogRef.afterClosed().subscribe((result?: { name: string; plural: string | null } | null) => {
+            if (!result?.name) {
                 return;
             }
             const idx = meaningIndex ?? this.meaningIndexFromMap(meaningId) ?? 1;
             const langueId = this.activeLang?.id ?? this.data.langue.id;
-            const typeId = this.activeTypeId ?? this.data.typeId ?? null;
             if (!langueId || !typeId) {
                 this.messageService.error('Langue ou type manquant pour ajouter une traduction.');
                 return;
             }
             const payload = {
                 wordLangueTypeId: null,
-                name: value,
-                plural: '',
+                name: result.name,
+                plural: result.plural ?? '',
                 langueId,
                 typeId,
                 genderId: null,
@@ -245,21 +249,29 @@ export class WordTranslationEditDialogComponent {
             return;
         }
         const currentName = typeof form.get('name')?.value === 'string' ? (form.get('name')?.value as string).trim() : '';
+        const currentPlural = typeof form.get('plural')?.value === 'string' ? (form.get('plural')?.value as string).trim() : '';
+        const typeId = this.extractNumber(form.get('typeId')?.value);
+        const showPlural = this.shouldShowPlural(typeId);
         const dialogRef = this.dialog.open(WordTranslationEntryDialogComponent, {
             width: '420px',
             data: {
                 titleKey: 'word.translation.editTitle',
                 confirmKey: 'word.translation.save',
                 labelKey: 'word.translation.label',
-                initialValue: currentName
+                initialValue: currentName,
+                showPlural,
+                initialPlural: currentPlural
             }
         });
-        dialogRef.afterClosed().subscribe((value?: string | null) => {
-            if (!value) {
+        dialogRef.afterClosed().subscribe((result?: { name: string; plural: string | null } | null) => {
+            if (!result?.name) {
                 return;
             }
             const payload = form.getRawValue();
-            payload.name = value;
+            payload.name = result.name;
+            if (result.plural !== null) {
+                payload.plural = result.plural;
+            }
             this.saving = true;
             this.http.put(`${this.configuration.baseUrl}word`, payload).subscribe({
                 next: () => {
@@ -440,6 +452,16 @@ export class WordTranslationEditDialogComponent {
         this.editingSnapshot = null;
         this.selectedIndex = -1;
         this.translationModalStore.selectLanguage(lang.id);
+    }
+
+    selectLanguageById(langueId: number | null): void {
+        if (langueId == null) {
+            return;
+        }
+        const lang = this.languages.find(item => item.id === langueId);
+        if (lang) {
+            this.selectLanguage(lang);
+        }
     }
 
     private buildFormsForLang(lang: Langue, provided?: WordTranslationValue[]): FormGroup[] {
@@ -771,6 +793,10 @@ export class WordTranslationEditDialogComponent {
         if (!isGenderedLanguage) {
             return false;
         }
+        return typeId === 1;
+    }
+
+    private shouldShowPlural(typeId?: number | null): boolean {
         return typeId === 1;
     }
 

@@ -1,6 +1,6 @@
 .word-sense-dialog__content {
     width: 100%;
-    max-width: 900px;
+    max-width: 1000px;
     min-height: 400px;
 }
 
@@ -31,6 +31,7 @@
     flex-direction: column;
     gap: 16px;
     padding-top: 12px;
+    width: 100%;
 }
 
 .word-sense-dialog__card {
@@ -50,8 +51,44 @@
 }
 
 .word-sense-dialog__card-title {
-    font-weight: 600;
+    font-weight: 400;
     font-size: 15px;
+    line-height: 1.4;
+}
+
+.word-sense-dialog__sense-index {
+    font-weight: 700;
+}
+
+.word-sense-dialog__card-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.word-sense-dialog__translations {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.word-sense-dialog__translation-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.word-sense-dialog__translation-flag {
+    width: 18px;
+    height: 12px;
+    object-fit: cover;
+    border-radius: 2px;
+    flex: 0 0 auto;
+}
+
+.word-sense-dialog__translation-text {
+    color: rgba(0, 0, 0, 0.75);
 }
 
 .word-sense-dialog__card-body {
@@ -111,6 +148,31 @@
     white-space: pre-wrap;
 }
 
+.word-sense-dialog__example-translations {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.word-sense-dialog__example-translation-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.word-sense-dialog__example-translation-flag {
+    width: 18px;
+    height: 12px;
+    object-fit: cover;
+    border-radius: 2px;
+    flex: 0 0 auto;
+}
+
+.word-sense-dialog__example-translation-text {
+    color: rgba(0, 0, 0, 0.75);
+}
+
 .word-sense-dialog__example-actions {
     display: flex;
     align-items: center;
@@ -145,4 +207,6 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    border: 1px solid #f28c28;
+    color: #f28c28;
 }

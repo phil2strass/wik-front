@@ -16,21 +16,38 @@
             <div class="word-sense-dialog__card">
                 <div class="word-sense-dialog__card-header">
                     <div class="word-sense-dialog__card-title">
-                        {{ senseLabel(state, idx) }}
-                    </div>
-                    <div class="word-sense-dialog__card-actions">
-                        <button mat-icon-button type="button" (click)="openEditSenseDialog(state)" [disabled]="busy">
-                            <mat-icon>edit</mat-icon>
-                        </button>
-                        <button mat-icon-button type="button" color="warn" (click)="confirmDeleteSense(state)" [disabled]="busy">
-                            <mat-icon>delete</mat-icon>
-                        </button>
+                        @if (senseContent(state)) {
+                            <span class="word-sense-dialog__sense-index">{{ idx + 1 }}.</span> {{ senseContent(state) }}
+                        } @else {
+                            {{ senseLabel(state, idx) }}
+                        }
                     </div>
                 </div>
-                <div class="word-sense-dialog__card-body">
-                    <div class="word-sense-dialog__card-content">
-                        {{ senseDisplay(state, idx) }}
+                @if (senseTranslations(state).length) {
+                    <div class="word-sense-dialog__translations">
+                        @for (item of senseTranslations(state); track trackTranslation) {
+                            <div class="word-sense-dialog__translation-item">
+                                @if (item.flagSrc) {
+                                    <img class="word-sense-dialog__translation-flag" [src]="item.flagSrc" [alt]="item.langLabel" />
+                                }
+                                <span class="word-sense-dialog__translation-text">{{ item.content }}</span>
+                            </div>
+                        }
                     </div>
+                }
+                <div class="word-sense-dialog__card-actions">
+                    <button mat-button type="button" (click)="openEditSenseDialog(state)" [disabled]="busy">
+                        <mat-icon>edit</mat-icon>
+                        <span>{{ 'word.examples.edit' | translate }}</span>
+                    </button>
+                    <button mat-button type="button" (click)="openSenseTranslationDialog(state)" [disabled]="busy">
+                        <mat-icon>translate</mat-icon>
+                        <span>{{ 'word.senses.translation.button' | translate }}</span>
+                    </button>
+                    <button mat-button type="button" color="warn" (click)="confirmDeleteSense(state)" [disabled]="busy">
+                        <mat-icon>delete</mat-icon>
+                        <span>{{ 'word.examples.delete' | translate }}</span>
+                    </button>
                 </div>
                 <div class="word-sense-dialog__examples">
                     <div class="word-sense-dialog__examples-header">
@@ -57,11 +74,33 @@
                                         <button mat-icon-button type="button" (click)="openEditExampleDialog(state, exIdx)" [disabled]="busy">
                                             <mat-icon>edit</mat-icon>
                                         </button>
+                                        <button
+                                            mat-icon-button
+                                            type="button"
+                                            (click)="openExampleTranslationDialog(state, example)"
+                                            [disabled]="busy">
+                                            <mat-icon>translate</mat-icon>
+                                        </button>
                                         <button mat-icon-button type="button" color="warn" (click)="confirmDeleteExample(state, exIdx)" [disabled]="busy">
                                             <mat-icon>delete</mat-icon>
                                         </button>
                                     </div>
                                 </div>
+                                @if (exampleTranslations(state, example).length) {
+                                    <div class="word-sense-dialog__example-translations">
+                                        @for (item of exampleTranslations(state, example); track trackTranslation) {
+                                            <div class="word-sense-dialog__example-translation-item">
+                                                @if (item.flagSrc) {
+                                                    <img
+                                                        class="word-sense-dialog__example-translation-flag"
+                                                        [src]="item.flagSrc"
+                                                        [alt]="item.langLabel" />
+                                                }
+                                                <span class="word-sense-dialog__example-translation-text">{{ item.content }}</span>
+                                            </div>
+                                        }
+                                    </div>
+                                }
                             </div>
                         }
                     </div>

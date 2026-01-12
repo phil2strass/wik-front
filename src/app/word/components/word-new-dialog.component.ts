@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { WordStore } from '../word-store';
 import { WordFormComponent } from './word-form/word-form.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
     selector: 'word-new-dialog',
@@ -17,13 +18,13 @@ import { WordFormComponent } from './word-form/word-form.component';
             <mat-progress-bar *ngIf="isLoading()" mode="indeterminate"></mat-progress-bar>
         </div>
         <mat-dialog-actions class="d-flex gap-10 align-items-center">
-            <button mat-button (click)="onCancel()">Annuler</button>
+            <button mat-button (click)="onCancel()">{{ 'common.actions.cancel' | translate }}</button>
             <button
                 mat-flat-button
                 color="primary"
                 (click)="onSave()"
                 [disabled]="form.invalid || !form.dirty || isLoading()">
-                <span>Enregistrer</span>
+                <span>{{ 'common.actions.save' | translate }}</span>
             </button>
         </mat-dialog-actions>
     `,
@@ -38,7 +39,15 @@ import { WordFormComponent } from './word-form/word-form.component';
             }
         `
     ],
-    imports: [CommonModule, MatButtonModule, MatDialogContent, MatDialogActions, MatProgressBarModule, WordFormComponent]
+    imports: [
+        CommonModule,
+        MatButtonModule,
+        MatDialogContent,
+        MatDialogActions,
+        MatProgressBarModule,
+        WordFormComponent,
+        TranslateModule
+    ]
 })
 export class WordNewDialog {
     @ViewChild('wordFormRef') wordFormComponent?: WordFormComponent;
