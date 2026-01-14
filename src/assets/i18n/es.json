@@ -100,6 +100,14 @@
   "Menu 1": "Menu 1",
   "Menu 2": "Menu 2",
   "Disabled": "Desabilitada",
+  "sidebar": {
+    "vocabulary": "Vocabulario",
+    "new": "Nuevo",
+    "list": "Lista",
+    "listSens": "Lista de sentidos",
+    "import": "Importar (JSON)",
+    "importSens": "Importar sentidos"
+  },
   "common": {
     "actions": {
       "save": "Guardar",

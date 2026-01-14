@@ -46,6 +46,19 @@
         "submit": "Valider l'import",
         "required": "Ce champ est requis"
     },
+    "word.senseList": {
+        "title": "Liste des sens",
+        "hint": "Sélectionnez un type pour afficher les mots.",
+        "empty": "Aucun mot pour ce type.",
+        "placeholder": "Choisir un type"
+    },
+    "word.senseImport": {
+        "title": "Import des sens",
+        "label": "Coller un JSON de sens",
+        "submit": "Ajouter",
+        "required": "Ce champ est requis",
+        "invalid": "JSON invalide"
+    },
     "common.actions.reset": "Réinitialiser",
     "common.actions.close": "Fermer",
     "word.examples": {
@@ -199,6 +212,8 @@
     "sidebar": {
         "vocabulary": "Vocabulaire",
         "new": "Nouveau",
-        "list": "Liste"
+        "list": "Liste",
+        "listSens": "Liste type",
+        "importSens": "Importer les sens"
     }
 }

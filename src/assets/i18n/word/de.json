@@ -46,6 +46,19 @@
         "submit": "Importieren",
         "required": "Dieses Feld ist erforderlich"
     },
+    "word.senseList": {
+        "title": "Bedeutungsliste",
+        "hint": "Wählen Sie einen Typ aus, um Wörter anzuzeigen.",
+        "empty": "Keine Wörter für diesen Typ.",
+        "placeholder": "Typ auswählen"
+    },
+    "word.senseImport": {
+        "title": "Bedeutungen importieren",
+        "label": "JSON mit Bedeutungen einfügen",
+        "submit": "Hinzufügen",
+        "required": "Dieses Feld ist erforderlich",
+        "invalid": "Ungültiges JSON"
+    },
     "common.actions.reset": "Zurücksetzen",
     "common.actions.close": "Schliessen",
     "word.examples": {
@@ -199,6 +212,8 @@
     "sidebar": {
         "vocabulary": "Wortschatz",
         "new": "Neu",
-        "list": "Liste"
+        "list": "Liste",
+        "listSens": "Typenliste",
+        "importSens": "Bedeutungen importieren"
     }
 }

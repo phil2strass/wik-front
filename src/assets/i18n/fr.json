@@ -119,7 +119,9 @@
     "vocabulary": "Vocabulaire",
     "new": "Nouveau",
     "list": "Liste",
-    "import": "Importer (JSON)"
+    "listSens": "Liste type",
+    "import": "Importer (JSON)",
+    "importSens": "Importer les sens"
   },
   "welcome": {
     "message": "Bientôt un site pour apprendre du vocabulaire et sauvegarder votre savoir."

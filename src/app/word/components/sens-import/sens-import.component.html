@@ -1,0 +1,26 @@
+<mat-card class="sens-import">
+    <mat-card-header>
+        <mat-card-title>{{ 'word.senseImport.title' | translate }}</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+        <form [formGroup]="form" class="sens-import__form">
+            <mat-form-field appearance="outline" class="sens-import__field">
+                <mat-label>{{ 'word.senseImport.label' | translate }}</mat-label>
+                <textarea matInput rows="14" formControlName="payload"></textarea>
+                <mat-error *ngIf="form.get('payload')?.hasError('required')">
+                    {{ 'word.senseImport.required' | translate }}
+                </mat-error>
+            </mat-form-field>
+        </form>
+    </mat-card-content>
+
+    <mat-card-actions align="end" class="sens-import__actions">
+        <button mat-stroked-button color="primary" type="button" (click)="clear()">
+            {{ 'common.actions.reset' | translate }}
+        </button>
+        <button mat-flat-button color="primary" type="button" (click)="submit()" [disabled]="loading()">
+            {{ 'word.senseImport.submit' | translate }}
+        </button>
+    </mat-card-actions>
+</mat-card>

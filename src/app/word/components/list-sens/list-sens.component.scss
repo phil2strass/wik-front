@@ -1,0 +1,28 @@
+.list-sens {
+    padding: 16px;
+}
+
+.list-sens__toolbar {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.list-sens__field {
+    min-width: 240px;
+}
+
+.list-sens__content {
+    min-height: 120px;
+}
+
+.list-sens__spinner {
+    display: block;
+    margin: 16px auto;
+}
+
+.list-sens__hint,
+.list-sens__empty {
+    color: rgba(0, 0, 0, 0.6);
+}

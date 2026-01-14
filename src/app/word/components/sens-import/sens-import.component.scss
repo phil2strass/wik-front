@@ -1,0 +1,19 @@
+.sens-import {
+    margin: 16px;
+}
+
+.sens-import__form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.sens-import__field {
+    width: 100%;
+}
+
+.sens-import__actions {
+    padding: 0 16px 16px;
+    display: flex;
+    gap: 12px;
+}

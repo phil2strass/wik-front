@@ -46,6 +46,19 @@
         "submit": "Import",
         "required": "This field is required"
     },
+    "word.senseList": {
+        "title": "Sense List",
+        "hint": "Select a type to display words.",
+        "empty": "No words for this type.",
+        "placeholder": "Choose a type"
+    },
+    "word.senseImport": {
+        "title": "Import senses",
+        "label": "Paste a sense JSON",
+        "submit": "Add",
+        "required": "This field is required",
+        "invalid": "Invalid JSON"
+    },
     "common.actions.reset": "Reset",
     "common.actions.close": "Close",
     "word.examples": {
@@ -199,6 +212,8 @@
     "sidebar": {
         "vocabulary": "Vocabulary",
         "new": "New",
-        "list": "List"
+        "list": "List",
+        "listSens": "Type List",
+        "importSens": "Import senses"
     }
 }

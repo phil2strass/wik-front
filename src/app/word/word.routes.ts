@@ -26,8 +26,16 @@ export default [
                 component: WordGridComponent
             },
             {
+                path: 'list-sens',
+                loadComponent: () => import('./components/list-sens/list-sens.component').then(m => m.ListSensComponent)
+            },
+            {
                 path: 'import',
                 loadComponent: () => import('./components/word-import/word-import.component').then(m => m.WordImportComponent)
+            },
+            {
+                path: 'import-sens',
+                loadComponent: () => import('./components/sens-import/sens-import.component').then(m => m.SensImportComponent)
             },
             {
                 path: 'categories',

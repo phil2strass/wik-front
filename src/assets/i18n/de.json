@@ -119,6 +119,8 @@
     "vocabulary": "Vokabular",
     "new": "Neu",
     "list": "Liste",
-    "import": "Import (JSON)"
+    "listSens": "Typenliste",
+    "import": "Import (JSON)",
+    "importSens": "Bedeutungen importieren"
   }
 }

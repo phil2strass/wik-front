@@ -17,6 +17,12 @@ export const navItems: NavItem[] = [
         adminOnly: true
     },
     {
+        displayName: 'sidebar.listSens',
+        iconName: 'list-details',
+        route: '/word/list-sens',
+        adminOnly: true
+    },
+    {
         displayName: 'Catégories',
         iconName: 'category',
         route: '/word/categories',
@@ -26,6 +32,12 @@ export const navItems: NavItem[] = [
         displayName: 'sidebar.import',
         iconName: 'upload',
         route: '/word/import',
+        adminOnly: true
+    },
+    {
+        displayName: 'sidebar.importSens',
+        iconName: 'file-import',
+        route: '/word/import-sens',
         adminOnly: true
     }
     /*
