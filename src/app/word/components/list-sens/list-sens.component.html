@@ -31,9 +31,6 @@
                     <mat-list *ngIf="status() !== 'loading'">
                         <mat-list-item *ngFor="let word of words(); trackBy: trackByWord">
                             {{ displayWord(word) }}
-                            <ng-container *ngIf="senseCounts()[word.wordLangueTypeId] > 0">
-                                ({{ senseCounts()[word.wordLangueTypeId] }})
-                            </ng-container>
                         </mat-list-item>
                     </mat-list>
 
