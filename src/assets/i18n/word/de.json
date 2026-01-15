@@ -115,7 +115,8 @@
         "save": "Speichern",
         "editTitle": "Übersetzung bearbeiten",
         "errors": {
-            "required": "Übersetzung ist erforderlich"
+            "required": "Übersetzung ist erforderlich",
+            "genderRequired": "Bitte ein Genus auswählen."
         },
         "homonym": {
             "add": "Homonym hinzufügen",

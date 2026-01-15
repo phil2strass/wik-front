@@ -8,7 +8,7 @@ import { HttpClient } from '@angular/common/http';
 import { Configuration } from '../../../shared/config/configuration';
 import { MessageService } from '@shared/ui-messaging/message/message.service';
 import { Word, WordTranslationValue } from '../../models/word.model';
-import { Langue } from '@shared/data/models/langue.model';
+import { Gender, Langue } from '@shared/data/models/langue.model';
 import { Observable } from 'rxjs';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { MatIconModule } from '@angular/material/icon';
@@ -22,6 +22,7 @@ import { WordMeaningTranslation, WordTranslationModalStore } from '../../word-tr
 import { WordTranslationDeleteConfirmDialogComponent } from '../word-translation-delete-confirm-dialog.component';
 import { ExampleTranslationDialogComponent } from '@root/app/word/components/example-dialog/example-translation-dialog.component';
 import { WordTranslationEntryDialogComponent } from '@root/app/word/components/word-translation-entry-dialog.component';
+import { WordGridStore } from '../../word-grid-store';
 
 type WordTranslationEditDialogData = {
     parentWord: Word;
@@ -71,13 +72,13 @@ export class WordTranslationEditDialogComponent {
     constructor(
         @Inject(MAT_DIALOG_DATA) public data: WordTranslationEditDialogData,
         private dialogRef: MatDialogRef<WordTranslationEditDialogComponent>,
-        private dialog: MatDialog,
-        private fb: FormBuilder,
-        private http: HttpClient,
-        private configuration: Configuration,
-        private messageService: MessageService,
-        private translate: TranslateService
-    ) {
+    private dialog: MatDialog,
+    private fb: FormBuilder,
+    private http: HttpClient,
+    private configuration: Configuration,
+    private messageService: MessageService,
+    private translate: TranslateService
+) {
         this.translationModalStore.init({
             parentWord: data.parentWord,
             langue: data.langue,
@@ -127,6 +128,7 @@ export class WordTranslationEditDialogComponent {
     }
 
     private readonly translationModalStore = inject(WordTranslationModalStore);
+    private readonly wordGridStore = inject(WordGridStore);
 
     get languages(): Langue[] {
         return this.translationModalStore.languages();
@@ -196,16 +198,22 @@ export class WordTranslationEditDialogComponent {
         }
         const typeId = this.activeTypeId ?? this.data.typeId ?? null;
         const showPlural = this.shouldShowPlural(typeId);
+        const genderConfig = this.resolveGenderConfig(this.activeLang, typeId);
         const dialogRef = this.dialog.open(WordTranslationEntryDialogComponent, {
             width: '420px',
             data: {
                 titleKey: 'word.translation.addTitle',
                 confirmKey: 'word.translation.add',
                 labelKey: 'word.translation.label',
-                showPlural
+                showPlural,
+                showGender: genderConfig.showGender,
+                genders: genderConfig.genders,
+                genderId: null,
+                genderRequired: genderConfig.genderRequired,
+                langueIso: genderConfig.langueIso
             }
         });
-        dialogRef.afterClosed().subscribe((result?: { name: string; plural: string | null } | null) => {
+        dialogRef.afterClosed().subscribe((result?: { name: string; plural: string | null; genderId: number | null } | null) => {
             if (!result?.name) {
                 return;
             }
@@ -221,7 +229,7 @@ export class WordTranslationEditDialogComponent {
                 plural: result.plural ?? '',
                 langueId,
                 typeId,
-                genderId: null,
+                genderId: result.genderId ?? null,
                 baseWordTypeId: this.data.parentWord.wordLangueTypeId,
                 baseWordLangueTypeId: meaningId,
                 targetWordLangueTypeId: null,
@@ -232,6 +240,7 @@ export class WordTranslationEditDialogComponent {
                 next: () => {
                     this.messageService.info('Bien enregistré !');
                     this.translationModalStore.reloadTranslations();
+                    this.refreshGrid();
                 },
                 error: err => {
                     this.messageService.error(err?.error ?? 'Erreur lors de la sauvegarde');
@@ -252,6 +261,7 @@ export class WordTranslationEditDialogComponent {
         const currentPlural = typeof form.get('plural')?.value === 'string' ? (form.get('plural')?.value as string).trim() : '';
         const typeId = this.extractNumber(form.get('typeId')?.value);
         const showPlural = this.shouldShowPlural(typeId);
+        const genderConfig = this.resolveGenderConfig(this.activeLang, typeId);
         const dialogRef = this.dialog.open(WordTranslationEntryDialogComponent, {
             width: '420px',
             data: {
@@ -260,10 +270,15 @@ export class WordTranslationEditDialogComponent {
                 labelKey: 'word.translation.label',
                 initialValue: currentName,
                 showPlural,
-                initialPlural: currentPlural
+                initialPlural: currentPlural,
+                showGender: genderConfig.showGender,
+                genders: genderConfig.genders,
+                genderId: this.extractNumber(form.get('genderId')?.value),
+                genderRequired: genderConfig.genderRequired,
+                langueIso: genderConfig.langueIso
             }
         });
-        dialogRef.afterClosed().subscribe((result?: { name: string; plural: string | null } | null) => {
+        dialogRef.afterClosed().subscribe((result?: { name: string; plural: string | null; genderId: number | null } | null) => {
             if (!result?.name) {
                 return;
             }
@@ -272,11 +287,13 @@ export class WordTranslationEditDialogComponent {
             if (result.plural !== null) {
                 payload.plural = result.plural;
             }
+            payload.genderId = result.genderId ?? null;
             this.saving = true;
             this.http.put(`${this.configuration.baseUrl}word`, payload).subscribe({
                 next: () => {
                     this.messageService.info('Bien enregistré !');
                     this.translationModalStore.reloadTranslations();
+                    this.refreshGrid();
                 },
                 error: err => {
                     this.messageService.error(err?.error ?? 'Erreur lors de la sauvegarde');
@@ -372,6 +389,7 @@ export class WordTranslationEditDialogComponent {
                 next: () => {
                     this.messageService.info('Suppression réussie');
                     this.translationModalStore.reloadTranslations();
+                    this.refreshGrid();
                 },
                 error: err => {
                     this.messageService.error(err?.error ?? 'Erreur lors de la suppression');
@@ -415,6 +433,7 @@ export class WordTranslationEditDialogComponent {
                 this.editingForm = null;
                 this.editingSnapshot = null;
                 this.translationModalStore.reloadTranslations();
+                this.refreshGrid();
             },
             error: err => {
                 this.messageService.error(err?.error ?? 'Erreur lors de la sauvegarde');
@@ -798,6 +817,27 @@ export class WordTranslationEditDialogComponent {
 
     private shouldShowPlural(typeId?: number | null): boolean {
         return typeId === 1;
+    }
+
+    private resolveGenderConfig(langue: Langue | null | undefined, typeId?: number | null): {
+        showGender: boolean;
+        genderRequired: boolean;
+        genders: Gender[];
+        langueIso: string | null;
+    } {
+        const targetLangue = langue ?? this.data.langue;
+        const genders = targetLangue?.genders ?? [];
+        const showGender = typeId === 1 && genders.length > 0;
+        return {
+            showGender,
+            genderRequired: showGender && this.shouldRequireGender(targetLangue, typeId),
+            genders,
+            langueIso: targetLangue?.iso ?? null
+        };
+    }
+
+    private refreshGrid(): void {
+        this.wordGridStore.load();
     }
 
     private computeTitle(data: WordTranslationEditDialogData): string {

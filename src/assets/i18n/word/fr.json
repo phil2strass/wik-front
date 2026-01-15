@@ -115,7 +115,8 @@
         "save": "Enregistrer",
         "editTitle": "Modifier la traduction",
         "errors": {
-            "required": "La traduction est requise"
+            "required": "La traduction est requise",
+            "genderRequired": "Veuillez sélectionner un genre."
         },
         "homonym": {
             "add": "Ajouter un homonyme",

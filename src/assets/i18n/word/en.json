@@ -115,7 +115,8 @@
         "save": "Save",
         "editTitle": "Edit translation",
         "errors": {
-            "required": "Translation is required"
+            "required": "Translation is required",
+            "genderRequired": "Please select a gender."
         },
         "homonym": {
             "add": "Add homonym",

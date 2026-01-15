@@ -36,7 +36,7 @@ export const DataStore = signalStore(
                 if (store.types() && store.types().length === 0) {
                     dataService.getTypes().subscribe((type: Type[]) => {
                         patchState(store, {
-                            types: [...type].sort((a, b) => (a.id ?? 0) - (b.id ?? 0))
+                            types: type
                         });
                     });
                 }
