@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { TranslateModule } from '@ngx-translate/core';
@@ -27,6 +27,8 @@ export class ListSensComponent {
     protected readonly selectedTypeId = signal<number | null>(null);
     protected readonly words = signal<Word[]>([]);
     protected readonly status = signal<'idle' | 'loading' | 'loaded' | 'error'>('idle');
+    protected readonly wordBlocks = computed(() => this.chunkWords(this.words(), 25));
+    private readonly separatorLine = '--------------------';
 
     onTypeChange(typeId: number | null): void {
         this.selectedTypeId.set(typeId ?? null);
@@ -44,7 +46,17 @@ export class ListSensComponent {
 
     displayWord(word: Word): string {
         const display = word.displayName?.trim();
-        return display ? display : word.name;
+        const label = display ? display : word.name;
+        const id = word.wordLangueTypeId;
+        return id != null ? `${id} ${label}` : label;
+    }
+
+    private chunkWords(words: Word[], size: number): Word[][] {
+        const blocks: Word[][] = [];
+        for (let index = 0; index < words.length; index += size) {
+            blocks.push(words.slice(index, index + size));
+        }
+        return blocks;
     }
 
     private loadWords(typeId: number): void {
@@ -72,5 +84,36 @@ export class ListSensComponent {
                 this.#messageService.error(err?.error ?? err);
             }
         });
+    }
+
+    downloadTxt(): void {
+        if (this.status() !== 'loaded' || this.words().length === 0) {
+            return;
+        }
+
+        const blocks = this.wordBlocks();
+        const lines: string[] = [];
+
+        blocks.forEach((block, index) => {
+            block.forEach(word => {
+                lines.push(this.displayWord(word));
+            });
+            if (index < blocks.length - 1) {
+                lines.push(this.separatorLine);
+            }
+        });
+
+        const content = `${lines.join('\n')}\n`;
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const typeId = this.selectedTypeId();
+        const filename = typeId != null ? `liste-type-${typeId}.txt` : 'liste-type.txt';
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+
+        URL.revokeObjectURL(url);
     }
 }

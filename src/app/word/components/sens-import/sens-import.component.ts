@@ -47,8 +47,12 @@ export class SensImportComponent {
         let parsed: unknown;
         try {
             parsed = JSON.parse(this.form.value.payload);
-            if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+            const isObject = parsed && typeof parsed === 'object';
+            if (!isObject) {
                 throw new Error('payload.notObject');
+            }
+            if (Array.isArray(parsed) && parsed.length === 0) {
+                throw new Error('payload.empty');
             }
         } catch (e) {
             this.#messages.error('JSON invalide');

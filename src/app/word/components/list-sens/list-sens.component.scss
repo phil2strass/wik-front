@@ -13,8 +13,20 @@
     min-width: 240px;
 }
 
+.list-sens__download {
+    margin-left: auto;
+}
+
 .list-sens__content {
     min-height: 120px;
+}
+
+.list-sens__block {
+    padding: 4px 0;
+}
+
+.list-sens__block mat-divider {
+    margin: 8px 0;
 }
 
 .list-sens__spinner {

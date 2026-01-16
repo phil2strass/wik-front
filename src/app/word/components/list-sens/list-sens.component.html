@@ -17,10 +17,22 @@
                         </mat-option>
                     </mat-select>
                 </mat-form-field>
+                <button
+                    mat-stroked-button
+                    color="primary"
+                    class="list-sens__download"
+                    (click)="downloadTxt()"
+                    [disabled]="status() !== 'loaded' || words().length === 0"
+                >
+                    Download TXT
+                </button>
             </div>
 
             <ng-container *ngIf="selectedTypeId(); else noSelection">
                 <div class="list-sens__content">
+                    <div *ngIf="status() === 'loaded'" class="list-sens__count">
+                        {{ words().length }} résultat(s)
+                    </div>
                     <mat-progress-spinner
                         *ngIf="status() === 'loading'"
                         mode="indeterminate"
@@ -28,11 +40,16 @@
                         class="list-sens__spinner"
                     ></mat-progress-spinner>
 
-                    <mat-list *ngIf="status() !== 'loading'">
-                        <mat-list-item *ngFor="let word of words(); trackBy: trackByWord">
-                            {{ displayWord(word) }}
-                        </mat-list-item>
-                    </mat-list>
+                    <div *ngIf="status() !== 'loading'">
+                        <div *ngFor="let block of wordBlocks(); let last = last" class="list-sens__block">
+                            <mat-list>
+                                <mat-list-item *ngFor="let word of block; trackBy: trackByWord">
+                                    {{ displayWord(word) }}
+                                </mat-list-item>
+                            </mat-list>
+                            <mat-divider *ngIf="!last"></mat-divider>
+                        </div>
+                    </div>
 
                     <div class="list-sens__empty" *ngIf="status() === 'loaded' && words().length === 0">
                         {{ 'word.senseList.empty' | translate }}
