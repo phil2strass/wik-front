@@ -26,6 +26,28 @@
                 >
                     Download TXT
                 </button>
+                <button
+                    mat-flat-button
+                    color="primary"
+                    class="list-sens__chatgpt"
+                    (click)="triggerChatGpt()"
+                    [disabled]="!selectedTypeId() || aiLoading()"
+                >
+                    ChatGPT
+                </button>
+                <span class="list-sens__status" *ngIf="aiJobStatus() as status">
+                    AI: {{ status.status }} ({{ status.completedBatches }}/{{ status.batches }})
+                </span>
+            </div>
+            <div class="list-sens__ai-error" *ngIf="aiJobFirstError() as error">
+                <div class="list-sens__ai-error-title">Erreur OpenAI (lot {{ error.batchIndex + 1 }})</div>
+                <div class="list-sens__ai-error-message">{{ error.message }}</div>
+                <pre class="list-sens__ai-error-raw">{{ error.raw }}</pre>
+                <div class="list-sens__ai-error-file" *ngIf="error.rawFile">Fichier brut: {{ error.rawFile }}</div>
+            </div>
+            <div class="list-sens__ai-error" *ngIf="aiJobFirstImportError() as error">
+                <div class="list-sens__ai-error-title">Erreur import (wordLangueType {{ error.wordLangueTypeId ?? '-' }})</div>
+                <div class="list-sens__ai-error-message">{{ error.message }}</div>
             </div>
 
             <ng-container *ngIf="selectedTypeId(); else noSelection">

@@ -44,6 +44,7 @@ export const WordGridStore = signalStore(
     withComputed(state => ({
         status: computed(() => state.status()),
         data: computed(() => state.data()),
+        pageIndex: computed(() => state.pageIndex()),
         pageSize: computed(() => state.pageSize()),
         resultsLength: computed(() => state.resultsLength()),
         typeFilter: computed(() => state.typeFilter())

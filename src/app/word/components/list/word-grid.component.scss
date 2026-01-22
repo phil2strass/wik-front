@@ -42,12 +42,68 @@
     align-items: center;
 }
 
+.word-grid__paginator {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    justify-content: space-between;
+}
+
+.word-grid__page-input {
+    width: 140px;
+    margin-top: 8px;
+}
+
+.word-grid__actions {
+    gap: 12px;
+}
+
+.word-grid__ai-status {
+    color: rgba(0, 0, 0, 0.6);
+    white-space: nowrap;
+}
+
+.word-grid__ai-error {
+    margin: 8px 0 0 0;
+    padding: 8px 12px;
+    border-left: 3px solid #d32f2f;
+    background: rgba(211, 47, 47, 0.06);
+}
+
+.word-grid__ai-error-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.word-grid__ai-error-message {
+    color: rgba(0, 0, 0, 0.7);
+    margin-bottom: 6px;
+}
+
+.word-grid__ai-error-raw {
+    max-height: 160px;
+    overflow: auto;
+    font-size: 12px;
+    background: rgba(0, 0, 0, 0.04);
+    padding: 8px;
+    border-radius: 4px;
+    margin: 0;
+}
+
+.word-grid__ai-error-file {
+    margin-top: 6px;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.7);
+    word-break: break-all;
+}
+
 .word-grid__type-field {
     min-width: 180px;
     max-width: 260px;
 }
 
-.word-grid__toolbar button[mat-flat-button] {
+.word-grid__toolbar button[mat-flat-button],
+.word-grid__toolbar button[mat-stroked-button] {
     height: 37px;
     line-height: 37px;
     margin-bottom: 19.5px

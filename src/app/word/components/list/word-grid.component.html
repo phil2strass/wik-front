@@ -18,10 +18,34 @@
                     </mat-select>
                 </mat-form-field>
             </div>
-            <div class="col-sm-12 col-md-3 d-flex align-items-center justify-content-end m-t-14">
-                <button mat-flat-button (click)="openCreate()">{{ "word.create" | translate }}</button>
+            <div class="col-sm-12 col-md-3 d-flex align-items-center justify-content-end m-t-14 word-grid__actions">
+                <button mat-stroked-button type="button" (click)="triggerChatGpt()" [disabled]="!typeFilter() || aiLoading()">
+                    ChatGPT
+                </button>
+                @if (aiJobStatus()) {
+                    <span class="m-l-12 f-s-12 word-grid__ai-status">
+                        AI: {{ aiJobStatus()?.status }} ({{ aiJobStatus()?.completedBatches }}/{{ aiJobStatus()?.batches }})
+                    </span>
+                }
+                <button mat-flat-button type="button" (click)="openCreate()">{{ "word.create" | translate }}</button>
             </div>
         </div>
+        @if (aiJobFirstError()) {
+            <div class="m-x-15 word-grid__ai-error">
+                <div class="word-grid__ai-error-title">Erreur OpenAI (lot {{ aiJobFirstError()?.batchIndex + 1 }})</div>
+                <div class="word-grid__ai-error-message">{{ aiJobFirstError()?.message }}</div>
+                <pre class="word-grid__ai-error-raw">{{ aiJobFirstError()?.raw }}</pre>
+                @if (aiJobFirstError()?.rawFile) {
+                    <div class="word-grid__ai-error-file">Fichier brut: {{ aiJobFirstError()?.rawFile }}</div>
+                }
+            </div>
+        }
+        @if (aiJobFirstImportError()) {
+            <div class="m-x-15 word-grid__ai-error">
+                <div class="word-grid__ai-error-title">Erreur import (wordLangueType {{ aiJobFirstImportError()?.wordLangueTypeId ?? '-' }})</div>
+                <div class="word-grid__ai-error-message">{{ aiJobFirstImportError()?.message }}</div>
+            </div>
+        }
     }
     @if (selection.selected.length > 0) {
         <div class="d-flex justify-content-between align-items-center m-10">
@@ -136,11 +160,26 @@
         </table>
     </div>
 
-    <mat-paginator
-        [pageSizeOptions]="[5, 10, 20]"
-        [pageSize]="pageSize()"
-        [length]="resultsLength()"
-        showFirstLastButtons
-        aria-label="Sélection page des mots"
-        class="b-t-1 p-x-48"></mat-paginator>
+    <div class="word-grid__paginator b-t-1 p-x-48">
+        <mat-paginator
+            [pageSizeOptions]="[5, 10, 20]"
+            [pageSize]="pageSize()"
+            [length]="resultsLength()"
+            showFirstLastButtons
+            aria-label="Sélection page des mots"></mat-paginator>
+        <mat-form-field appearance="outline" class="word-grid__page-input">
+            <mat-label>Page</mat-label>
+            <input
+                #pageInput
+                matInput
+                type="number"
+                min="1"
+                [max]="totalPages()"
+                [value]="pageIndex() + 1"
+                [disabled]="resultsLength() === 0"
+                (keyup.enter)="jumpToPage(pageInput.value)"
+                (blur)="jumpToPage(pageInput.value)" />
+            <span matSuffix>/ {{ totalPages() }}</span>
+        </mat-form-field>
+    </div>
 </div>

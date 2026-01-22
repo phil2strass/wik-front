@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, ViewChild, OnDestroy } from '@angular/core';
+import { Component, computed, effect, inject, ViewChild, OnDestroy, signal } from '@angular/core';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { DataStore } from '@shared/data/data-store';
@@ -19,10 +19,15 @@ import { Type } from '@shared/data/models/type.model';
 import { SecurityStore } from '@shared/security/security-store';
 import { WordTranslationEditDialogComponent } from '../word-translation-view-dialog/word-translation-view-dialog.component';
 import { MatPaginatorIntl } from '@angular/material/paginator';
-import { Subscription } from 'rxjs';
+import { Subscription, timer } from 'rxjs';
+import { switchMap, takeWhile } from 'rxjs/operators';
 import { ExpressionDialogComponent } from '../expression-dialog/expression-dialog.component';
 import { ExpressionTranslationDialogComponent } from '../expression-dialog/expression-translation-dialog.component';
 import { WordSenseDialogComponent } from '../word-sense-dialog/word-sense-dialog.component';
+import { HttpClient } from '@angular/common/http';
+import { Configuration } from '@shared/config/configuration';
+import { MessageService } from '@shared/ui-messaging/message/message.service';
+import { CHAT_GPT_BATCH_COUNT, CHAT_GPT_BATCH_SIZE } from '@shared/config/ai-config';
 
 @Component({
     selector: 'app-word-list',
@@ -38,11 +43,23 @@ export class WordGridComponent implements OnDestroy {
     readonly #wordGridStore = inject(WordGridStore);
     protected readonly status = this.#wordGridStore.status;
     protected readonly data = this.#wordGridStore.data;
+    protected readonly pageIndex = this.#wordGridStore.pageIndex;
     protected readonly pageSize = this.#wordGridStore.pageSize;
     protected readonly resultsLength = this.#wordGridStore.resultsLength;
     protected readonly typeFilter = this.#wordGridStore.typeFilter;
+    protected readonly totalPages = computed(() => {
+        const size = this.pageSize();
+        const total = this.resultsLength();
+        if (!size || size <= 0) {
+            return 1;
+        }
+        return Math.max(1, Math.ceil(total / size));
+    });
 
     readonly #securityStore = inject(SecurityStore);
+    readonly #http = inject(HttpClient);
+    readonly #config = inject(Configuration);
+    readonly #messages = inject(MessageService);
     protected readonly profil = this.#securityStore.loadedProfil;
     protected readonly langueSelectedId = this.#securityStore.langueSelected;
     protected readonly selectedLangueName = computed(() => {
@@ -56,11 +73,25 @@ export class WordGridComponent implements OnDestroy {
         return langues.find(langue => langue.id === selectedId)?.iso ?? '';
     });
     translationLanguages: Langue[] = [];
+    readonly #aiLoading = signal(false);
+    protected readonly aiLoading = this.#aiLoading;
+    readonly #aiJobStatus = signal<{
+        status: string;
+        batches: number;
+        completedBatches: number;
+        jobId: string;
+        errors?: any[];
+        importErrors?: any[];
+    } | null>(null);
+    protected readonly aiJobStatus = this.#aiJobStatus;
+    protected readonly aiJobFirstError = computed(() => this.#aiJobStatus()?.errors?.[0] ?? null);
+    protected readonly aiJobFirstImportError = computed(() => this.#aiJobStatus()?.importErrors?.[0] ?? null);
 
     readonly dialog = inject(MatDialog);
     readonly #translate = inject(TranslateService);
     readonly #paginatorIntl = inject(MatPaginatorIntl);
     #langChangeSub?: Subscription;
+    #aiJobPollSub?: Subscription;
 
     displayedColumns: string[] = ['select', 'name', 'actions'];
 
@@ -154,6 +185,7 @@ export class WordGridComponent implements OnDestroy {
 
     ngOnDestroy(): void {
         this.#langChangeSub?.unsubscribe();
+        this.#aiJobPollSub?.unsubscribe();
     }
 
     ngAfterViewInit(): void {
@@ -174,6 +206,91 @@ export class WordGridComponent implements OnDestroy {
 
     onTypeFilterChange(typeId: number | null) {
         this.#wordGridStore.setTypeFilter(typeId ?? null);
+    }
+
+    jumpToPage(rawValue: string): void {
+        const parsed = Number(rawValue);
+        if (!Number.isFinite(parsed)) {
+            return;
+        }
+        const target = Math.min(Math.max(Math.floor(parsed), 1), this.totalPages());
+        const index = target - 1;
+        this.paginator.pageIndex = index;
+        this.#wordGridStore.setPage(index, this.paginator.pageSize);
+    }
+
+    triggerChatGpt(): void {
+        const typeId = this.typeFilter();
+        const langueId = this.langueSelectedId();
+        if (!typeId || !langueId) {
+            this.#messages.error("Type ou langue manquant");
+            return;
+        }
+        const batchSize = CHAT_GPT_BATCH_SIZE;
+        const batchCount = CHAT_GPT_BATCH_COUNT;
+        const count = batchSize * batchCount;
+        const params = new URLSearchParams({
+            langueId: `${langueId}`,
+            typeId: `${typeId}`,
+            count: `${count}`,
+            batchSize: `${batchSize}`,
+            batchCount: `${batchCount}`,
+            import: 'true'
+        });
+        this.#aiLoading.set(true);
+        this.#http.post<any>(`${this.#config.baseUrl}ai/sens/generate-missing-async?${params.toString()}`, null).subscribe({
+            next: res => {
+                const jobId = res?.jobId ?? '';
+                const batches = res?.batches ?? 0;
+                this.#messages.info(`ChatGPT lancé (${batches} lots)${jobId ? `, job ${jobId}` : ''}`);
+                if (jobId) {
+                    this.startJobPolling(jobId);
+                }
+            },
+            error: err => {
+                this.#messages.error(err?.error ?? "Erreur lors de l'appel ChatGPT");
+            },
+            complete: () => this.#aiLoading.set(false)
+        });
+    }
+
+    private startJobPolling(jobId: string): void {
+        this.#aiJobPollSub?.unsubscribe();
+        this.#aiJobStatus.set({ status: 'PENDING', batches: 0, completedBatches: 0, jobId });
+        this.#aiJobPollSub = timer(0, 2000)
+            .pipe(
+                switchMap(() => this.#http.get<any>(`${this.#config.baseUrl}ai/sens/jobs/${jobId}`)),
+                takeWhile(res => res?.status !== 'DONE' && res?.status !== 'FAILED', true)
+            )
+            .subscribe({
+                next: res => {
+                    this.#aiJobStatus.set({
+                        status: res?.status ?? 'UNKNOWN',
+                        batches: res?.batches ?? 0,
+                        completedBatches: res?.completedBatches ?? 0,
+                        jobId,
+                        errors: Array.isArray(res?.errors) ? res.errors : [],
+                        importErrors: Array.isArray(res?.importResult?.errors) ? res.importResult.errors : []
+                    });
+                    if (res?.status === 'DONE') {
+                        const errorCount = Array.isArray(res?.errors) ? res.errors.length : 0;
+                        const importErrorCount = Array.isArray(res?.importResult?.errors) ? res.importResult.errors.length : 0;
+                        if (errorCount > 0 || importErrorCount > 0) {
+                            this.#messages.error(`ChatGPT terminé avec ${errorCount + importErrorCount} erreur(s)`);
+                        } else {
+                            this.#messages.info(`ChatGPT terminé (${res?.items ?? 0} mots)`);
+                        }
+                        this.#aiJobPollSub?.unsubscribe();
+                    } else if (res?.status === 'FAILED') {
+                        this.#messages.error(res?.error ?? 'ChatGPT échoué');
+                        this.#aiJobPollSub?.unsubscribe();
+                    }
+                },
+                error: () => {
+                    this.#messages.error("Erreur lors du suivi ChatGPT");
+                    this.#aiJobPollSub?.unsubscribe();
+                }
+            });
     }
 
     typeLabel(type: Type | { id?: number; name?: string } | null | undefined): string {

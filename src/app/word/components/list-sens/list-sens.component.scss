@@ -17,6 +17,46 @@
     margin-left: auto;
 }
 
+.list-sens__status {
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.list-sens__ai-error {
+    margin-bottom: 12px;
+    padding: 8px 12px;
+    border-left: 3px solid #d32f2f;
+    background: rgba(211, 47, 47, 0.06);
+}
+
+.list-sens__ai-error-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.list-sens__ai-error-message {
+    color: rgba(0, 0, 0, 0.7);
+    margin-bottom: 6px;
+}
+
+.list-sens__ai-error-raw {
+    max-height: 200px;
+    overflow: auto;
+    font-size: 12px;
+    background: rgba(0, 0, 0, 0.04);
+    padding: 8px;
+    border-radius: 4px;
+    margin: 0;
+}
+
+.list-sens__ai-error-file {
+    margin-top: 6px;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.7);
+    word-break: break-all;
+}
+
 .list-sens__content {
     min-height: 120px;
 }
