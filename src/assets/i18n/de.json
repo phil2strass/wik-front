@@ -121,6 +121,7 @@
     "list": "Liste",
     "listSens": "Typenliste",
     "import": "Import (JSON)",
-    "importSens": "Bedeutungen importieren"
+    "importSens": "Bedeutungen importieren",
+    "dictionary": "Woerterbuch"
   }
 }

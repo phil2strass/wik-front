@@ -106,7 +106,8 @@
     "list": "Lista",
     "listSens": "Lista de sentidos",
     "import": "Importar (JSON)",
-    "importSens": "Importar sentidos"
+    "importSens": "Importar sentidos",
+    "dictionary": "Diccionario"
   },
   "common": {
     "actions": {

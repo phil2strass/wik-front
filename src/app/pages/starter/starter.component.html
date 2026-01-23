@@ -1,33 +1,73 @@
-<!-- ============================================================== -->
-<!-- Simple four boxes Row -->
-<!-- ============================================================== -->
-<mat-card class="cardWithShadow">
-  <mat-card-content>
-    <div class="container-fluid">
-      <div class="row">
-        <div class="col-lg-4">
-          <button mat-raised-button>Basic</button>
-        </div>
-        <div class="col-lg-4">
-          <button mat-raised-button color="primary">Primary</button>
-        </div>
-        <div class="col-lg-4">
-          <button mat-raised-button color="accent">Accent</button>
-        </div>
-        <div class="col-lg-4">
-          <button mat-raised-button color="warn">Warn</button>
-        </div>
-        <div class="col-lg-4">
-          <button mat-raised-button disabled>Disabled</button>
-        </div>
-        <div class="col-lg-4">
-          <a mat-raised-button href="https://www.google.com/" target="_blank"
-            >Link</a
-          >
+<section class="dictionary-shell">
+  <header class="dictionary-header">
+    <div class="header-text">
+      <p class="eyebrow">{{ uiText.eyebrow }}</p>
+      <h1>{{ uiText.title }}</h1>
+      <p class="subtitle">
+        {{ uiText.subtitle }}
+      </p>
+    </div>
+    <div class="pagination-controls">
+      <button mat-stroked-button (click)="previousPage()" [disabled]="currentPage === 1">
+        {{ uiText.previous }}
+      </button>
+      <div class="page-indicator">
+        <span>{{ uiText.page }}</span>
+        <mat-form-field appearance="outline" class="page-input">
+          <input
+            matInput
+            type="number"
+            min="1"
+            [max]="totalPages"
+            [(ngModel)]="pageInput"
+            (ngModelChange)="goToPage($event)"
+          />
+        </mat-form-field>
+        <span>{{ uiText.of }} {{ totalPages }}</span>
+      </div>
+      <button
+        mat-stroked-button
+        color="primary"
+        (click)="nextPage()"
+        [disabled]="currentPage === totalPages"
+      >
+        {{ uiText.next }}
+      </button>
+    </div>
+  </header>
+
+  <article class="dictionary-page">
+    <div class="page-top">
+      <span class="page-label">{{ uiText.page }} {{ currentPage }}</span>
+      <span class="page-count">{{ totalCount }} {{ uiText.totalWords }}</span>
+    </div>
+
+    <div class="entry" *ngFor="let entry of pagedEntries; let i = index">
+      <div class="entry-head">
+        <h2 class="word">{{ entry.word }}</h2>
+        <p class="meta">
+          <span class="type">{{ entry.type }}</span>
+          <span class="gender" *ngIf="entry.gender">· {{ entry.gender }}</span>
+        </p>
+        <p class="translations">
+          <span>{{ entry.translations.join(', ') }}</span>
+        </p>
+      </div>
+
+      <div class="sense" *ngFor="let sense of entry.senses; let sIndex = index">
+        <p class="sense-text">
+          <span class="sense-index">{{ sIndex + 1 }}.</span>
+          {{ sense.label }}
+        </p>
+        <p class="sense-translation">{{ sense.translation }}</p>
+        <div class="examples" *ngIf="sense.examples.length">
+          <p class="examples-label">{{ uiText.examplesLabel }}</p>
+          <p class="example" *ngFor="let example of sense.examples">
+            <span class="example-source">"{{ example.source }}"</span>
+            <span class="example-translation">{{ example.translation }}</span>
+          </p>
         </div>
       </div>
-      <p class="f-s-10">test</p>
-      <p class="f-s-20">test</p>
     </div>
-  </mat-card-content>
-</mat-card>
+  </article>
+</section>

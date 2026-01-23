@@ -1,0 +1,177 @@
+.dictionary-shell {
+  min-height: 100vh;
+  padding: 48px clamp(20px, 4vw, 56px) 64px;
+  background: linear-gradient(140deg, #f7f3ee 0%, #f2efe8 45%, #ede6dc 100%);
+  color: #1f1a14;
+  font-family: "Merriweather", "Georgia", serif;
+}
+
+.dictionary-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.header-text {
+  max-width: 520px;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  font-size: 0.7rem;
+  margin: 0 0 8px;
+  color: #7a6d5e;
+}
+
+.subtitle {
+  margin: 12px 0 0;
+  font-size: 1rem;
+  color: #4f463d;
+}
+
+.pagination-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  font-family: "Figtree", "Helvetica", sans-serif;
+}
+
+.page-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #3a332b;
+}
+
+.page-input {
+  width: 90px;
+}
+
+.dictionary-page {
+  background: #fcfaf7;
+  border-radius: 28px;
+  padding: clamp(24px, 4vw, 48px);
+  box-shadow: 0 18px 50px rgba(34, 27, 18, 0.12);
+  border: 1px solid rgba(79, 70, 61, 0.12);
+}
+
+.page-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: "Figtree", "Helvetica", sans-serif;
+  font-size: 0.9rem;
+  color: #6b5f52;
+  margin-bottom: 24px;
+}
+
+.entry {
+  padding: 20px 0;
+  border-top: 1px solid rgba(79, 70, 61, 0.12);
+}
+
+.entry:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.entry-head {
+  margin-bottom: 12px;
+}
+
+.word {
+  font-size: 1.6rem;
+  margin: 0 0 4px;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.meta {
+  margin: 0 0 8px;
+  font-family: "Figtree", "Helvetica", sans-serif;
+  color: #5c5146;
+}
+
+.translations {
+  margin: 0;
+  font-size: 1rem;
+  color: #2d261f;
+}
+
+.sense {
+  margin-top: 12px;
+  padding-left: 18px;
+  border-left: 2px solid rgba(154, 138, 120, 0.4);
+}
+
+.sense-text {
+  margin: 0 0 6px;
+  font-size: 1.02rem;
+}
+
+.sense-index {
+  font-family: "Figtree", "Helvetica", sans-serif;
+  font-weight: 600;
+  color: #7b6b5a;
+  margin-right: 6px;
+}
+
+.sense-translation {
+  margin: 0 0 10px;
+  font-style: italic;
+  color: #4f463d;
+}
+
+.examples {
+  margin-top: 6px;
+}
+
+.examples-label {
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  color: #8a7a67;
+  margin: 0 0 8px;
+  font-family: "Figtree", "Helvetica", sans-serif;
+}
+
+.example {
+  margin: 0 0 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.example-source {
+  color: #2b231c;
+}
+
+.example-translation {
+  color: #6a5f53;
+  font-style: italic;
+}
+
+@media (max-width: 720px) {
+  .dictionary-shell {
+    padding: 32px 18px 48px;
+  }
+
+  .pagination-controls {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .dictionary-page {
+    border-radius: 20px;
+  }
+
+  .word {
+    font-size: 1.4rem;
+  }
+}

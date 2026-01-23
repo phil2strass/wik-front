@@ -39,6 +39,11 @@ export const navItems: NavItem[] = [
         iconName: 'file-import',
         route: '/word/import-sens',
         adminOnly: true
+    },
+    {
+        displayName: 'sidebar.dictionary',
+        iconName: 'book',
+        route: '/starter'
     }
     /*
   {

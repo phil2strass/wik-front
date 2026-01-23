@@ -121,7 +121,8 @@
     "list": "List",
     "listSens": "Type List",
     "import": "Import (JSON)",
-    "importSens": "Import senses"
+    "importSens": "Import senses",
+    "dictionary": "Dictionary"
   },
   "welcome": {
     "message": "Coming soon: a site to learn vocabulary and save your knowledge."
