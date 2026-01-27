@@ -8,6 +8,15 @@
       </p>
     </div>
     <div class="pagination-controls">
+      <mat-form-field appearance="outline" class="type-filter">
+        <mat-label>Type</mat-label>
+        <mat-select [(ngModel)]="typeFilter" (ngModelChange)="onTypeFilterChange($event)">
+          <mat-option [value]="null">Tous</mat-option>
+          <mat-option *ngFor="let type of types()" [value]="type.id">
+            {{ type.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
       <button mat-stroked-button (click)="previousPage()" [disabled]="currentPage === 1">
         {{ uiText.previous }}
       </button>
@@ -44,13 +53,39 @@
 
     <div class="entry" *ngFor="let entry of pagedEntries; let i = index">
       <div class="entry-head">
-        <h2 class="word">{{ entry.word }}</h2>
+        <h2 class="word">
+          <span class="word-label">{{ entry.word }}</span>
+          <span class="word-categories" *ngIf="entry.categories?.length">
+            <span class="word-category-chip" *ngFor="let cat of entry.categories">
+              {{ cat.name }}
+            </span>
+          </span>
+          <button
+            mat-icon-button
+            type="button"
+            class="word-edit"
+            aria-label="Editer les sens"
+            (click)="openSenseDialog(entry)"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+        </h2>
         <p class="meta">
           <span class="type">{{ entry.type }}</span>
           <span class="gender" *ngIf="entry.gender">· {{ entry.gender }}</span>
         </p>
         <p class="translations">
-          <span>{{ entry.translations.join(', ') }}</span>
+          <span class="translations-text">{{ entry.translations.join(', ') }}</span>
+          <button
+            mat-icon-button
+            type="button"
+            class="translation-edit"
+            aria-label="Editer les traductions"
+            (click)="openTranslationDialog(entry)"
+            [disabled]="!motherTongueId"
+          >
+            <mat-icon>translate</mat-icon>
+          </button>
         </p>
       </div>
 

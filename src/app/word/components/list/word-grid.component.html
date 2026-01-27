@@ -50,9 +50,14 @@
     @if (selection.selected.length > 0) {
         <div class="d-flex justify-content-between align-items-center m-10">
             <div class="m-x-15">Selected: {{ selection.selected.length }}</div>
-            <button mat-icon-button color="warn" class="m-r-10" (click)="deleteSelected()">
-                <tabler-icon name="trash"></tabler-icon>
-            </button>
+            <div class="word-grid__selection-actions m-r-10">
+                <button mat-stroked-button color="primary" type="button" (click)="openCategoryAssignDialog()">
+                    Ajouter catégorie
+                </button>
+                <button mat-icon-button color="warn" (click)="deleteSelected()">
+                    <tabler-icon name="trash"></tabler-icon>
+                </button>
+            </div>
         </div>
     }
 
@@ -162,7 +167,7 @@
 
     <div class="word-grid__paginator b-t-1 p-x-48">
         <mat-paginator
-            [pageSizeOptions]="[5, 10, 20]"
+            [pageSizeOptions]="[5, 10, 20, 50, 100, 200, 500]"
             [pageSize]="pageSize()"
             [length]="resultsLength()"
             showFirstLastButtons

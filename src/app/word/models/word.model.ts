@@ -1,5 +1,6 @@
 import { Gender } from '@shared/data/models/langue.model';
 import { Type } from '@shared/data/models/type.model';
+import { Categorie } from './categorie.model';
 
 export interface WordTranslationValue {
     name: string;
@@ -28,4 +29,5 @@ export interface Word {
     plural: string;
     translations?: WordTranslations;
     displayName?: string;
+    categories?: Categorie[];
 }

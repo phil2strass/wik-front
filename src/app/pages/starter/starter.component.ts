@@ -4,13 +4,19 @@ import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { MatDialog } from '@angular/material/dialog';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { Configuration } from '@shared/config/configuration';
 import { SecurityStore } from '@shared/security/security-store';
+import { DataStore } from '@shared/data/data-store';
+import { Langue } from '@shared/data/models/langue.model';
+import { Categorie } from '../../word/models/categorie.model';
 import { Word, WordTranslationValue } from '../../word/models/word.model';
 import { SenseService } from '../../word/services/sense.service';
 import { MaterialModule } from '../../material.module';
+import { WordSenseDialogComponent } from '../../word/components/word-sense-dialog/word-sense-dialog.component';
+import { WordTranslationEditDialogComponent } from '../../word/components/word-translation-view-dialog/word-translation-view-dialog.component';
 
 type SenseEntry = {
   label: string;
@@ -20,10 +26,21 @@ type SenseEntry = {
 
 type DictionaryEntry = {
   word: string;
+  wordData: Word;
   type: string;
   gender?: string;
   translations: string[];
   senses: SenseEntry[];
+  categories: Categorie[];
+};
+
+type WordGridTranslation = {
+  wordLangueTypeId: number;
+  langueId: number;
+  typeId: number;
+  name: string;
+  genderId: number | null;
+  plural: string;
 };
 
 type DictionaryUiText = {
@@ -51,8 +68,11 @@ export class StarterComponent {
   readonly #http = inject(HttpClient);
   readonly #baseUrl = inject(Configuration).baseUrl;
   readonly #securityStore = inject(SecurityStore);
+  readonly #dataStore = inject(DataStore);
   readonly #senseService = inject(SenseService);
+  readonly #dialog = inject(MatDialog);
   readonly pageSize = 5;
+  readonly types = this.#dataStore.types;
   readonly uiTextByLang: Record<string, DictionaryUiText> = {
     fr: {
       eyebrow: 'Dictionnaire personnel',
@@ -105,6 +125,7 @@ export class StarterComponent {
   currentUiLang = 'en';
   totalCount = 0;
   entries: DictionaryEntry[] = [];
+  typeFilter: number | null = null;
   targetLangueId?: number;
   motherTongueId?: number;
   loading = false;
@@ -156,6 +177,11 @@ export class StarterComponent {
     this.goToPage(this.currentPage + 1);
   }
 
+  onTypeFilterChange(typeId: number | null): void {
+    this.typeFilter = typeId ?? null;
+    this.goToPage(1);
+  }
+
   private applyUiLanguage(lang: string): void {
     const normalized = (lang || 'en').toLowerCase();
     this.currentUiLang = this.uiTextByLang[normalized] ? normalized : 'en';
@@ -172,6 +198,9 @@ export class StarterComponent {
       .set('page', String(this.currentPage - 1))
       .set('size', String(this.pageSize))
       .set('sort', 'name,asc');
+    if (this.typeFilter != null) {
+      params = params.set('typeId', this.typeFilter.toString());
+    }
 
     this.#http
       .get<Word[]>(`${this.#baseUrl}word/search`, { params, observe: 'response' })
@@ -219,11 +248,10 @@ export class StarterComponent {
   }
 
   private buildEntry(word: Word, motherTongueId?: number) {
-    const translations = this.extractTranslationNames(word.translations, motherTongueId);
     const typeLabel = word.type?.name ?? '';
     const genderLabel = word.gender?.name ?? undefined;
     const wordLabel = (word.name ?? word.displayName ?? '').trim();
-    return this.#senseService.getSenses(word.wordLangueTypeId).pipe(
+    const senses$ = this.#senseService.getSenses(word.wordLangueTypeId).pipe(
       switchMap(senses => {
         const ordered = [...senses].sort(
           (a, b) => (a.pos ?? 0) - (b.pos ?? 0) || a.id - b.id
@@ -232,24 +260,105 @@ export class StarterComponent {
           return of([] as SenseEntry[]);
         }
         return forkJoin(ordered.map(sense => this.buildSense(sense.id, sense.content, motherTongueId)));
-      }),
-      map(senses => ({
+      })
+    );
+    const translations$ = this.loadWordTranslations(word, motherTongueId);
+    const fallbackTranslations = this.extractTranslationNames(word.translations, motherTongueId);
+    return forkJoin({ senses: senses$, translations: translations$ }).pipe(
+      map(({ senses, translations }) => ({
         word: wordLabel,
+        wordData: word,
         type: typeLabel,
         gender: genderLabel,
         translations,
+        categories: word.categories ?? [],
         senses
       })),
       catchError(() =>
         of({
           word: wordLabel,
+          wordData: word,
           type: typeLabel,
           gender: genderLabel,
-          translations,
+          translations: fallbackTranslations,
+          categories: word.categories ?? [],
           senses: []
         })
       )
     );
+  }
+
+  openSenseDialog(entry: DictionaryEntry): void {
+    const dialogRef = this.#dialog.open(WordSenseDialogComponent, {
+      width: '1200px',
+      maxWidth: '95vw',
+      data: {
+        word: entry.wordData
+      }
+    });
+    dialogRef.afterClosed().subscribe(() => {
+      this.loadPage();
+    });
+  }
+
+  openTranslationDialog(entry: DictionaryEntry): void {
+    if (!this.motherTongueId) {
+      return;
+    }
+    const langue = this.getLangueById(this.motherTongueId);
+    if (!langue) {
+      return;
+    }
+    const translationValues = this.extractTranslationValues(entry.wordData, langue.id);
+    const dialogRef = this.#dialog.open(WordTranslationEditDialogComponent, {
+      width: '75vw',
+      minWidth: '800px',
+      autoFocus: false,
+      restoreFocus: false,
+      data: {
+        parentWord: entry.wordData,
+        langue,
+        languages: [langue],
+        translations: translationValues,
+        typeId: entry.wordData.type?.id ?? null,
+        sourceLangueName: this.selectedLangueName(),
+        sourceLangueIso: this.selectedLangueIso()
+      }
+    });
+    dialogRef.afterClosed().subscribe(updated => {
+      if (updated) {
+        this.loadPage();
+      }
+    });
+  }
+
+  categoryClass(index: number): string {
+    const palette = ['category-chip--a', 'category-chip--b', 'category-chip--c', 'category-chip--d', 'category-chip--e'];
+    return palette[index % palette.length];
+  }
+
+  private selectedLangueName(): string {
+    const selectedId = this.#securityStore.langueSelected();
+    const langue = this.getLangueById(selectedId ?? undefined);
+    return langue?.name ?? '';
+  }
+
+  private selectedLangueIso(): string {
+    const selectedId = this.#securityStore.langueSelected();
+    const langue = this.getLangueById(selectedId ?? undefined);
+    return langue?.iso ?? '';
+  }
+
+  private getLangueById(id?: number): Langue | undefined {
+    if (id == null) {
+      return undefined;
+    }
+    const langues = this.#dataStore.langues();
+    return langues?.find(langue => langue.id === id);
+  }
+
+  private extractTranslationValues(word: Word, langueId: number): WordTranslationValue[] {
+    return this.normalizeTranslationBucket(word.translations, langueId);
   }
 
   private buildSense(senseId: number, content: string, motherTongueId?: number) {
@@ -307,6 +416,24 @@ export class StarterComponent {
       .map(value => value.name)
       .filter(name => !!name)
       .filter((name, index, self) => self.indexOf(name) === index);
+  }
+
+  private loadWordTranslations(word: Word, motherTongueId?: number) {
+    if (!motherTongueId) {
+      return of([] as string[]);
+    }
+    const url = `${this.#baseUrl}word/${word.wordLangueTypeId}/translations/${motherTongueId}`;
+    return this.#http.get<WordGridTranslation[]>(url).pipe(
+      map(payload => {
+        const normalized = Array.isArray(payload) ? payload : [];
+        return normalized
+          .filter(item => item?.langueId === motherTongueId)
+          .map(item => (item?.name ?? '').trim())
+          .filter(name => !!name)
+          .filter((name, index, self) => self.indexOf(name) === index);
+      }),
+      catchError(() => of(this.extractTranslationNames(word.translations, motherTongueId)))
+    );
   }
 
   private normalizeTranslationBucket(translations: Word['translations'], langueId: number): WordTranslationValue[] {

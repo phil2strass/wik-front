@@ -9,6 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { CategoryCreateDialogComponent } from './category-create-dialog.component';
+import { CategoryEditDialogComponent } from './category-edit-dialog.component';
 import { CategorieService } from '../services/categorie.service';
 import { Categorie } from '../models/categorie.model';
 import { MessageService } from '@shared/ui-messaging/message/message.service';
@@ -19,12 +20,14 @@ import { MessageService } from '@shared/ui-messaging/message/message.service';
     encapsulation: ViewEncapsulation.None,
     template: `
         <div class="category-list__container">
-            <mat-card class="cardWithShadow b-1 rounded p-24">
+            <mat-card class="cardWithShadow b-1 rounded p-32 category-list__card">
                 <div class="category-list__header">
                     <h3 class="m-t-0">Catégories</h3>
-                    <button mat-flat-button color="primary" type="button" (click)="openCreateDialog()" [disabled]="loading">
-                        Créer catégorie
-                    </button>
+                    <div class="category-list__header-actions">
+                        <button mat-flat-button color="primary" type="button" (click)="openCreateDialog()" [disabled]="loading">
+                            Créer catégorie
+                        </button>
+                    </div>
                 </div>
 
                 <div class="category-list__table-wrapper">
@@ -42,6 +45,9 @@ import { MessageService } from '@shared/ui-messaging/message/message.service';
                         <ng-container matColumnDef="actions">
                             <th mat-header-cell *matHeaderCellDef></th>
                             <td mat-cell *matCellDef="let row" class="category-list__actions">
+                                <button mat-icon-button type="button" (click)="openEditDialog(row)" [disabled]="loading">
+                                    <mat-icon>edit</mat-icon>
+                                </button>
                                 <button mat-icon-button color="warn" (click)="remove(row)" [disabled]="loading">
                                     <mat-icon>delete</mat-icon>
                                 </button>
@@ -62,11 +68,25 @@ import { MessageService } from '@shared/ui-messaging/message/message.service';
                 justify-content: flex-start;
                 padding: 16px;
             }
+            .category-list__card {
+                width: min(1100px, 100%);
+            }
             .category-list__form {
                 display: flex;
                 gap: 12px;
                 align-items: flex-end;
                 margin-bottom: 12px;
+            }
+            .category-list__header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 16px;
+            }
+            .category-list__header-actions {
+                display: flex;
+                justify-content: flex-end;
+                flex: 1;
             }
             .category-list__field {
                 flex: 0 0 280px;
@@ -93,7 +113,8 @@ import { MessageService } from '@shared/ui-messaging/message/message.service';
         MatButtonModule,
         MatIconModule,
         MatDialogModule,
-        CategoryCreateDialogComponent
+        CategoryCreateDialogComponent,
+        CategoryEditDialogComponent
     ]
 })
 export class CategoryListComponent implements OnInit {
@@ -135,6 +156,32 @@ export class CategoryListComponent implements OnInit {
             if (typeof name === 'string' && name.trim()) {
                 this.submit(name.trim());
             }
+        });
+    }
+
+    openEditDialog(cat: Categorie): void {
+        if (this.loading || !cat?.id) return;
+        const dialogRef = this.dialog.open(CategoryEditDialogComponent, {
+            width: '420px',
+            data: { category: cat }
+        });
+        dialogRef.afterClosed().subscribe(name => {
+            const trimmed = typeof name === 'string' ? name.trim() : '';
+            if (!trimmed || trimmed === cat.name) {
+                return;
+            }
+            this.loading = true;
+            this.categorieService.update(cat.id, trimmed).subscribe({
+                next: updated => {
+                    this.categories = this.categories.map(item => (item.id === cat.id ? updated : item));
+                    this.loading = false;
+                    this.messageService.info('Catégorie modifiée');
+                },
+                error: err => {
+                    this.loading = false;
+                    this.messageService.error(err?.error ?? 'Erreur lors de la modification');
+                }
+            });
         });
     }
 

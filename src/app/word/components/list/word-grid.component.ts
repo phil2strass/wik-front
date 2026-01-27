@@ -28,6 +28,7 @@ import { HttpClient } from '@angular/common/http';
 import { Configuration } from '@shared/config/configuration';
 import { MessageService } from '@shared/ui-messaging/message/message.service';
 import { CHAT_GPT_BATCH_COUNT, CHAT_GPT_BATCH_SIZE } from '@shared/config/ai-config';
+import { CategoryAssignDialogComponent } from '../category-assign-dialog.component';
 
 @Component({
     selector: 'app-word-list',
@@ -659,6 +660,37 @@ export class WordGridComponent implements OnDestroy {
                 this.#wordGridStore.deleteMany(ids);
                 this.selection.clear();
             }
+        });
+    }
+
+    openCategoryAssignDialog(): void {
+        const selectedWords = [...this.selection.selected];
+        if (selectedWords.length === 0) {
+            return;
+        }
+        const dialogRef = this.dialog.open(CategoryAssignDialogComponent, {
+            width: '480px'
+        });
+        dialogRef.afterClosed().subscribe((categorieIds: number[] | undefined) => {
+            if (!categorieIds?.length) {
+                return;
+            }
+            const wordLangueTypeIds = selectedWords.map(word => word.wordLangueTypeId);
+            this.#http
+                .post<void>(`${this.#config.baseUrl}word/bulk-categories`, {
+                    wordLangueTypeIds,
+                    categorieIds
+                })
+                .subscribe({
+                    next: () => {
+                        this.#messages.info('Catégories ajoutées');
+                        this.selection.clear();
+                        this.#wordGridStore.load();
+                    },
+                    error: err => {
+                        this.#messages.error(err?.error ?? 'Erreur lors de la mise à jour des catégories');
+                    }
+                });
         });
     }
 }

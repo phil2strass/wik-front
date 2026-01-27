@@ -26,7 +26,7 @@ interface WordDialogData {
     selector: 'word-edit-dialog',
     template: `
         <mat-dialog-content class="word-edit-dialog__content">
-            <app-word-form #wordFormRef [form]="form" mode="update" [useCard]="false" [disableTypeSelection]="true"></app-word-form>
+            <app-word-form #wordFormRef [form]="form" mode="update" [useCard]="false" [disableTypeSelection]="false"></app-word-form>
         </mat-dialog-content>
         <div class="word-edit-dialog__loader-slot">
             <mat-progress-bar *ngIf="isLoading()" mode="indeterminate"></mat-progress-bar>
@@ -115,7 +115,7 @@ export class WordEditDialog {
             genderId: [genderId],
             plural: [this.data.plural]
         });
-        this.form.get('typeId')?.disable({ emitEvent: false });
+        this.form.get('typeId')?.enable({ emitEvent: false });
         effect(() => {
             if (this.action() == 'updated') {
                 this.#wordStore.actionInit();

@@ -41,6 +41,10 @@
   font-family: "Figtree", "Helvetica", sans-serif;
 }
 
+.type-filter {
+  min-width: 180px;
+}
+
 .page-indicator {
   display: flex;
   align-items: center;
@@ -92,6 +96,41 @@
   align-items: baseline;
 }
 
+.word-label {
+  display: inline-block;
+}
+
+.word-categories {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.word-category-chip {
+  font-size: 0.65rem;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #e2f3e6;
+  color: #2a5c37;
+  border: 1px solid #c6e8cf;
+  font-family: "Figtree", "Helvetica", sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.word-edit {
+  height: 32px;
+  width: 32px;
+  margin-left: 4px;
+  color: #6f6253;
+}
+
+.word-edit mat-icon {
+  font-size: 18px;
+}
+
 .meta {
   margin: 0 0 8px;
   font-family: "Figtree", "Helvetica", sans-serif;
@@ -102,7 +141,26 @@
   margin: 0;
   font-size: 1rem;
   color: #2d261f;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
+
+.translations-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.translation-edit {
+  height: 32px;
+  width: 32px;
+  color: #6f6253;
+}
+
+.translation-edit mat-icon {
+  font-size: 18px;
+}
+
 
 .sense {
   margin-top: 12px;

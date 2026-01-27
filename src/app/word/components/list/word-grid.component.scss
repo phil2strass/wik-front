@@ -58,6 +58,12 @@
     gap: 12px;
 }
 
+.word-grid__selection-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .word-grid__ai-status {
     color: rgba(0, 0, 0, 0.6);
     white-space: nowrap;
