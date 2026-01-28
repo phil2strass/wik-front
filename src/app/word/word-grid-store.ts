@@ -39,7 +39,8 @@ export const WordGridStore = signalStore(
         sortDirection: 'asc',
         resultsLength: 0,
         data: [] as Word[],
-        typeFilter: null as number | null
+        typeFilter: null as number | null,
+        searchTerm: ''
     }),
     withComputed(state => ({
         status: computed(() => state.status()),
@@ -47,7 +48,8 @@ export const WordGridStore = signalStore(
         pageIndex: computed(() => state.pageIndex()),
         pageSize: computed(() => state.pageSize()),
         resultsLength: computed(() => state.resultsLength()),
-        typeFilter: computed(() => state.typeFilter())
+        typeFilter: computed(() => state.typeFilter()),
+        searchTerm: computed(() => state.searchTerm())
     })),
     withMethods(store => {
         const httpClient = inject(HttpClient);
@@ -67,6 +69,10 @@ export const WordGridStore = signalStore(
             const typeFilter = store.typeFilter();
             if (typeFilter != null) {
                 params = params.set('typeId', typeFilter.toString());
+            }
+            const searchTerm = store.searchTerm().trim();
+            if (searchTerm.length > 0) {
+                params = params.set('term', searchTerm);
             }
             params = params
                 .set('page', store.pageIndex().toString())
@@ -108,6 +114,10 @@ export const WordGridStore = signalStore(
             },
             setTypeFilter: (typeId: number | null) => {
                 patchState(store, { typeFilter: typeId, pageIndex: 0 });
+                load();
+            },
+            setSearchTerm: (term: string) => {
+                patchState(store, { searchTerm: term, pageIndex: 0 });
                 load();
             },
             delete: rxMethod<number>(

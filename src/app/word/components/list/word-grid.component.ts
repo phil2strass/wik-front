@@ -19,8 +19,8 @@ import { Type } from '@shared/data/models/type.model';
 import { SecurityStore } from '@shared/security/security-store';
 import { WordTranslationEditDialogComponent } from '../word-translation-view-dialog/word-translation-view-dialog.component';
 import { MatPaginatorIntl } from '@angular/material/paginator';
-import { Subscription, timer } from 'rxjs';
-import { switchMap, takeWhile } from 'rxjs/operators';
+import { Subject, Subscription, timer } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, takeWhile } from 'rxjs/operators';
 import { ExpressionDialogComponent } from '../expression-dialog/expression-dialog.component';
 import { ExpressionTranslationDialogComponent } from '../expression-dialog/expression-translation-dialog.component';
 import { WordSenseDialogComponent } from '../word-sense-dialog/word-sense-dialog.component';
@@ -48,6 +48,7 @@ export class WordGridComponent implements OnDestroy {
     protected readonly pageSize = this.#wordGridStore.pageSize;
     protected readonly resultsLength = this.#wordGridStore.resultsLength;
     protected readonly typeFilter = this.#wordGridStore.typeFilter;
+    protected readonly searchTerm = this.#wordGridStore.searchTerm;
     protected readonly totalPages = computed(() => {
         const size = this.pageSize();
         const total = this.resultsLength();
@@ -93,6 +94,8 @@ export class WordGridComponent implements OnDestroy {
     readonly #paginatorIntl = inject(MatPaginatorIntl);
     #langChangeSub?: Subscription;
     #aiJobPollSub?: Subscription;
+    #filterSub?: Subscription;
+    #filterInput$ = new Subject<string>();
 
     displayedColumns: string[] = ['select', 'name', 'actions'];
 
@@ -134,6 +137,9 @@ export class WordGridComponent implements OnDestroy {
         });
 
         this.#langChangeSub = this.#translate.onLangChange.subscribe(() => this.updatePaginatorLabels());
+        this.#filterSub = this.#filterInput$
+            .pipe(debounceTime(250), distinctUntilChanged())
+            .subscribe(term => this.#wordGridStore.setSearchTerm(term));
     }
 
     private collectTranslationLangues(translations: Word['translations'], pushLangue: (langueId?: number | null) => void): void {
@@ -187,6 +193,7 @@ export class WordGridComponent implements OnDestroy {
     ngOnDestroy(): void {
         this.#langChangeSub?.unsubscribe();
         this.#aiJobPollSub?.unsubscribe();
+        this.#filterSub?.unsubscribe();
     }
 
     ngAfterViewInit(): void {
@@ -202,7 +209,7 @@ export class WordGridComponent implements OnDestroy {
 
     applyFilter(event: Event) {
         const filterValue = (event.target as HTMLInputElement).value;
-        //this.dataSource.filter = filterValue.trim().toLowerCase();
+        this.#filterInput$.next(filterValue);
     }
 
     onTypeFilterChange(typeId: number | null) {
@@ -373,7 +380,7 @@ export class WordGridComponent implements OnDestroy {
     }
 
     formatTranslationValue(row: Word, langue: Langue): string | undefined {
-        const values = this.extractTranslationValues(row, langue.id);
+        const values = this.filterTranslationValues(this.extractTranslationValues(row, langue.id), row.type?.id ?? null);
         if (!values.length) {
             return undefined;
         }
@@ -384,6 +391,13 @@ export class WordGridComponent implements OnDestroy {
             })
             .filter(value => !!value);
         return formatted.length ? formatted.join(', ') : undefined;
+    }
+
+    private filterTranslationValues(values: WordTranslationValue[], typeId: number | null): WordTranslationValue[] {
+        if (!typeId) {
+            return values;
+        }
+        return values.filter(value => value.typeId === typeId);
     }
 
     private extractTranslationValues(row: Word, langueId: number): WordTranslationValue[] {

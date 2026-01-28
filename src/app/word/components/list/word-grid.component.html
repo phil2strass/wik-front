@@ -4,7 +4,7 @@
             <div class="col-sm-12 col-md-4 m-t-14">
                 <mat-form-field appearance="outline" class="w-100" color="primary">
                     <mat-icon matPrefix>search</mat-icon>
-                    <input matInput (keyup)="applyFilter($event)" placeholder="Search Product" />
+                    <input matInput [value]="searchTerm()" (keyup)="applyFilter($event)" placeholder="Search Product" />
                 </mat-form-field>
             </div>
             <div class="col-sm-12 col-md-3 m-t-14">
