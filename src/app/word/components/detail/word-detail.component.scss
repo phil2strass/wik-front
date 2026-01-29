@@ -1,0 +1,66 @@
+.word-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+.word-detail-right {
+  position: sticky;
+  top: 16px;
+  align-self: stretch;
+}
+
+.word-detail-panel {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 16px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.word-detail-panel h3 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.word-detail-panel .mat-mdc-form-field {
+  width: 100%;
+}
+
+.word-detail-panel .word-detail-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.word-detail-panel .word-detail-status {
+  margin-top: 12px;
+  font-size: 13px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.word-detail-panel .word-detail-error {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #b42318;
+}
+
+.word-detail-panel .entry {
+  margin-top: 16px;
+  flex: 1 1 auto;
+}
+
+@media (max-width: 992px) {
+  .word-detail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .word-detail-right {
+    position: static;
+  }
+}

@@ -13,6 +13,7 @@ import { MaterialModule } from '@root/app/material.module';
 import { CommonModule } from '@angular/common';
 import { SelectionModel } from '@angular/cdk/collections';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
 import { WordDeleteSelectedDialogComponent } from '../word-delete-selected-dialog.component';
 import { Gender, Langue } from '@shared/data/models/langue.model';
 import { Type } from '@shared/data/models/type.model';
@@ -62,6 +63,7 @@ export class WordGridComponent implements OnDestroy {
     readonly #http = inject(HttpClient);
     readonly #config = inject(Configuration);
     readonly #messages = inject(MessageService);
+    readonly #router = inject(Router);
     protected readonly profil = this.#securityStore.loadedProfil;
     protected readonly langueSelectedId = this.#securityStore.langueSelected;
     protected readonly selectedLangueName = computed(() => {
@@ -358,6 +360,12 @@ export class WordGridComponent implements OnDestroy {
             restoreFocus: false,
             data: { word: row }
         });
+    }
+
+    openView(row: Word): void {
+        const urlTree = this.#router.createUrlTree(['/word/view', row.wordLangueTypeId]);
+        const url = this.#router.serializeUrl(urlTree);
+        window.open(url, '_blank');
     }
 
     openExpressionTranslationDialog(row: Word, langue: Langue): void {

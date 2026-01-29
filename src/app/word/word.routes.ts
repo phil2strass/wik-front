@@ -26,6 +26,11 @@ export default [
                 component: WordGridComponent
             },
             {
+                path: 'view/:wordLangueTypeId',
+                loadComponent: () =>
+                    import('./components/detail/word-detail.component').then(m => m.WordDetailComponent)
+            },
+            {
                 path: 'list-sens',
                 loadComponent: () => import('./components/list-sens/list-sens.component').then(m => m.ListSensComponent)
             },

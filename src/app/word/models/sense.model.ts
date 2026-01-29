@@ -25,3 +25,12 @@ export interface WordSenseExampleTranslation {
     langueId: number;
     content: string;
 }
+
+export interface WordSenseWordTranslation {
+    id?: number;
+    sensId: number;
+    langueId: number;
+    content: string;
+    genderId?: number | null;
+    plural?: string | null;
+}

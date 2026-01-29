@@ -9,11 +9,12 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { finalize } from 'rxjs/operators';
+import { finalize, catchError } from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs';
 import { DataStore } from '@shared/data/data-store';
 import { MessageService } from '@shared/ui-messaging/message/message.service';
 import { Word } from '../../models/word.model';
-import { WordSense, WordSenseExampleTranslation, WordSenseTranslation } from '../../models/sense.model';
+import { WordSense, WordSenseExampleTranslation, WordSenseTranslation, WordSenseWordTranslation } from '../../models/sense.model';
 import { SenseService } from '../../services/sense.service';
 import { ExampleAddDialogComponent, ExampleAddDialogResult } from '../example-dialog/example-add-dialog.component';
 import { ExampleDeleteDialogComponent } from '../example-dialog/example-delete-dialog.component';
@@ -21,6 +22,7 @@ import { SenseEntryDialogComponent, SenseEntryDialogResult } from './sense-entry
 import { Langue } from '@shared/data/models/langue.model';
 import { WordTranslationDeleteConfirmDialogComponent } from '../word-translation-delete-confirm-dialog.component';
 import { SenseTranslationDialogComponent, SenseTranslationDialogResult } from './sense-translation-dialog.component';
+import { SecurityStore } from '@shared/security/security-store';
 import {
     SenseExampleTranslationDialogComponent,
     SenseExampleTranslationDialogResult
@@ -35,6 +37,7 @@ type SenseState = {
     examples: FormArray<FormGroup>;
     loadingExamples: boolean;
     translations: Record<number, string>;
+    wordTranslations: SenseTranslationItem[];
     exampleTranslations: Record<number, Record<number, string>>;
 };
 
@@ -72,6 +75,7 @@ export class WordSenseDialogComponent {
     #translate = inject(TranslateService);
     #dataStore = inject(DataStore);
     #dialog = inject(MatDialog);
+    #securityStore = inject(SecurityStore);
 
     senses: SenseState[] = [];
     loading = false;
@@ -474,6 +478,10 @@ export class WordSenseDialogComponent {
         return items;
     }
 
+    senseWordTranslations(state: SenseState): SenseTranslationItem[] {
+        return state.wordTranslations ?? [];
+    }
+
     exampleTranslations(state: SenseState, example: FormGroup): SenseTranslationItem[] {
         const exampleId = this.extractNumber(example.get('id')?.value);
         if (!exampleId) {
@@ -501,6 +509,7 @@ export class WordSenseDialogComponent {
     }
 
     trackTranslation = (_: number, item: SenseTranslationItem) => item.langueId;
+    trackWordTranslation = (_: number, item: SenseTranslationItem) => `${item.langueId}-${item.content}`;
 
     trackSense = (_: number, state: SenseState) => this.extractNumber(state.form.get('id')?.value) ?? state.form;
 
@@ -528,6 +537,7 @@ export class WordSenseDialogComponent {
                     this.senses.forEach(state => {
                         this.loadExamples(state);
                         this.loadTranslations(state);
+                        this.loadWordTranslations(state);
                     });
                 },
                 error: err => {
@@ -595,6 +605,32 @@ export class WordSenseDialogComponent {
         });
     }
 
+    private loadWordTranslations(state: SenseState): void {
+        const senseId = this.extractNumber(state.form.get('id')?.value);
+        if (!senseId) {
+            return;
+        }
+        const langueIds = this.wordTranslationLangueIds();
+        if (!langueIds.length) {
+            state.wordTranslations = [];
+            return;
+        }
+        const requests = langueIds.map(langueId =>
+            this.#senseService.getSenseWordTranslations(senseId, langueId).pipe(
+                catchError(() => of([]))
+            )
+        );
+        forkJoin(requests).subscribe({
+            next: results => {
+                const flattened = results.flat();
+                state.wordTranslations = this.toWordTranslationItems(flattened, langueIds);
+            },
+            error: err => {
+                this.#messageService.error(err?.error ?? this.#translate.instant('word.senses.translation.errors.load'));
+            }
+        });
+    }
+
     private createSenseState(sense: WordSense): SenseState {
         return {
             form: this.#fb.group({
@@ -606,6 +642,7 @@ export class WordSenseDialogComponent {
             examples: this.#fb.array<FormGroup>([]),
             loadingExamples: false,
             translations: {},
+            wordTranslations: [],
             exampleTranslations: {}
         };
     }
@@ -636,6 +673,53 @@ export class WordSenseDialogComponent {
             }
         });
         return map;
+    }
+
+    private toWordTranslationItems(translations: WordSenseWordTranslation[], order?: number[]): SenseTranslationItem[] {
+        const items: SenseTranslationItem[] = [];
+        const languages = this.#dataStore.langues() ?? [];
+        translations?.forEach(item => {
+            if (item?.langueId == null) {
+                return;
+            }
+            const content = (item.content ?? '').toString().trim();
+            if (!content) {
+                return;
+            }
+            const lang = languages.find(langue => langue.id === item.langueId);
+            const iso = lang?.iso?.trim().toLowerCase();
+            items.push({
+                langueId: item.langueId,
+                content,
+                flagSrc: iso ? `assets/images/flag/icon-flag-${iso}.svg` : null,
+                langLabel: lang?.name ?? `Lang ${item.langueId}`
+            });
+        });
+        if (order?.length) {
+            const rank = new Map(order.map((id, idx) => [id, idx]));
+            items.sort((a, b) => {
+                const ra = rank.has(a.langueId) ? rank.get(a.langueId)! : Number.MAX_SAFE_INTEGER;
+                const rb = rank.has(b.langueId) ? rank.get(b.langueId)! : Number.MAX_SAFE_INTEGER;
+                if (ra !== rb) return ra - rb;
+                return a.content.localeCompare(b.content);
+            });
+        }
+        return items;
+    }
+
+    private wordTranslationLangueIds(): number[] {
+        const profil = this.#securityStore.loadedProfil();
+        const ids = new Set<number>();
+        if (profil?.langueMaternelle != null) {
+            ids.add(profil.langueMaternelle);
+        }
+        const learning = profil?.langues ?? [];
+        learning.forEach(id => {
+            if (id != null) {
+                ids.add(id);
+            }
+        });
+        return Array.from(ids);
     }
 
     private buildExampleTranslationPayload(

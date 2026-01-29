@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Configuration } from '@shared/config/configuration';
 import { Observable } from 'rxjs';
-import { WordSense, WordSenseExample, WordSenseExampleTranslation, WordSenseTranslation } from '../models/sense.model';
+import { WordSense, WordSenseExample, WordSenseExampleTranslation, WordSenseTranslation, WordSenseWordTranslation } from '../models/sense.model';
 
 @Injectable({ providedIn: 'root' })
 export class SenseService {
@@ -31,6 +31,10 @@ export class SenseService {
 
     getSenseTranslations(sensId: number): Observable<WordSenseTranslation[]> {
         return this.#http.get<WordSenseTranslation[]>(`${this.#baseUrl}sens/${sensId}/translations`);
+    }
+
+    getSenseWordTranslations(sensId: number, langueId: number): Observable<WordSenseWordTranslation[]> {
+        return this.#http.get<WordSenseWordTranslation[]>(`${this.#baseUrl}sens/${sensId}/word-translations/${langueId}`);
     }
 
     saveSenseTranslations(sensId: number, translations: WordSenseTranslation[]): Observable<WordSenseTranslation[]> {

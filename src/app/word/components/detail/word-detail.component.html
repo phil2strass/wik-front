@@ -1,0 +1,123 @@
+<section class="dictionary-shell">
+  <header class="dictionary-header">
+    <div class="pagination-controls">
+      <button mat-stroked-button (click)="goBack()">
+        {{ uiText.back }}
+      </button>
+    </div>
+  </header>
+
+  <div class="word-detail-layout">
+    <article class="dictionary-page word-detail-left">
+      <div class="entry" *ngIf="entry as entry">
+        <div class="entry-head">
+          <h2 class="word">
+            <span class="word-label">{{ entry.word }}</span>
+            <span class="word-categories" *ngIf="entry.categories?.length">
+              <span class="word-category-chip" *ngFor="let cat of entry.categories">
+                {{ cat.name }}
+              </span>
+            </span>
+          </h2>
+          <p class="meta">
+            <span class="type">{{ entry.type }}</span>
+            <span class="gender" *ngIf="entry.gender">· {{ entry.gender }}</span>
+          </p>
+        <p class="translations">
+          <span class="translations-text">{{ entry.translations.join(', ') }}</span>
+        </p>
+        </div>
+
+        <div class="sense" *ngFor="let sense of entry.senses; let sIndex = index">
+          <p class="sense-text">
+            <span class="sense-index">{{ sIndex + 1 }}.</span>
+            {{ sense.label }}
+          </p>
+          <p class="sense-translation" *ngIf="sense.wordTranslations.length">
+            ({{ sense.wordTranslations.join(', ') }})
+          </p>
+          <p class="sense-translation">{{ sense.translation }}</p>
+          <div class="examples" *ngIf="sense.examples.length">
+            <p class="examples-label">{{ uiText.examplesLabel }}</p>
+            <p class="example" *ngFor="let example of sense.examples">
+              <span class="example-source">"{{ example.source }}"</span>
+              <span class="example-translation">{{ example.translation }}</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="entry" *ngIf="!entry">
+        <p class="subtitle" *ngIf="loading">{{ uiText.loading }}</p>
+        <p class="subtitle" *ngIf="!loading && notFound">{{ uiText.notFound }}</p>
+      </div>
+    </article>
+
+    <aside class="word-detail-right">
+      <div class="word-detail-panel">
+        <h3>ChatGPT</h3>
+        <mat-form-field appearance="outline">
+          <mat-label>Moteur</mat-label>
+          <mat-select [(ngModel)]="selectedChatEngine">
+            <mat-option *ngFor="let engine of chatEngines" [value]="engine.id">
+              {{ engine.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <div class="word-detail-actions">
+          <button mat-flat-button color="primary" (click)="onChatGptClick()">ChatGPT</button>
+        </div>
+
+        <div class="word-detail-status" *ngIf="aiLoading">Chargement...</div>
+        <div class="word-detail-error" *ngIf="aiError">{{ aiError }}</div>
+
+        <div class="entry" *ngIf="aiResult as aiResult">
+          <div class="entry-head">
+            <h2 class="word">
+              <span class="word-label">{{ aiResult.word }}</span>
+            </h2>
+            <p class="meta">
+              <span class="type">{{ aiResult.langue }}</span>
+              <span class="gender" *ngIf="aiResult.gender">· {{ aiResult.gender }}</span>
+            </p>
+          </div>
+
+          <div class="sense" *ngFor="let sense of aiResult.sens; let sIndex = index">
+            <p class="sense-text">
+              <span class="sense-index">{{ sense.senseIndex || sIndex + 1 }}.</span>
+              {{ sense.sensSrc }}
+            </p>
+            <p class="sense-translation">FR: {{ sense.sensFr }}</p>
+            <p class="sense-translation">DE: {{ sense.sensDe }}</p>
+            <p class="sense-translation" *ngIf="sense.wordFr">
+              Mot (FR): {{ sense.wordFr }}
+              <span *ngIf="sense.wordFrGender"> ({{ sense.wordFrGender }})</span>
+              <span *ngIf="sense.wordFrPlural"> · pluriel: {{ sense.wordFrPlural }}</span>
+            </p>
+            <p class="sense-translation" *ngIf="sense.wordDe">
+              Mot (DE): {{ sense.wordDe }}
+              <span *ngIf="sense.wordDeGender"> ({{ sense.wordDeGender }})</span>
+              <span *ngIf="sense.wordDePlural"> · plural: {{ sense.wordDePlural }}</span>
+            </p>
+            <div class="examples" *ngIf="sense.examples.length">
+              <p class="examples-label">{{ uiText.examplesLabel }}</p>
+              <p class="example" *ngFor="let example of sense.examples">
+                <span class="example-source">"{{ example.src }}"</span>
+                <span class="example-translation">FR: {{ example.fr }}</span>
+                <span class="example-translation">DE: {{ example.de }}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="word-detail-actions" *ngIf="aiResult">
+          <button mat-flat-button color="primary" (click)="integrateAiResult()" [disabled]="aiIntegrating">
+            Intégrer
+          </button>
+        </div>
+        <div class="word-detail-status" *ngIf="aiIntegrating">Intégration...</div>
+        <div class="word-detail-error" *ngIf="aiIntegrateError">{{ aiIntegrateError }}</div>
+      </div>
+    </aside>
+  </div>
+</section>
