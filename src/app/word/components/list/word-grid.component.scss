@@ -121,6 +121,10 @@
     padding-left: 12px;
 }
 
+.word-grid__category-chips {
+    display: inline-flex;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;

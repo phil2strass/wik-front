@@ -207,6 +207,7 @@
             "name": "Name",
             "plural": "Plural",
             "type": "Type",
+            "category": "Category",
             "actions": "Actions"
         }
     },

@@ -21,7 +21,8 @@ import { SecurityStore } from '@shared/security/security-store';
 import { WordTranslationEditDialogComponent } from '../word-translation-view-dialog/word-translation-view-dialog.component';
 import { MatPaginatorIntl } from '@angular/material/paginator';
 import { Subject, Subscription, timer } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, takeWhile } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, finalize, switchMap, takeWhile } from 'rxjs/operators';
+import { MatChipSelectionChange } from '@angular/material/chips';
 import { ExpressionDialogComponent } from '../expression-dialog/expression-dialog.component';
 import { ExpressionTranslationDialogComponent } from '../expression-dialog/expression-translation-dialog.component';
 import { WordSenseDialogComponent } from '../word-sense-dialog/word-sense-dialog.component';
@@ -98,6 +99,7 @@ export class WordGridComponent implements OnDestroy {
     #aiJobPollSub?: Subscription;
     #filterSub?: Subscription;
     #filterInput$ = new Subject<string>();
+    #categoryToggleLoading = new Set<string>();
 
     displayedColumns: string[] = ['select', 'name', 'actions'];
 
@@ -133,6 +135,7 @@ export class WordGridComponent implements OnDestroy {
             if (typeFilterValue == null) {
                 dynamicColumns.push('type');
             }
+            dynamicColumns.push('category');
             dynamicColumns.push(...this.translationLanguages.map(lang => this.translationColumnId(lang.id)));
             this.displayedColumns = ['select', 'name', ...dynamicColumns, 'actions'];
             this.updatePaginatorLabels();
@@ -321,6 +324,54 @@ export class WordGridComponent implements OnDestroy {
                 .join(', ');
         }
         return this.typeLabel(row.type) || '-';
+    }
+
+    hasCategory(row: Word, categoryId: number): boolean {
+        return Array.isArray(row.categories) && row.categories.some(category => category.id === categoryId);
+    }
+
+    isCategoryToggleLoading(wordLangueTypeId: number, categoryId: number): boolean {
+        return this.#categoryToggleLoading.has(`${wordLangueTypeId}:${categoryId}`);
+    }
+
+    onCategoryToggle(row: Word, categoryId: number, event: MatChipSelectionChange): void {
+        if (!event.isUserInput) {
+            return;
+        }
+        const selected = event.selected;
+        const key = `${row.wordLangueTypeId}:${categoryId}`;
+        if (this.#categoryToggleLoading.has(key)) {
+            event.source.selected = !selected;
+            return;
+        }
+        this.#categoryToggleLoading.add(key);
+        this.#http
+            .post<void>(`${this.#config.baseUrl}word/${row.wordLangueTypeId}/categories/toggle`, {
+                categorieId: categoryId,
+                active: selected
+            })
+            .pipe(finalize(() => this.#categoryToggleLoading.delete(key)))
+            .subscribe({
+                next: () => this.updateRowCategories(row, categoryId, selected),
+                error: err => {
+                    event.source.selected = !selected;
+                    this.#messages.error(err?.error ?? 'Erreur lors de la mise à jour des catégories');
+                }
+            });
+    }
+
+    private updateRowCategories(row: Word, categoryId: number, active: boolean): void {
+        const current = Array.isArray(row.categories) ? [...row.categories] : [];
+        if (active) {
+            if (!current.some(category => category.id === categoryId)) {
+                current.push({ id: categoryId, name: '8 ans' });
+            }
+        } else {
+            const next = current.filter(category => category.id !== categoryId);
+            row.categories = next;
+            return;
+        }
+        row.categories = current;
     }
 
     translationColumnId(langueId: number): string {
