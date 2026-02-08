@@ -113,7 +113,7 @@ export class WordEditDialog {
             langueId: [langueId, Validators.required],
             typeId: [typeId, Validators.required],
             genderId: [genderId],
-            plural: [this.data.plural]
+            plural: [this.data.plural ?? '']
         });
         this.form.get('typeId')?.enable({ emitEvent: false });
         effect(() => {

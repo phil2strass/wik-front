@@ -27,6 +27,9 @@
         },
         "translationFor": "Word in {{lang}}"
     },
+    "word.ai": {
+        "plural": "ChatGPT plural"
+    },
     "word.type": {
         "1": "noun",
         "2": "plural noun",
@@ -38,7 +41,10 @@
         "8": "conjunction",
         "9": "interjection",
         "10": "determiner",
-        "11": "proper noun"
+        "11": "proper noun",
+        "12": "abbreviation",
+        "13": "indefinite pronoun",
+        "14": "Latin expression"
     },
     "word.import": {
         "title": "Import words from JSON",

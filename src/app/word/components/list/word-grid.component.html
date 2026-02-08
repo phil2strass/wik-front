@@ -19,15 +19,41 @@
                 </mat-form-field>
             </div>
             <div class="col-sm-12 col-md-3 d-flex align-items-center justify-content-end m-t-14 word-grid__actions">
-                <button mat-stroked-button type="button" (click)="triggerChatGpt()" [disabled]="!typeFilter() || aiLoading()">
-                    ChatGPT
+                <button mat-stroked-button type="button" [matMenuTriggerFor]="actionsMenu">
+                    Actions
                 </button>
+                <mat-menu #actionsMenu="matMenu" class="cardWithShadow">
+                    <button mat-menu-item (click)="triggerChatGpt()" [disabled]="!typeFilter() || aiLoading()">
+                        <span>ChatGPT</span>
+                    </button>
+                    <button mat-menu-item (click)="triggerChatGptJsonl()" [disabled]="!typeFilter()">
+                        <span>ChatGPT sens jsonl</span>
+                    </button>
+                    <button mat-menu-item (click)="triggerChatGptTrad()" [disabled]="!typeFilter() || aiTradLoading()">
+                        <span>ChatGPT trad</span>
+                    </button>
+                    <button mat-menu-item (click)="triggerChatGptPluralAll()" [disabled]="aiPluralLoading()">
+                        <span>{{ 'word.ai.plural' | translate }}</span>
+                    </button>
+                    <button mat-menu-item (click)="openCreate()">
+                        <span>{{ "word.create" | translate }}</span>
+                    </button>
+                </mat-menu>
                 @if (aiJobStatus()) {
                     <span class="m-l-12 f-s-12 word-grid__ai-status">
                         AI: {{ aiJobStatus()?.status }} ({{ aiJobStatus()?.completedBatches }}/{{ aiJobStatus()?.batches }})
                     </span>
                 }
-                <button mat-flat-button type="button" (click)="openCreate()">{{ "word.create" | translate }}</button>
+                @if (aiPluralJobStatus()) {
+                    <span class="m-l-12 f-s-12 word-grid__ai-status">
+                        Pluriel: {{ aiPluralJobStatus()?.status }} ({{ aiPluralJobStatus()?.completedBatches }}/{{ aiPluralJobStatus()?.batches }})
+                    </span>
+                }
+                @if (aiTradJobStatus()) {
+                    <span class="m-l-12 f-s-12 word-grid__ai-status">
+                        Trad: {{ aiTradJobStatus()?.status }} ({{ aiTradJobStatus()?.completedBatches }}/{{ aiTradJobStatus()?.batches }})
+                    </span>
+                }
             </div>
         </div>
         @if (aiJobFirstError()) {
@@ -51,6 +77,29 @@
         <div class="d-flex justify-content-between align-items-center m-10">
             <div class="m-x-15">Selected: {{ selection.selected.length }}</div>
             <div class="word-grid__selection-actions m-r-10">
+                <button mat-stroked-button color="primary" type="button" (click)="addCategory8ans()">
+                    Catégorie 8 ans
+                </button>
+                <button mat-stroked-button color="primary" type="button" [disabled]="aiSenseSelectedLoading()"
+                        (click)="triggerChatGptSelectedSenses()">
+                    ChatGPT sens (sélection)
+                </button>
+                <button
+                    mat-stroked-button
+                    color="primary"
+                    type="button"
+                    [disabled]="aiPluralLoading()"
+                    (click)="triggerChatGptPlural()">
+                    {{ 'word.ai.plural' | translate }}
+                </button>
+                <button
+                    mat-stroked-button
+                    color="primary"
+                    type="button"
+                    [disabled]="aiTradLoading()"
+                    (click)="triggerChatGptTradSelected()">
+                    ChatGPT trad (sélection)
+                </button>
                 <button mat-stroked-button color="primary" type="button" (click)="openCategoryAssignDialog()">
                     Ajouter catégorie
                 </button>
@@ -101,6 +150,12 @@
                     {{ 'word.table.column.type' | translate }}
                 </th>
                 <td mat-cell *matCellDef="let row" class="f-s-14">{{ typesLabel(row) }}</td>
+            </ng-container>
+            <ng-container matColumnDef="plural">
+                <th mat-header-cell *matHeaderCellDef class="f-w-600 mat-subtitle-1 f-s-14">
+                    {{ 'word.table.column.plural' | translate }}
+                </th>
+                <td mat-cell *matCellDef="let row" class="f-s-14">{{ row.plural?.trim() || '-' }}</td>
             </ng-container>
             <ng-container matColumnDef="category">
                 <th mat-header-cell *matHeaderCellDef class="f-w-600 mat-subtitle-1 f-s-14">

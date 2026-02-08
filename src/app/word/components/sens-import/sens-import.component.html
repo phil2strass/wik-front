@@ -5,13 +5,13 @@
 
     <mat-card-content>
         <form [formGroup]="form" class="sens-import__form">
-            <mat-form-field appearance="outline" class="sens-import__field">
-                <mat-label>{{ 'word.senseImport.label' | translate }}</mat-label>
-                <textarea matInput rows="14" formControlName="payload"></textarea>
-                <mat-error *ngIf="form.get('payload')?.hasError('required')">
-                    {{ 'word.senseImport.required' | translate }}
-                </mat-error>
-            </mat-form-field>
+            <div class="sens-import__upload">
+                <input
+                    #fileInput
+                    type="file"
+                    accept=".json,.jsonl,application/json"
+                    (change)="onFileSelected($event)" />
+            </div>
         </form>
     </mat-card-content>
 

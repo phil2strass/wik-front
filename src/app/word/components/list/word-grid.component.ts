@@ -80,6 +80,31 @@ export class WordGridComponent implements OnDestroy {
     translationLanguages: Langue[] = [];
     readonly #aiLoading = signal(false);
     protected readonly aiLoading = this.#aiLoading;
+    readonly #aiPluralLoading = signal(false);
+    protected readonly aiPluralLoading = this.#aiPluralLoading;
+    readonly #aiTradLoading = signal(false);
+    protected readonly aiTradLoading = this.#aiTradLoading;
+    readonly #aiSenseSelectedLoading = signal(false);
+    protected readonly aiSenseSelectedLoading = this.#aiSenseSelectedLoading;
+    readonly #aiPluralJobStatus = signal<{
+        status: string;
+        batches: number;
+        completedBatches: number;
+        jobId: string;
+        errors?: any[];
+        updated?: number;
+        empty?: number;
+    } | null>(null);
+    protected readonly aiPluralJobStatus = this.#aiPluralJobStatus;
+    readonly #aiTradJobStatus = signal<{
+        status: string;
+        batches: number;
+        completedBatches: number;
+        jobId: string;
+        errors?: any[];
+        inserted?: number;
+    } | null>(null);
+    protected readonly aiTradJobStatus = this.#aiTradJobStatus;
     readonly #aiJobStatus = signal<{
         status: string;
         batches: number;
@@ -97,6 +122,8 @@ export class WordGridComponent implements OnDestroy {
     readonly #paginatorIntl = inject(MatPaginatorIntl);
     #langChangeSub?: Subscription;
     #aiJobPollSub?: Subscription;
+    #aiPluralJobPollSub?: Subscription;
+    #aiTradJobPollSub?: Subscription;
     #filterSub?: Subscription;
     #filterInput$ = new Subject<string>();
     #categoryToggleLoading = new Set<string>();
@@ -135,6 +162,7 @@ export class WordGridComponent implements OnDestroy {
             if (typeFilterValue == null) {
                 dynamicColumns.push('type');
             }
+            dynamicColumns.push('plural');
             dynamicColumns.push('category');
             dynamicColumns.push(...this.translationLanguages.map(lang => this.translationColumnId(lang.id)));
             this.displayedColumns = ['select', 'name', ...dynamicColumns, 'actions'];
@@ -198,6 +226,8 @@ export class WordGridComponent implements OnDestroy {
     ngOnDestroy(): void {
         this.#langChangeSub?.unsubscribe();
         this.#aiJobPollSub?.unsubscribe();
+        this.#aiPluralJobPollSub?.unsubscribe();
+        this.#aiTradJobPollSub?.unsubscribe();
         this.#filterSub?.unsubscribe();
     }
 
@@ -220,6 +250,7 @@ export class WordGridComponent implements OnDestroy {
     onTypeFilterChange(typeId: number | null) {
         this.#wordGridStore.setTypeFilter(typeId ?? null);
     }
+
 
     jumpToPage(rawValue: string): void {
         const parsed = Number(rawValue);
@@ -255,6 +286,11 @@ export class WordGridComponent implements OnDestroy {
             next: res => {
                 const jobId = res?.jobId ?? '';
                 const batches = res?.batches ?? 0;
+                const items = res?.items ?? 0;
+                if (batches === 0 || items === 0) {
+                    this.#messages.info('Aucun mot à traiter');
+                    return;
+                }
                 this.#messages.info(`ChatGPT lancé (${batches} lots)${jobId ? `, job ${jobId}` : ''}`);
                 if (jobId) {
                     this.startJobPolling(jobId);
@@ -265,6 +301,202 @@ export class WordGridComponent implements OnDestroy {
             },
             complete: () => this.#aiLoading.set(false)
         });
+    }
+
+    triggerChatGptJsonl(): void {
+        const typeId = this.typeFilter();
+        const langueId = this.langueSelectedId();
+        if (!typeId || !langueId) {
+            this.#messages.error("Type ou langue manquant");
+            return;
+        }
+        const batchSize = CHAT_GPT_BATCH_SIZE;
+        const batchCount = CHAT_GPT_BATCH_COUNT;
+        const params = new URLSearchParams({
+            langueId: `${langueId}`,
+            typeId: `${typeId}`,
+            batchSize: `${batchSize}`,
+            batchCount: `${batchCount}`
+        });
+        this.#http.post<any>(`${this.#config.baseUrl}ai/sens/jsonl?${params.toString()}`, null).subscribe({
+            next: res => {
+                const files: string[] = Array.isArray(res?.files) ? res.files : [];
+                const file = res?.file ?? '';
+                const items = res?.items ?? 0;
+                if (!items) {
+                    this.#messages.info('Aucun mot à exporter');
+                    return;
+                }
+                if (files.length > 0) {
+                    this.#messages.info(`JSONL généré (${items} mot(s), ${files.length} fichier(s)): ${files.join(', ')}`);
+                } else {
+                    this.#messages.info(`JSONL généré (${items} mot(s)): ${file}`);
+                }
+            },
+            error: err => {
+                this.#messages.error(err?.error ?? "Erreur lors de la génération JSONL");
+            }
+        });
+    }
+
+    triggerChatGptPluralAll(): void {
+        const langueId = this.langueSelectedId();
+        if (!langueId) {
+            this.#messages.error("Langue manquante");
+            return;
+        }
+        const batchSize = CHAT_GPT_BATCH_SIZE;
+        const batchCount = CHAT_GPT_BATCH_COUNT;
+        const params = new URLSearchParams({
+            langueId: `${langueId}`,
+            typeId: '1',
+            batchSize: `${batchSize}`,
+            batchCount: `${batchCount}`
+        });
+        this.#aiPluralLoading.set(true);
+        this.#http.post<any>(`${this.#config.baseUrl}ai/word/plurals-async?${params.toString()}`, null).subscribe({
+            next: res => {
+                const jobId = res?.jobId ?? '';
+                const batches = res?.batches ?? 0;
+                this.#messages.info(`ChatGPT pluriel lancé (${batches} lots)${jobId ? `, job ${jobId}` : ''}`);
+                if (jobId) {
+                    this.startPluralJobPolling(jobId);
+                }
+            },
+            error: err => {
+                this.#messages.error(err?.error ?? "Erreur lors de l'appel ChatGPT pluriel");
+            },
+            complete: () => this.#aiPluralLoading.set(false)
+        });
+    }
+
+    triggerChatGptTrad(): void {
+        const typeId = this.typeFilter();
+        const langueId = this.langueSelectedId();
+        if (!typeId || !langueId) {
+            this.#messages.error("Type ou langue manquant");
+            return;
+        }
+        const batchSize = CHAT_GPT_BATCH_SIZE;
+        const batchCount = CHAT_GPT_BATCH_COUNT;
+        const params = new URLSearchParams({
+            langueId: `${langueId}`,
+            typeId: `${typeId}`,
+            batchSize: `${batchSize}`,
+            batchCount: `${batchCount}`
+        });
+        this.#aiTradLoading.set(true);
+        this.#http.post<any>(`${this.#config.baseUrl}ai/sens/word-trad-async?${params.toString()}`, null).subscribe({
+            next: res => {
+                const jobId = res?.jobId ?? '';
+                const batches = res?.batches ?? 0;
+                const items = res?.items ?? 0;
+                if (batches === 0 || items === 0) {
+                    this.#messages.info('Aucun mot à traiter');
+                    return;
+                }
+                this.#messages.info(`ChatGPT trad lancé (${batches} lots)${jobId ? `, job ${jobId}` : ''}`);
+                if (jobId) {
+                    this.startTradJobPolling(jobId);
+                }
+            },
+            error: err => {
+                this.#messages.error(err?.error ?? "Erreur lors de l'appel ChatGPT trad");
+            },
+            complete: () => this.#aiTradLoading.set(false)
+        });
+    }
+
+    triggerChatGptTradSelected(): void {
+        const selectedWords = [...this.selection.selected];
+        if (!selectedWords.length) {
+            return;
+        }
+        const wordLangueTypeIds = selectedWords
+            .map(word => word.wordLangueTypeId)
+            .filter((id): id is number => Number.isFinite(id as number));
+        if (!wordLangueTypeIds.length) {
+            return;
+        }
+        const langueId = this.langueSelectedId();
+        this.#aiTradLoading.set(true);
+        this.#http
+            .post<{ total: number; inserted: number }>(`${this.#config.baseUrl}ai/sens/word-trad`, {
+                wordLangueTypeIds,
+                langueId
+            })
+            .subscribe({
+                next: res => {
+                    const total = res?.total ?? wordLangueTypeIds.length;
+                    const inserted = res?.inserted ?? 0;
+                    this.#messages.info(`ChatGPT trad terminé (${inserted}/${total})`);
+                    this.selection.clear();
+                    this.#wordGridStore.load();
+                },
+                error: err => {
+                    this.#messages.error(err?.error ?? 'Erreur lors de ChatGPT trad');
+                },
+                complete: () => this.#aiTradLoading.set(false)
+            });
+    }
+
+    triggerChatGptSelectedSenses(): void {
+        const selectedWords = [...this.selection.selected];
+        if (!selectedWords.length) {
+            return;
+        }
+        const wordLangueTypeIds = selectedWords
+            .map(word => word.wordLangueTypeId)
+            .filter((id): id is number => Number.isFinite(id as number));
+        if (!wordLangueTypeIds.length) {
+            return;
+        }
+        let langueId = this.langueSelectedId();
+        let typeId = this.typeFilter();
+        if (!langueId || !typeId) {
+            const first = selectedWords[0];
+            if (!langueId && typeof first?.langue === 'number') {
+                langueId = first.langue;
+            }
+            if (!typeId && first?.type?.id) {
+                typeId = first.type.id;
+            }
+        }
+        if (!langueId || !typeId) {
+            this.#messages.error("Type ou langue manquant");
+            return;
+        }
+        const mismatch = selectedWords.some(w =>
+            (typeof w.langue === 'number' && w.langue !== langueId) ||
+            (w.type?.id && w.type.id !== typeId)
+        );
+        if (mismatch) {
+            this.#messages.error("Les mots sélectionnés n'ont pas tous le même type/langue");
+            return;
+        }
+        this.#aiSenseSelectedLoading.set(true);
+        this.#http
+            .post<{ items: number; batches: number }>(`${this.#config.baseUrl}ai/sens/generate-selected`, {
+                wordLangueTypeIds,
+                langueId,
+                typeId
+            })
+            .subscribe({
+                next: res => {
+                    const items = res?.items ?? 0;
+                    if (items === 0) {
+                        this.#messages.info('Aucun mot sans sens');
+                        return;
+                    }
+                    this.#messages.info(`ChatGPT sens terminé (${items} mot(s))`);
+                    this.selection.clear();
+                    this.#wordGridStore.load();
+                },
+                error: err => {
+                    this.#messages.error(err?.error ?? 'Erreur lors de ChatGPT sens');
+                },
+                complete: () => this.#aiSenseSelectedLoading.set(false)
+            });
     }
 
     private startJobPolling(jobId: string): void {
@@ -302,6 +534,84 @@ export class WordGridComponent implements OnDestroy {
                 error: () => {
                     this.#messages.error("Erreur lors du suivi ChatGPT");
                     this.#aiJobPollSub?.unsubscribe();
+                }
+            });
+    }
+
+    private startPluralJobPolling(jobId: string): void {
+        this.#aiPluralJobPollSub?.unsubscribe();
+        this.#aiPluralJobStatus.set({ status: 'PENDING', batches: 0, completedBatches: 0, jobId });
+        this.#aiPluralJobPollSub = timer(0, 2000)
+            .pipe(
+                switchMap(() => this.#http.get<any>(`${this.#config.baseUrl}ai/word/plurals/jobs/${jobId}`)),
+                takeWhile(res => res?.status !== 'DONE' && res?.status !== 'FAILED', true)
+            )
+            .subscribe({
+                next: res => {
+                    this.#aiPluralJobStatus.set({
+                        status: res?.status ?? 'UNKNOWN',
+                        batches: res?.batches ?? 0,
+                        completedBatches: res?.completedBatches ?? 0,
+                        jobId,
+                        errors: Array.isArray(res?.errors) ? res.errors : [],
+                        updated: res?.updated ?? 0,
+                        empty: res?.empty ?? 0
+                    });
+                    if (res?.status === 'DONE') {
+                        const errorCount = Array.isArray(res?.errors) ? res.errors.length : 0;
+                        if (errorCount > 0) {
+                            this.#messages.error(`ChatGPT pluriel terminé avec ${errorCount} erreur(s)`);
+                        } else {
+                            this.#messages.info(`ChatGPT pluriel terminé (${res?.updated ?? 0} maj, vides: ${res?.empty ?? 0})`);
+                        }
+                        this.#aiPluralJobPollSub?.unsubscribe();
+                    } else if (res?.status === 'FAILED') {
+                        this.#messages.error(res?.error ?? 'ChatGPT pluriel échoué');
+                        this.#aiPluralJobPollSub?.unsubscribe();
+                    }
+                },
+                error: () => {
+                    this.#messages.error("Erreur lors du suivi ChatGPT pluriel");
+                    this.#aiPluralJobPollSub?.unsubscribe();
+                }
+            });
+    }
+
+    private startTradJobPolling(jobId: string): void {
+        this.#aiTradJobPollSub?.unsubscribe();
+        this.#aiTradJobStatus.set({ status: 'PENDING', batches: 0, completedBatches: 0, jobId });
+        this.#aiTradJobPollSub = timer(0, 2000)
+            .pipe(
+                switchMap(() => this.#http.get<any>(`${this.#config.baseUrl}ai/sens/word-trad/jobs/${jobId}`)),
+                takeWhile(res => res?.status !== 'DONE' && res?.status !== 'FAILED', true)
+            )
+            .subscribe({
+                next: res => {
+                    this.#aiTradJobStatus.set({
+                        status: res?.status ?? 'UNKNOWN',
+                        batches: res?.batches ?? 0,
+                        completedBatches: res?.completedBatches ?? 0,
+                        jobId,
+                        errors: Array.isArray(res?.errors) ? res.errors : [],
+                        inserted: res?.inserted ?? 0
+                    });
+                    if (res?.status === 'DONE') {
+                        const errorCount = Array.isArray(res?.errors) ? res.errors.length : 0;
+                        if (errorCount > 0) {
+                            this.#messages.error(`ChatGPT trad terminé avec ${errorCount} erreur(s)`);
+                        } else {
+                            this.#messages.info(`ChatGPT trad terminé (${res?.inserted ?? 0} traductions)`);
+                        }
+                        this.#aiTradJobPollSub?.unsubscribe();
+                        this.#wordGridStore.load();
+                    } else if (res?.status === 'FAILED') {
+                        this.#messages.error(res?.error ?? 'ChatGPT trad échoué');
+                        this.#aiTradJobPollSub?.unsubscribe();
+                    }
+                },
+                error: () => {
+                    this.#messages.error("Erreur lors du suivi ChatGPT trad");
+                    this.#aiTradJobPollSub?.unsubscribe();
                 }
             });
     }
@@ -736,6 +1046,41 @@ export class WordGridComponent implements OnDestroy {
         });
     }
 
+    triggerChatGptPlural(): void {
+        const selectedWords = [...this.selection.selected];
+        if (selectedWords.length === 0) {
+            return;
+        }
+        if (this.#aiPluralLoading()) {
+            return;
+        }
+        const wordLangueTypeIds = selectedWords
+            .map(word => word.wordLangueTypeId)
+            .filter((id): id is number => Number.isFinite(id as number));
+        if (!wordLangueTypeIds.length) {
+            return;
+        }
+        this.#aiPluralLoading.set(true);
+        this.#http
+            .post<{ total: number; updated: number; empty: number }>(`${this.#config.baseUrl}ai/word/plurals`, {
+                wordLangueTypeIds
+            })
+            .subscribe({
+                next: res => {
+                    const total = res?.total ?? wordLangueTypeIds.length;
+                    const updated = res?.updated ?? 0;
+                    const empty = res?.empty ?? 0;
+                    this.#messages.info(`Pluriels mis à jour (${updated}/${total}, vides: ${empty})`);
+                    this.selection.clear();
+                    this.#wordGridStore.load();
+                },
+                error: err => {
+                    this.#messages.error(err?.error ?? 'Erreur lors de la génération des pluriels');
+                },
+                complete: () => this.#aiPluralLoading.set(false)
+            });
+    }
+
     openCategoryAssignDialog(): void {
         const selectedWords = [...this.selection.selected];
         if (selectedWords.length === 0) {
@@ -766,4 +1111,28 @@ export class WordGridComponent implements OnDestroy {
                 });
         });
     }
+
+    addCategory8ans(): void {
+        const selectedWords = [...this.selection.selected];
+        if (selectedWords.length === 0) {
+            return;
+        }
+        const wordLangueTypeIds = selectedWords.map(word => word.wordLangueTypeId);
+        this.#http
+            .post<void>(`${this.#config.baseUrl}word/bulk-categories`, {
+                wordLangueTypeIds,
+                categorieIds: [2]
+            })
+            .subscribe({
+                next: () => {
+                    this.#messages.info('Catégorie 8 ans ajoutée');
+                    this.selection.clear();
+                    this.#wordGridStore.load();
+                },
+                error: err => {
+                    this.#messages.error(err?.error ?? 'Erreur lors de la mise à jour des catégories');
+                }
+            });
+    }
+
 }

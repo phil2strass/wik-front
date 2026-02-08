@@ -27,6 +27,9 @@
         },
         "translationFor": "Mot en {{lang}}"
     },
+    "word.ai": {
+        "plural": "ChatGPT pluriel"
+    },
     "word.type": {
         "1": "nom",
         "2": "nom pluriel",
@@ -38,7 +41,10 @@
         "8": "conjonction",
         "9": "interjection",
         "10": "déterminant",
-        "11": "nom propre"
+        "11": "nom propre",
+        "12": "abréviation",
+        "13": "pronom indéfini",
+        "14": "locution latine"
     },
     "word.import": {
         "title": "Importer des mots en JSON",
