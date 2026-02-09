@@ -161,9 +161,12 @@ export class WordGridComponent implements OnDestroy {
             const dynamicColumns: string[] = [];
             if (typeFilterValue == null) {
                 dynamicColumns.push('type');
+                dynamicColumns.push('category');
+                dynamicColumns.push('plural');
+            } else {
+                dynamicColumns.push('category');
+                dynamicColumns.push('plural');
             }
-            dynamicColumns.push('plural');
-            dynamicColumns.push('category');
             dynamicColumns.push(...this.translationLanguages.map(lang => this.translationColumnId(lang.id)));
             this.displayedColumns = ['select', 'name', ...dynamicColumns, 'actions'];
             this.updatePaginatorLabels();

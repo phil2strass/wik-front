@@ -164,10 +164,10 @@
                 <td mat-cell *matCellDef="let row" class="f-s-14">
                     <mat-chip-listbox aria-label="Catégories" class="word-grid__category-chips" [multiple]="true">
                         <mat-chip-option
-                            [selected]="hasCategory(row, 2)"
-                            [disabled]="isCategoryToggleLoading(row.wordLangueTypeId, 2)"
-                            (selectionChange)="onCategoryToggle(row, 2, $event)">
-                            8 ans
+                            [selected]="hasCategory(row, 3)"
+                            [disabled]="isCategoryToggleLoading(row.wordLangueTypeId, 3)"
+                            (selectionChange)="onCategoryToggle(row, 3, $event)">
+                            Oxford junior
                         </mat-chip-option>
                     </mat-chip-listbox>
                 </td>
