@@ -2,13 +2,13 @@
     @if (selection.selected.length === 0) {
         <div class="row justify-content-between gap-16 m-x-15 word-grid__toolbar">
             <div class="col-sm-12 col-md-4 m-t-14">
-                <mat-form-field appearance="outline" class="w-100" color="primary">
+                <mat-form-field appearance="outline" class="w-100 word-grid__toolbar-field" color="primary">
                     <mat-icon matPrefix>search</mat-icon>
                     <input matInput [value]="searchTerm()" (keyup)="applyFilter($event)" placeholder="Search Product" />
                 </mat-form-field>
             </div>
             <div class="col-sm-12 col-md-3 m-t-14">
-                <mat-form-field appearance="outline" class="w-100 word-grid__type-field" color="primary">
+                <mat-form-field appearance="outline" class="w-100 word-grid__type-field word-grid__toolbar-field" color="primary">
                     <mat-label>{{ 'word.form.type.label' | translate }}</mat-label>
                     <mat-select [value]="typeFilter()" (selectionChange)="onTypeFilterChange($event.value)">
                         <mat-option [value]="null">Tous</mat-option>
@@ -19,8 +19,17 @@
                 </mat-form-field>
             </div>
             <div class="col-sm-12 col-md-3 d-flex align-items-center justify-content-end m-t-14 word-grid__actions">
-                <button mat-stroked-button type="button" [matMenuTriggerFor]="actionsMenu">
-                    Actions
+                <button
+                    type="button"
+                    dir="ltr"
+                    class="k-button k-grid-excel word-grid__actions-trigger"
+                    [matMenuTriggerFor]="actionsMenu">
+                    <span class="k-icon-wrapper-host" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="k-svg-i-file-excel k-button-icon k-svg-icon k-icon" viewBox="0 0 512 512" focusable="false">
+                            <path d="m288 304 64 112h-48l-48-84.5-31.5 52.5H256v32h-96l64-112-64-112h48l48 84 48-84h48zm64-272H96c-17.7 0-32 14.3-32 32v384c0 17.7 14.3 32 32 32h320c17.7 0 32-14.3 32-32V128zm64 416H96V64h224v96h96z"></path>
+                        </svg>
+                    </span>
+                    <span class="k-button-text">Actions</span>
                 </button>
                 <mat-menu #actionsMenu="matMenu" class="cardWithShadow">
                     <button mat-menu-item (click)="triggerChatGpt()" [disabled]="!typeFilter() || aiLoading()">
@@ -237,7 +246,7 @@
     </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns" [class.app-table-row-selected]="selection.isSelected(row)"></tr>
         </table>
     </div>
 

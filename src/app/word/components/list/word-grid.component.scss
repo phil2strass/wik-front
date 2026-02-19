@@ -39,7 +39,27 @@
 }
 
 .word-grid__toolbar {
-    align-items: center;
+    align-items: flex-start;
+    background-color: #fafafa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: none;
+    padding: 8px 16px;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+}
+
+.word-grid__toolbar .m-t-14 {
+    margin-top: 0 !important;
+}
+
+.b-1.rounded {
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    border-radius: 0 !important;
+    background-color: #ffffff;
+}
+
+.word-grid__toolbar + .table-responsive.b-t-1 {
+    border-top: 0 !important;
 }
 
 .word-grid__paginator {
@@ -47,6 +67,12 @@
     align-items: center;
     gap: 16px;
     justify-content: space-between;
+    background-color: #fafafa;
+    border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+.word-grid__paginator .mat-mdc-paginator {
+    background-color: transparent;
 }
 
 .word-grid__page-input {
@@ -56,6 +82,7 @@
 
 .word-grid__actions {
     gap: 12px;
+    align-items: flex-start !important;
 }
 
 .word-grid__selection-actions {
@@ -108,11 +135,104 @@
     max-width: 260px;
 }
 
+:host ::ng-deep .word-grid__toolbar-field.mat-mdc-form-field {
+    --mdc-outlined-text-field-container-color: #ffffff;
+    --mat-form-field-outlined-container-color: #ffffff;
+}
+
+:host ::ng-deep .word-grid__toolbar-field .mat-mdc-text-field-wrapper,
+:host ::ng-deep .word-grid__toolbar-field .mdc-text-field,
+:host ::ng-deep .word-grid__toolbar-field .mdc-text-field--outlined {
+    background-color: #ffffff !important;
+}
+
+:host ::ng-deep .word-grid__toolbar-field .mat-mdc-form-field-focus-overlay {
+    background-color: transparent !important;
+}
+
+:host ::ng-deep .word-grid__toolbar-field .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+}
+
+:host ::ng-deep .word-grid__toolbar-field .mat-mdc-form-field-bottom-align::before {
+    display: none;
+}
+
 .word-grid__toolbar button[mat-flat-button],
-.word-grid__toolbar button[mat-stroked-button] {
-    height: 37px;
-    line-height: 37px;
-    margin-bottom: 19.5px
+.word-grid__toolbar button[mat-stroked-button],
+.word-grid__toolbar .word-grid__actions-trigger {
+    height: 33px;
+    line-height: 1.4285714286;
+    margin-bottom: 0;
+    padding: 0 8px;
+}
+
+.word-grid__toolbar .word-grid__actions-trigger,
+.word-grid__toolbar button[mat-stroked-button],
+.word-grid__selection-actions button[mat-stroked-button] {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.08);
+    background-color: #f5f5f5;
+    color: #424242;
+    box-shadow: none;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+}
+
+.word-grid__toolbar .word-grid__actions-trigger:hover,
+.word-grid__toolbar button[mat-stroked-button]:hover,
+.word-grid__selection-actions button[mat-stroked-button]:hover {
+    border-color: rgba(0, 0, 0, 0.08);
+    background-color: #ebebeb;
+    color: #424242;
+}
+
+.word-grid__toolbar .word-grid__actions-trigger:focus-visible,
+.word-grid__toolbar button[mat-stroked-button]:focus-visible,
+.word-grid__selection-actions button[mat-stroked-button]:focus-visible {
+    box-shadow: inset 0 0 0 2px currentColor;
+}
+
+.word-grid__toolbar .word-grid__actions-trigger[disabled],
+.word-grid__toolbar button[mat-stroked-button][disabled],
+.word-grid__selection-actions button[mat-stroked-button][disabled] {
+    border-color: rgba(0, 0, 0, 0.08);
+    background-color: #f5f5f5;
+    color: #424242;
+    opacity: 0.6;
+}
+
+.word-grid__toolbar .word-grid__actions-trigger:active,
+.word-grid__toolbar button[mat-stroked-button]:active,
+.word-grid__selection-actions button[mat-stroked-button]:active {
+    background-color: #d8d8d8;
+}
+
+.word-grid__actions-trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    white-space: nowrap;
+}
+
+.word-grid__actions-trigger .k-icon-wrapper-host {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+}
+
+.word-grid__actions-trigger .k-button-icon,
+.word-grid__actions-trigger .k-svg-icon,
+.word-grid__actions-trigger .k-icon {
+    width: 1rem;
+    height: 1rem;
+    fill: currentColor;
+    pointer-events: none;
 }
 
 .word-grid__menu-section {
